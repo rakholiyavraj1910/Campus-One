@@ -1,26 +1,31 @@
 -- ==============================================================================
--- CampusOne Forward Migration: 20261026010000_fix_user_role_type_and_signup.sql
--- Fix: type "user_role_type" does not exist (SQLSTATE 42704) during signup
--- Ensures search_path = public, pg_temp on security definer auth triggers and functions
--- Safe, minimal, idempotent, and preserves all existing tables and data
+-- CampusOne Minimal Forward Migration: 20261026010000_fix_user_role_type_and_signup.sql
+-- Fix: type "user_role_type" does not exist (SQLSTATE 42704) during /auth/v1/signup
+-- Safe, forward-only, idempotent, and non-destructive to existing data.
 -- ==============================================================================
 
--- 1. Ensure user_role_type enum exists in public schema and includes all valid application roles
+-- 1. Ensure public.user_role_type enum exists (preserves existing production enum)
 DO $$ BEGIN
-  CREATE TYPE public.user_role_type AS ENUM ('student', 'faculty', 'admin', 'guest', 'pending');
-EXCEPTION WHEN duplicate_object THEN
-  BEGIN
-    ALTER TYPE public.user_role_type ADD VALUE IF NOT EXISTS 'pending';
-  EXCEPTION WHEN others THEN null;
-  END;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_type t 
+    JOIN pg_namespace n ON n.oid = t.typnamespace 
+    WHERE n.nspname = 'public' AND t.typname = 'user_role_type'
+  ) THEN
+    CREATE TYPE public.user_role_type AS ENUM ('student', 'faculty', 'admin', 'guest');
+  END IF;
 END $$;
 
--- 2. Ensure default on profiles.role column is properly schema-qualified
+-- 2. Ensure default on public.profiles.role is schema-qualified
 ALTER TABLE IF EXISTS public.profiles 
   ALTER COLUMN role SET DEFAULT 'student'::public.user_role_type;
 
 -- 3. Replace handle_new_user() with explicit search_path and schema-qualified public.user_role_type
--- This resolves SQLSTATE 42704 when GoTrue invokes the trigger in auth context
+-- Security rules enforced:
+-- - ALL public signups receive exclusively 'student'::public.user_role_type.
+-- - No automatic admin assignment by email address or domain.
+-- - Faculty access requests store admin_level = 'pending_faculty' and stay pending.
+-- - ON CONFLICT (id) DO NOTHING prevents overwriting existing roles or profile data.
+-- - SET search_path = public, pg_temp resolves SQLSTATE 42704 in GoTrue's auth connection.
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -29,21 +34,10 @@ SET search_path = public, pg_temp
 AS $$
 DECLARE
   assigned_role public.user_role_type := 'student'::public.user_role_type;
-  initial_admin_email TEXT := 'admin@campusone.edu';
-  candidate_role TEXT;
 BEGIN
-  candidate_role := NEW.raw_user_meta_data->>'role';
-
-  -- Rule 1: Explicit institutional root administrator check
-  IF NEW.email = initial_admin_email THEN
-    assigned_role := 'admin'::public.user_role_type;
-  -- Rule 2: Institutional faculty domain check (only elevated if specifically approved or institutional faculty)
-  ELSIF candidate_role = 'faculty' AND (NEW.email LIKE '%@faculty.campusone.edu' OR NEW.email LIKE '%@campusone.edu') THEN
-    assigned_role := 'faculty'::public.user_role_type;
-  -- Rule 3: Default public registrations are strictly assigned 'student'
-  ELSE
-    assigned_role := 'student';
-  END IF;
+  -- Strict security: Every public signup receives ONLY the student role.
+  -- Faculty requests remain student with admin_level = 'pending_faculty' until approved.
+  assigned_role := 'student'::public.user_role_type;
 
   INSERT INTO public.profiles (
     id,
@@ -73,15 +67,16 @@ BEGIN
     COALESCE(NEW.raw_user_meta_data->>'division', 'A'),
     NEW.raw_user_meta_data->>'designation',
     NEW.raw_user_meta_data->>'cabin',
-    NEW.raw_user_meta_data->>'admin_level',
+    CASE 
+      WHEN NEW.raw_user_meta_data->>'admin_level' = 'pending_faculty' 
+        OR NEW.raw_user_meta_data->>'requested_role' = 'faculty'
+      THEN 'pending_faculty'
+      ELSE NULL 
+    END,
     NOW(),
     NOW()
   )
-  ON CONFLICT (id) DO UPDATE SET
-    email = EXCLUDED.email,
-    name = COALESCE(EXCLUDED.name, profiles.name),
-    department = COALESCE(EXCLUDED.department, profiles.department),
-    updated_at = NOW();
+  ON CONFLICT (id) DO NOTHING;
 
   RETURN NEW;
 END;
@@ -138,7 +133,7 @@ BEGIN
 END;
 $$;
 
--- 8. Harden prevent_role_escalation() with search_path
+-- 8. Harden prevent_role_escalation() with search_path and schema-qualified is_admin()
 CREATE OR REPLACE FUNCTION public.prevent_role_escalation()
 RETURNS TRIGGER
 LANGUAGE plpgsql

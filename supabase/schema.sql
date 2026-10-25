@@ -11,12 +11,13 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- 2. ENUMS
 DO $$ BEGIN
-  CREATE TYPE public.user_role_type AS ENUM ('student', 'faculty', 'admin', 'guest', 'pending');
-EXCEPTION WHEN duplicate_object THEN
-  BEGIN
-    ALTER TYPE public.user_role_type ADD VALUE IF NOT EXISTS 'pending';
-  EXCEPTION WHEN others THEN null;
-  END;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_type t 
+    JOIN pg_namespace n ON n.oid = t.typnamespace 
+    WHERE n.nspname = 'public' AND t.typname = 'user_role_type'
+  ) THEN
+    CREATE TYPE public.user_role_type AS ENUM ('student', 'faculty', 'admin', 'guest');
+  END IF;
 END $$;
 
 DO $$ BEGIN
@@ -428,21 +429,10 @@ SET search_path = public, pg_temp
 AS $$
 DECLARE
   assigned_role public.user_role_type := 'student'::public.user_role_type;
-  initial_admin_email TEXT := 'admin@campusone.edu';
-  candidate_role TEXT;
 BEGIN
-  candidate_role := NEW.raw_user_meta_data->>'role';
-
-  -- Rule 1: Explicit institutional root administrator check
-  IF NEW.email = initial_admin_email THEN
-    assigned_role := 'admin'::public.user_role_type;
-  -- Rule 2: Institutional faculty domain check
-  ELSIF candidate_role = 'faculty' AND (NEW.email LIKE '%@faculty.campusone.edu' OR NEW.email LIKE '%@campusone.edu') THEN
-    assigned_role := 'faculty'::public.user_role_type;
-  -- Rule 3: Default public registrations are strictly assigned 'student'
-  ELSE
-    assigned_role := 'student';
-  END IF;
+  -- Strict security: Every public signup receives ONLY the student role.
+  -- Faculty requests remain student with admin_level = 'pending_faculty' until approved.
+  assigned_role := 'student'::public.user_role_type;
 
   INSERT INTO public.profiles (
     id,
@@ -465,22 +455,23 @@ BEGIN
     NEW.email,
     COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)),
     assigned_role,
-    COALESCE(NEW.raw_user_meta_data->>'department', 'Computer Science & Engineering'),
+    COALESCE(NEW.raw_user_meta_data->>'department', 'Architecture'),
     COALESCE(NEW.raw_user_meta_data->>'roll_number', 'CS-' || FLOOR(RANDOM() * 9000 + 1000)::TEXT),
     COALESCE(NEW.raw_user_meta_data->>'prn', '2025' || LPAD(FLOOR(RANDOM() * 100000000)::TEXT, 8, '0')),
-    COALESCE((NEW.raw_user_meta_data->>'semester')::INT, 6),
+    COALESCE((NEW.raw_user_meta_data->>'semester')::INT, 1),
     COALESCE(NEW.raw_user_meta_data->>'division', 'A'),
     NEW.raw_user_meta_data->>'designation',
     NEW.raw_user_meta_data->>'cabin',
-    NEW.raw_user_meta_data->>'admin_level',
+    CASE 
+      WHEN NEW.raw_user_meta_data->>'admin_level' = 'pending_faculty' 
+        OR NEW.raw_user_meta_data->>'requested_role' = 'faculty'
+      THEN 'pending_faculty'
+      ELSE NULL 
+    END,
     NOW(),
     NOW()
   )
-  ON CONFLICT (id) DO UPDATE SET
-    email = EXCLUDED.email,
-    name = COALESCE(EXCLUDED.name, profiles.name),
-    department = COALESCE(EXCLUDED.department, profiles.department),
-    updated_at = NOW();
+  ON CONFLICT (id) DO NOTHING;
 
   RETURN NEW;
 END;

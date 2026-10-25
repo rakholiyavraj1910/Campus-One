@@ -90,7 +90,8 @@ assert(fs.existsSync(forwardMigrationPath), '20261026010000_fix_user_role_type_a
 const forwardSql = fs.readFileSync(forwardMigrationPath, 'utf8');
 assert(forwardSql.includes('SET search_path = public, pg_temp'), 'Forward migration sets search_path on security definer functions');
 assert(forwardSql.includes('public.user_role_type'), 'Forward migration schema-qualifies public.user_role_type');
-assert(forwardSql.includes('ADD VALUE IF NOT EXISTS \'pending\''), 'Forward migration safely adds pending role value to enum');
+assert(forwardSql.includes('ON CONFLICT (id) DO NOTHING'), 'Forward migration prevents overwriting existing profile data on conflict');
+assert(forwardSql.includes("assigned_role := 'student'::public.user_role_type"), 'Forward migration strictly assigns student role to all public signups');
 
 // Check Storage Buckets
 assert(migrationSql.includes("('avatars'"), 'Configures avatars storage bucket');
