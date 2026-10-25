@@ -186,12 +186,20 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onNavigate, cur
 
             <div className="h-6 w-[1px] bg-slate-200 dark:bg-navy-800 hidden sm:block" />
 
-            {/* User Profile dropdown */}
-            <div className="relative">
+            {/* User Profile dropdown or Guest Portal Button */}
+            {role === 'guest' || user.id === 'guest' ? (
               <button
-                onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="flex items-center space-x-2 p-1.5 pl-2 rounded-xl hover:bg-slate-100 dark:hover:bg-navy-800 border border-transparent hover:border-slate-200 dark:hover:border-navy-700 transition-all focus:outline-none"
+                onClick={() => onNavigate('portal-select')}
+                className="px-3.5 py-1.5 rounded-xl bg-navy-900 hover:bg-navy-800 dark:bg-brand-cyan dark:hover:bg-cyan-400 text-white dark:text-navy-950 font-bold text-xs shadow-sm transition-all flex items-center space-x-1.5"
               >
+                <span>Enter Portal</span>
+              </button>
+            ) : (
+              <div className="relative">
+                <button
+                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                  className="flex items-center space-x-2 p-1.5 pl-2 rounded-xl hover:bg-slate-100 dark:hover:bg-navy-800 border border-transparent hover:border-slate-200 dark:hover:border-navy-700 transition-all focus:outline-none"
+                >
                 <img
                   src={user.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80'}
                   alt={user.name}
@@ -280,7 +288,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onNavigate, cur
 
                   <div className="border-t border-slate-100 dark:border-navy-800 pt-1">
                     <button
-                      onClick={logout}
+                      onClick={async () => {
+                        await logout();
+                        onNavigate('portal-select');
+                      }}
                       className="w-full text-left px-4 py-2 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-navy-800 flex items-center space-x-2 font-medium"
                     >
                       <LogOut className="w-4 h-4" />
@@ -290,6 +301,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onNavigate, cur
                 </div>
               )}
             </div>
+          )}
 
           </div>
         </div>

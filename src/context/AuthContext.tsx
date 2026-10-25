@@ -18,7 +18,22 @@ export interface AuthContextType {
   authError: string | null;
   // Live Supabase Auth Methods
   signInWithPassword: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  signUp: (email: string, password: string, name: string, department?: string) => Promise<{ success: boolean; error?: string }>;
+  signUp: (
+    email: string, 
+    password: string, 
+    name: string, 
+    department?: string,
+    studentDetails?: { rollNumber?: string; prn?: string; division?: string }
+  ) => Promise<{ success: boolean; error?: string }>;
+  requestFacultyAccess: (
+    email: string,
+    password: string,
+    name: string,
+    department: string,
+    designation: string,
+    cabin?: string,
+    specialization?: string
+  ) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
   // Compatibility & Demo mode methods
@@ -65,28 +80,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   // Convert DB row to UserProfile
-  const mapDbProfile = (db: any): UserProfile => ({
-    id: db.id,
-    name: db.name || 'CampusOne User',
-    email: db.email,
-    role: (db.role as UserRole) || 'student',
-    avatar: db.avatar_url || undefined,
-    phone: db.phone || undefined,
-    department: db.department || undefined,
-    rollNumber: db.roll_number || undefined,
-    prn: db.prn || undefined,
-    semester: db.semester || undefined,
-    academicYear: db.academic_year || undefined,
-    division: db.division || undefined,
-    cgpa: db.cgpa ? Number(db.cgpa) : undefined,
-    mentorName: db.mentor_name || undefined,
-    mentorEmail: db.mentor_email || undefined,
-    designation: db.designation || undefined,
-    cabin: db.cabin || undefined,
-    specialization: db.specialization || undefined,
-    consultationHours: db.consultation_hours || undefined,
-    adminLevel: db.admin_level || undefined,
-  });
+  const mapDbProfile = (db: any): UserProfile => {
+    const isPendingApproval = db.admin_level === 'pending_faculty' || db.role === 'pending';
+    return {
+      id: db.id,
+      name: db.name || 'CampusOne User',
+      email: db.email,
+      role: isPendingApproval ? 'pending' : ((db.role as UserRole) || 'student'),
+      avatar: db.avatar_url || undefined,
+      phone: db.phone || undefined,
+      department: db.department || undefined,
+      rollNumber: db.roll_number || undefined,
+      prn: db.prn || undefined,
+      semester: db.semester || undefined,
+      academicYear: db.academic_year || undefined,
+      division: db.division || undefined,
+      cgpa: db.cgpa ? Number(db.cgpa) : undefined,
+      mentorName: db.mentor_name || undefined,
+      mentorEmail: db.mentor_email || undefined,
+      designation: db.designation || undefined,
+      cabin: db.cabin || undefined,
+      specialization: db.specialization || undefined,
+      consultationHours: db.consultation_hours || undefined,
+      adminLevel: db.admin_level || undefined,
+    };
+  };
 
   // Fetch user profile from Supabase profiles table
   const fetchProfile = useCallback(async (userId: string, userEmail?: string): Promise<UserProfile | null> => {
@@ -235,12 +253,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Live Supabase SignUp (Security: never allows public admin escalation)
+  // Live Supabase SignUp (Security: student portal registrations receive exclusively student role)
   const signUp = async (
     email: string,
     password: string,
     name: string,
-    department: string = 'Computer Science & Engineering'
+    department: string = 'Computer Science & Engineering',
+    studentDetails?: { rollNumber?: string; prn?: string; division?: string }
   ): Promise<{ success: boolean; error?: string }> => {
     setAuthError(null);
 
@@ -252,6 +271,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email,
         name,
         department,
+        rollNumber: studentDetails?.rollNumber || '21CS' + Math.floor(100 + Math.random() * 900),
+        prn: studentDetails?.prn || '2025' + Date.now().toString().slice(-8),
+        division: studentDetails?.division || 'A',
         role: 'student',
       };
       setCurrentUser(newUser);
@@ -267,7 +289,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           data: {
             name: name.trim(),
             department,
-            role: 'student', // Client can only request student; trigger enforces this
+            roll_number: studentDetails?.rollNumber || '',
+            prn: studentDetails?.prn || '',
+            division: studentDetails?.division || 'A',
+            role: 'student', // Client can only request student; database trigger strictly validates this
           },
         },
       });
@@ -285,6 +310,87 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { success: true };
     } catch (err: any) {
       const msg = err.message || 'Registration failed. Please try again.';
+      setAuthError(msg);
+      return { success: false, error: msg };
+    }
+  };
+
+  // Dedicated Faculty Access Request (Creates pending approval profile; requires institutional admin approval)
+  const requestFacultyAccess = async (
+    email: string,
+    password: string,
+    name: string,
+    department: string,
+    designation: string,
+    cabin?: string,
+    specialization?: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    setAuthError(null);
+
+    if (!isSupabaseConfigured || !supabase) {
+      // Offline demo fallback - store pending request and set pending state
+      const pendingProfile: UserProfile = {
+        id: 'fac-req-' + Date.now(),
+        name,
+        email,
+        role: 'pending',
+        department,
+        designation,
+        cabin: cabin || 'Faculty Tower',
+        adminLevel: 'pending_faculty',
+      };
+      try {
+        const existing = JSON.parse(localStorage.getItem('campusone_pending_faculty_requests') || '[]');
+        existing.push({
+          id: pendingProfile.id,
+          name,
+          email,
+          department,
+          designation,
+          cabin: cabin || 'Faculty Tower',
+          specialization: specialization ? specialization.split(',').map(s => s.trim()) : [],
+          createdAt: new Date().toISOString(),
+          status: 'pending'
+        });
+        localStorage.setItem('campusone_pending_faculty_requests', JSON.stringify(existing));
+      } catch {
+        // ignore
+      }
+      setCurrentUser(pendingProfile);
+      return { success: true };
+    }
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          data: {
+            name: name.trim(),
+            department,
+            designation,
+            cabin: cabin || 'Faculty Tower',
+            specialization: specialization ? specialization.split(',').map(s => s.trim()) : [],
+            role: 'student', // Initial database role default; elevated strictly upon admin approval
+            requested_role: 'faculty',
+            admin_level: 'pending_faculty',
+          },
+        },
+      });
+
+      if (error) {
+        setAuthError(error.message);
+        return { success: false, error: error.message };
+      }
+
+      if (data.user) {
+        const profile = await fetchProfile(data.user.id, data.user.email);
+        if (profile) setCurrentUser(profile);
+      }
+
+      return { success: true };
+    } catch (err: any) {
+      const msg = err.message || 'Faculty access request failed. Please try again.';
       setAuthError(msg);
       return { success: false, error: msg };
     }
@@ -387,6 +493,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         authError,
         signInWithPassword,
         signUp,
+        requestFacultyAccess,
         signOut,
         resetPassword,
         switchRole,

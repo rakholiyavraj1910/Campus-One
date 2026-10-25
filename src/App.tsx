@@ -11,9 +11,14 @@ import { BookmarksModal } from './components/common/BookmarksModal';
 import { AuthModal } from './components/common/AuthModal';
 import { NoticeDetailModal } from './components/notices/NoticeDetailModal';
 import { Breadcrumbs } from './components/common/Breadcrumbs';
-import { LoginPage } from './components/auth/LoginPage';
 import { LoadingScreen } from './components/common/LoadingScreen';
 import { AccountPendingApproval } from './components/auth/AccountPendingApproval';
+
+// Three Distinct Portal Auth Components & Hub
+import { PortalSelectHub } from './components/auth/PortalSelectHub';
+import { StudentAuthPage } from './components/auth/StudentAuthPage';
+import { FacultyAuthPage } from './components/auth/FacultyAuthPage';
+import { AdminAuthPage } from './components/auth/AdminAuthPage';
 
 import { HomePage } from './components/home/HomePage';
 import { StudentDashboard } from './components/student/StudentDashboard';
@@ -27,31 +32,71 @@ import { ContactPage } from './components/public/ContactPage';
 
 import { Notice, EventItem } from './types';
 import { getNotices, getEvents } from './lib/storageService';
-import { GraduationCap, Heart, Shield, Sparkles, ExternalLink } from 'lucide-react';
+import { GraduationCap } from 'lucide-react';
 
-function getPageFromLocation(): { page: string; subTab?: string } {
-  if (typeof window === 'undefined') return { page: 'home' };
-  const path = window.location.pathname.replace(/^\/+/, '').split('/')[0].toLowerCase();
+interface ParsedLocation {
+  page: string;
+  authMode?: 'signin' | 'register';
+  subTab?: string;
+}
+
+function getPageFromLocation(): ParsedLocation {
+  if (typeof window === 'undefined') return { page: 'portal-select' };
+  const raw = window.location.pathname.replace(/^\/+/, '').toLowerCase();
+  const segments = raw.split('/');
+  const first = segments[0] || '';
+  const second = segments[1] || '';
   const searchParams = new URLSearchParams(window.location.search);
   const tab = searchParams.get('tab') || undefined;
+  const mode = (searchParams.get('mode') as 'signin' | 'register') || undefined;
 
-  if (!path || path === 'login' || path === 'home') return { page: 'home', subTab: tab };
-  if (path === 'student') return { page: 'student', subTab: tab || 'profile' };
-  if (path === 'faculty-portal' || path === 'faculty') return { page: 'faculty-portal' };
-  if (path === 'admin') return { page: 'admin' };
-  if (path === 'notices') return { page: 'notices' };
-  if (path === 'events') return { page: 'events' };
-  if (path === 'campus') return { page: 'campus', subTab: tab || 'departments' };
-  if (path === 'about') return { page: 'about' };
-  if (path === 'contact') return { page: 'contact' };
-  return { page: 'home', subTab: tab };
+  // 1. Dedicated Portal Authentication URLs
+  if (first === 'student' && (second === 'login' || second === 'register')) {
+    return { 
+      page: 'student-auth', 
+      authMode: second === 'register' ? 'register' : (mode || 'signin'), 
+      subTab: tab 
+    };
+  }
+  if (first === 'faculty' && (second === 'login' || second === 'register')) {
+    return { 
+      page: 'faculty-auth', 
+      authMode: second === 'register' ? 'register' : (mode || 'signin'), 
+      subTab: tab 
+    };
+  }
+  if (first === 'admin' && (second === 'login' || second === 'signin')) {
+    return { 
+      page: 'admin-auth', 
+      authMode: 'signin', 
+      subTab: tab 
+    };
+  }
+
+  // 2. Hub / Root / Public routes
+  if (!first || first === 'portal-select' || first === 'portals' || first === 'login') {
+    return { page: 'portal-select', subTab: tab };
+  }
+  if (first === 'home') return { page: 'home', subTab: tab };
+  if (first === 'student') return { page: 'student', subTab: tab || 'profile' };
+  if (first === 'faculty-portal' || first === 'faculty') return { page: 'faculty-portal', subTab: tab };
+  if (first === 'admin') return { page: 'admin', subTab: tab };
+  if (first === 'notices') return { page: 'notices', subTab: tab };
+  if (first === 'events') return { page: 'events', subTab: tab };
+  if (first === 'campus') return { page: 'campus', subTab: tab || 'departments' };
+  if (first === 'about') return { page: 'about', subTab: tab };
+  if (first === 'contact') return { page: 'contact', subTab: tab };
+
+  return { page: 'portal-select', subTab: tab };
 }
 
 const MainLayout: React.FC = () => {
   const { user, role, isAuthenticated, isPending, loading } = useAuth();
   
-  const [currentPage, setCurrentPage] = useState<string>(() => getPageFromLocation().page);
-  const [currentSubTab, setCurrentSubTab] = useState<string | undefined>(() => getPageFromLocation().subTab);
+  const initialLoc = getPageFromLocation();
+  const [currentPage, setCurrentPage] = useState<string>(initialLoc.page);
+  const [currentSubTab, setCurrentSubTab] = useState<string | undefined>(initialLoc.subTab);
+  const [authMode, setAuthMode] = useState<'signin' | 'register'>(initialLoc.authMode || 'signin');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedNoticeModal, setSelectedNoticeModal] = useState<Notice | null>(null);
 
@@ -69,26 +114,62 @@ const MainLayout: React.FC = () => {
     loadData();
   }, []);
 
+  // Synchronize location when authenticated user visits portal-select or auth pages
+  useEffect(() => {
+    if (isAuthenticated && !loading) {
+      if (
+        currentPage === 'portal-select' || 
+        currentPage === 'student-auth' || 
+        currentPage === 'faculty-auth' || 
+        currentPage === 'admin-auth'
+      ) {
+        const defaultPage = role === 'admin' ? 'admin' : role === 'faculty' ? 'faculty-portal' : 'student';
+        handleNavigate(defaultPage);
+      }
+    }
+  }, [isAuthenticated, loading, currentPage, role]);
+
   // Listen for browser Back/Forward navigation
   useEffect(() => {
     const handlePopState = () => {
       const loc = getPageFromLocation();
       setCurrentPage(loc.page);
       setCurrentSubTab(loc.subTab);
+      if (loc.authMode) setAuthMode(loc.authMode);
     };
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  const handleNavigate = (page: string, subTab?: string, noticeId?: string) => {
+  const handleNavigate = (
+    page: string, 
+    subTab?: string, 
+    noticeId?: string, 
+    mode?: 'signin' | 'register'
+  ) => {
     setCurrentPage(page);
     setCurrentSubTab(subTab);
+    if (mode) setAuthMode(mode);
 
-    // Synchronize browser history and URL pathname
-    const targetUrl = page === 'home' ? '/' : `/${page}${subTab ? `?tab=${subTab}` : ''}`;
+    // Compute browser target URL
+    let targetUrl = '/';
+    if (page === 'portal-select') {
+      targetUrl = '/';
+    } else if (page === 'student-auth') {
+      targetUrl = (mode || authMode) === 'register' ? '/student/login?mode=register' : '/student/login';
+    } else if (page === 'faculty-auth') {
+      targetUrl = (mode || authMode) === 'register' ? '/faculty/login?mode=register' : '/faculty/login';
+    } else if (page === 'admin-auth') {
+      targetUrl = '/admin/login';
+    } else if (page === 'home') {
+      targetUrl = '/home';
+    } else {
+      targetUrl = `/${page}${subTab ? `?tab=${subTab}` : ''}`;
+    }
+
     if (window.location.pathname + window.location.search !== targetUrl) {
-      window.history.pushState({ page, subTab }, '', targetUrl);
+      window.history.pushState({ page, subTab, mode }, '', targetUrl);
     }
 
     // If specific notice target
@@ -105,21 +186,65 @@ const MainLayout: React.FC = () => {
     return <LoadingScreen message="Restoring verified institutional session..." />;
   }
 
-  // 2. Pending Verification Gate
+  // 2. Pending Verification Gate (Faculty or Student undergoing admin approval)
   if (isPending) {
     return <AccountPendingApproval />;
   }
 
-  // 3. Login-First Security Gate (Redirect unauthenticated visitors to Login)
+  // 3. Unauthenticated / Logged-Out Routing Gate
   if (!isAuthenticated) {
-    return (
-      <LoginPage 
-        onLoginSuccess={() => {
-          const defaultPage = role === 'admin' ? 'admin' : role === 'faculty' ? 'faculty-portal' : 'home';
-          handleNavigate(currentPage !== 'home' ? currentPage : defaultPage, currentSubTab);
-        }} 
-      />
-    );
+    // Dedicated Student Auth
+    if (currentPage === 'student-auth' || currentPage === 'student') {
+      return (
+        <StudentAuthPage
+          initialMode={authMode}
+          onLoginSuccess={() => handleNavigate('student')}
+          onNavigateHub={() => handleNavigate('portal-select')}
+          onSwitchPortal={(p) => handleNavigate(p === 'faculty' ? 'faculty-auth' : 'admin-auth')}
+        />
+      );
+    }
+
+    // Dedicated Faculty Auth
+    if (currentPage === 'faculty-auth' || currentPage === 'faculty-portal' || currentPage === 'faculty') {
+      return (
+        <FacultyAuthPage
+          initialMode={authMode}
+          onLoginSuccess={() => handleNavigate('faculty-portal')}
+          onNavigateHub={() => handleNavigate('portal-select')}
+          onSwitchPortal={(p) => handleNavigate(p === 'student' ? 'student-auth' : 'admin-auth')}
+        />
+      );
+    }
+
+    // Dedicated Admin Auth
+    if (currentPage === 'admin-auth' || currentPage === 'admin') {
+      return (
+        <AdminAuthPage
+          onLoginSuccess={() => handleNavigate('admin')}
+          onNavigateHub={() => handleNavigate('portal-select')}
+          onSwitchPortal={(p) => handleNavigate(p === 'student' ? 'student-auth' : 'faculty-auth')}
+        />
+      );
+    }
+
+    // Public Open Resources (Allow prospective students & visitors to inspect notices, calendar, etc.)
+    const isPublicResource = ['notices', 'events', 'campus', 'about', 'contact', 'home'].includes(currentPage);
+    if (!isPublicResource) {
+      return (
+        <PortalSelectHub
+          onSelectPortal={(portal, mode) => {
+            const pageMap: Record<string, string> = {
+              student: 'student-auth',
+              faculty: 'faculty-auth',
+              admin: 'admin-auth'
+            };
+            handleNavigate(pageMap[portal] || 'portal-select', undefined, undefined, mode);
+          }}
+          onNavigatePublic={(p, sub) => handleNavigate(p, sub)}
+        />
+      );
+    }
   }
 
   return (
@@ -144,7 +269,7 @@ const MainLayout: React.FC = () => {
           onNavigate={handleNavigate}
         />
 
-        {/* 4. Main Page Area (Offset on desktop for fixed sidebar) */}
+        {/* 4. Main Page Area */}
         <main className="flex-1 lg:pl-72 transition-all duration-300 w-full min-w-0">
           <Breadcrumbs
             currentPage={currentPage}
@@ -227,12 +352,16 @@ const MainLayout: React.FC = () => {
                   CampusOne Digital Portal
                 </p>
                 <p className="text-[11px] text-slate-400">
-                  Apex Institute of Technology & Science • NAAC A++ Autonomous College
+                  Apex Institute of Technology &amp; Science • NAAC A++ Autonomous College
                 </p>
               </div>
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-4 text-xs">
+              <button onClick={() => handleNavigate('portal-select')} className="hover:text-brand-cyan transition-colors font-medium">
+                Portal Selection
+              </button>
+              <span>•</span>
               <button onClick={() => handleNavigate('about')} className="hover:text-brand-cyan transition-colors">
                 About CampusOne
               </button>
@@ -246,7 +375,7 @@ const MainLayout: React.FC = () => {
               </button>
               <span>•</span>
               <button onClick={() => handleNavigate('contact')} className="hover:text-brand-cyan transition-colors">
-                Contact & Helplines
+                Contact &amp; Helplines
               </button>
               {role === 'admin' && (
                 <>

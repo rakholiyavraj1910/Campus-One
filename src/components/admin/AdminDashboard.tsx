@@ -5,6 +5,7 @@ import { ManageEvents } from './ManageEvents';
 import { ManageFaculty } from './ManageFaculty';
 import { ManageMaterials } from './ManageMaterials';
 import { ManageStudents } from './ManageStudents';
+import { ManageFacultyRequests } from './ManageFacultyRequests';
 import { SystemSettings } from './SystemSettings';
 import { AuditLogsViewer } from './AuditLogsViewer';
 import { ManageFeedback } from './ManageFeedback';
@@ -17,11 +18,12 @@ import {
   Users, 
   FileText, 
   ShieldCheck, 
-  Settings,
-  ShieldAlert,
-  MessageSquare,
-  AlertTriangle,
-  ArrowRight
+  Settings, 
+  ShieldAlert, 
+  MessageSquare, 
+  AlertTriangle, 
+  ArrowRight,
+  UserCheck
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { getBackendStatus, BackendStatus, subscribeToBackendHealth } from '../../lib/supabaseClient';
@@ -42,7 +44,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onNavigate = () => {}
 }) => {
   const { role, user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'analytics' | 'notices' | 'events' | 'faculty' | 'materials' | 'students' | 'audit' | 'feedback' | 'system'>('analytics');
+  const [activeTab, setActiveTab] = useState<'analytics' | 'faculty-requests' | 'notices' | 'events' | 'faculty' | 'materials' | 'students' | 'audit' | 'feedback' | 'system'>('analytics');
   const [backendStatus, setBackendStatus] = useState<BackendStatus>(getBackendStatus());
 
   useEffect(() => {
@@ -56,9 +58,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   const tabs = [
     { id: 'analytics', label: 'Platform Analytics', icon: BarChart3 },
+    { id: 'faculty-requests', label: 'Faculty Approvals', icon: UserCheck },
     { id: 'notices', label: 'Manage Notices', icon: Bell, count: notices.length },
     { id: 'events', label: 'Manage Events', icon: Calendar, count: events.length },
-    { id: 'faculty', label: 'Manage Faculty', icon: Users },
+    { id: 'faculty', label: 'Faculty Roster', icon: Users },
     { id: 'materials', label: 'Upload Materials', icon: FileText },
     { id: 'students', label: 'Student Accounts', icon: ShieldCheck },
     { id: 'feedback', label: 'Student Grievances', icon: MessageSquare },
@@ -145,6 +148,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       {/* Dynamic Tab Views */}
       {activeTab === 'analytics' && <PlatformAnalytics notices={notices} events={events} />}
+      {activeTab === 'faculty-requests' && <ManageFacultyRequests />}
       {activeTab === 'notices' && <ManageNotices notices={notices} onRefreshNotices={onRefreshNotices} />}
       {activeTab === 'events' && <ManageEvents events={events} onRefreshEvents={onRefreshEvents} />}
       {activeTab === 'faculty' && <ManageFaculty />}
