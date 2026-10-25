@@ -88,7 +88,7 @@ assert(migrationSql.includes("RAISE EXCEPTION 'Unauthorized: Only institutional 
 const forwardMigrationPath = path.join(migrationDir, '20261026010000_fix_user_role_type_and_signup.sql');
 assert(fs.existsSync(forwardMigrationPath), '20261026010000_fix_user_role_type_and_signup.sql exists');
 const forwardSql = fs.readFileSync(forwardMigrationPath, 'utf8');
-assert(forwardSql.includes('SET search_path = public, pg_temp'), 'Forward migration sets search_path on security definer functions');
+assert(forwardSql.includes("SET search_path = ''") || forwardSql.includes('SET search_path = public, pg_temp'), 'Forward migration sets search_path on security definer functions');
 assert(forwardSql.includes('public.user_role_type'), 'Forward migration schema-qualifies public.user_role_type');
 assert(forwardSql.includes('ON CONFLICT (id) DO NOTHING'), 'Forward migration prevents overwriting existing profile data on conflict');
 assert(forwardSql.includes("assigned_role := 'student'::public.user_role_type"), 'Forward migration strictly assigns student role to all public signups');

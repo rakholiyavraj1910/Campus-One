@@ -425,7 +425,7 @@ CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, pg_temp
+SET search_path = ''
 AS $$
 DECLARE
   assigned_role public.user_role_type := 'student'::public.user_role_type;
@@ -453,11 +453,11 @@ BEGIN
   VALUES (
     NEW.id,
     NEW.email,
-    COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)),
+    COALESCE(NEW.raw_user_meta_data->>'name', pg_catalog.split_part(NEW.email, '@', 1)),
     assigned_role,
     COALESCE(NEW.raw_user_meta_data->>'department', 'Architecture'),
-    COALESCE(NEW.raw_user_meta_data->>'roll_number', 'CS-' || FLOOR(RANDOM() * 9000 + 1000)::TEXT),
-    COALESCE(NEW.raw_user_meta_data->>'prn', '2025' || LPAD(FLOOR(RANDOM() * 100000000)::TEXT, 8, '0')),
+    COALESCE(NEW.raw_user_meta_data->>'roll_number', 'CS-' || pg_catalog.floor(pg_catalog.random() * 9000 + 1000)::TEXT),
+    COALESCE(NEW.raw_user_meta_data->>'prn', '2025' || pg_catalog.lpad(pg_catalog.floor(pg_catalog.random() * 100000000)::TEXT, 8, '0')),
     COALESCE((NEW.raw_user_meta_data->>'semester')::INT, 1),
     COALESCE(NEW.raw_user_meta_data->>'division', 'A'),
     NEW.raw_user_meta_data->>'designation',
@@ -468,8 +468,8 @@ BEGIN
       THEN 'pending_faculty'
       ELSE NULL 
     END,
-    NOW(),
-    NOW()
+    pg_catalog.now(),
+    pg_catalog.now()
   )
   ON CONFLICT (id) DO NOTHING;
 
