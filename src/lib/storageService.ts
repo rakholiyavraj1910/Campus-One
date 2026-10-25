@@ -11,7 +11,8 @@ import {
   StudentRosterEntry,
   AttendanceSession,
   AuditLog,
-  FeedbackItem
+  FeedbackItem,
+  DepartmentInfo
 } from '../types';
 import { 
   INITIAL_NOTICES, 
@@ -26,7 +27,8 @@ import {
   INITIAL_STUDENT_ROSTER,
   INITIAL_ATTENDANCE_SESSIONS,
   INITIAL_AUDIT_LOGS,
-  INITIAL_FEEDBACK
+  INITIAL_FEEDBACK,
+  INITIAL_DEPARTMENTS
 } from './mockData';
 import { supabase, isSupabaseConfigured } from './supabaseClient';
 
@@ -46,6 +48,7 @@ const STORAGE_KEYS = {
   ATTENDANCE_SESSIONS: 'campusone_attendance_sessions_v1',
   AUDIT_LOGS: 'campusone_audit_logs_v1',
   FEEDBACK: 'campusone_feedback_v1',
+  DEPARTMENTS: 'campusone_departments_v1',
 };
 
 // Safe LocalStorage helpers for Demo Mode
@@ -174,6 +177,22 @@ const mapAuditLogFromDb = (row: any): AuditLog => ({
   targetId: row.target_id || undefined,
   details: row.details || '',
   timestamp: row.timestamp ? row.timestamp.replace('T', ' ').slice(0, 19) : '',
+});
+
+const mapDepartmentFromDb = (row: any): DepartmentInfo => ({
+  id: row.id,
+  name: row.name,
+  code: row.code,
+  hodName: row.hod_name || '',
+  hodEmail: row.hod_email || '',
+  establishedYear: row.established_year || 2000,
+  totalStudents: row.total_students || 300,
+  totalFaculty: row.total_faculty || 20,
+  description: row.description || '',
+  vision: row.vision || '',
+  programsOffered: row.programs_offered || [],
+  labs: row.labs || [],
+  bannerImage: row.banner_image || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80',
 });
 
 // ----------------- NOTICES CRUD -----------------
@@ -1105,6 +1124,30 @@ export const updateFeedbackStatus = async (
   const updated = list.map(item => item.id === id ? { ...item, status: newStatus } : item);
   saveToStorage(STORAGE_KEYS.FEEDBACK, updated);
   return updated;
+};
+
+// ----------------- DEPARTMENTS -----------------
+export const getDepartments = async (): Promise<DepartmentInfo[]> => {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('departments')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (!error && data && data.length > 0) {
+        return data.map(mapDepartmentFromDb);
+      }
+
+      if (error) {
+        console.warn(`[CampusOne Supabase Departments Fetch] Status ${error.code}: ${error.message}. Using demo fallback.`);
+      }
+    } catch (e) {
+      console.warn('[CampusOne Supabase Departments Fetch Failure]:', e);
+    }
+  }
+
+  return loadFromStorage<DepartmentInfo[]>(STORAGE_KEYS.DEPARTMENTS, INITIAL_DEPARTMENTS);
 };
 
 // ----------------- SYSTEM RESET & EXPORT -----------------

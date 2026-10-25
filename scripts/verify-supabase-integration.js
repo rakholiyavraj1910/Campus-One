@@ -224,6 +224,21 @@ const manageStudentsPath = path.join(rootDir, 'src', 'components', 'admin', 'Man
 const manageStudentsContent = fs.readFileSync(manageStudentsPath, 'utf8');
 assert(manageStudentsContent.includes('s.department'), 'Admin ManageStudents displays student department');
 
+// 8. Verify Department Directory & Storage Service
+console.log('\n8. Checking Department Directory & All 14 Departments:');
+const mockDataPath = path.join(rootDir, 'src', 'lib', 'mockData.ts');
+const mockDataContent = fs.readFileSync(mockDataPath, 'utf8');
+expectedDepartments.forEach(dept => {
+  assert(mockDataContent.includes(`name: '${dept}'`), `INITIAL_DEPARTMENTS contains complete profile for: ${dept}`);
+});
+
+assert(storageContent.includes('getDepartments'), 'storageService exports getDepartments');
+assert(storageContent.includes("from('departments')"), 'storageService queries departments table in Supabase');
+
+const deptDirectoryPath = path.join(rootDir, 'src', 'components', 'campus', 'DepartmentDirectory.tsx');
+const deptDirectoryContent = fs.readFileSync(deptDirectoryPath, 'utf8');
+assert(deptDirectoryContent.includes('getDepartments'), 'DepartmentDirectory loads departments via storageService');
+
 
 console.log('\n====================================================');
 console.log(`Results: ${passedTests}/${totalTests} tests passed (${Math.round((passedTests / totalTests) * 100)}%)`);

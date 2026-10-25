@@ -1,10 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { INITIAL_DEPARTMENTS } from '../../lib/mockData';
+import { getDepartments } from '../../lib/storageService';
 import { DepartmentInfo } from '../../types';
 import { Building2, Users, GraduationCap, Laptop, Sparkles, Mail, CheckCircle2 } from 'lucide-react';
 
 export const DepartmentDirectory: React.FC = () => {
+  const [departments, setDepartments] = useState<DepartmentInfo[]>(INITIAL_DEPARTMENTS);
   const [selectedDept, setSelectedDept] = useState<DepartmentInfo>(INITIAL_DEPARTMENTS[0]);
+
+  useEffect(() => {
+    getDepartments().then((data) => {
+      if (data && data.length > 0) {
+        setDepartments(data);
+        if (!data.some((d) => d.id === selectedDept.id)) {
+          setSelectedDept(data[0]);
+        }
+      }
+    });
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -24,14 +37,14 @@ export const DepartmentDirectory: React.FC = () => {
 
         <div className="flex items-center space-x-2">
           <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
-            {INITIAL_DEPARTMENTS.length} Engineering Departments
+            {departments.length} Engineering Departments
           </span>
         </div>
       </div>
 
       {/* Department Selector Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {INITIAL_DEPARTMENTS.map((dept) => (
+        {departments.map((dept) => (
           <button
             key={dept.id}
             onClick={() => setSelectedDept(dept)}
