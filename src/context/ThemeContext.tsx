@@ -12,9 +12,16 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setTheme] = useState<Theme>(() => {
-    const saved = localStorage.getItem('campusone_theme');
-    if (saved === 'dark' || saved === 'light') return saved;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('campusone_theme');
+        if (saved === 'dark' || saved === 'light') return saved;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      } catch {
+        return 'dark';
+      }
+    }
+    return 'dark';
   });
 
   useEffect(() => {
@@ -24,7 +31,11 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } else {
       root.classList.remove('dark');
     }
-    localStorage.setItem('campusone_theme', theme);
+    try {
+      localStorage.setItem('campusone_theme', theme);
+    } catch {
+      // ignore storage errors in restricted contexts
+    }
   }, [theme]);
 
   const toggleTheme = () => {

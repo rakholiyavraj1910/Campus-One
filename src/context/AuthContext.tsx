@@ -61,19 +61,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // In demo mode or initial state, use localStorage
   const [demoRole, setDemoRole] = useState<UserRole>(() => {
-    const saved = localStorage.getItem('campusone_active_role') as UserRole;
-    return saved && DEMO_USERS[saved] ? saved : 'student';
+    try {
+      const saved = localStorage.getItem('campusone_active_role') as UserRole;
+      return saved && DEMO_USERS[saved] ? saved : 'student';
+    } catch {
+      return 'student';
+    }
   });
 
   const [currentUser, setCurrentUser] = useState<UserProfile>(() => {
     if (!isSupabaseConfigured) {
-      const savedUser = localStorage.getItem('campusone_user_profile');
-      if (savedUser) {
-        try {
+      try {
+        const savedUser = localStorage.getItem('campusone_user_profile');
+        if (savedUser) {
           return JSON.parse(savedUser);
-        } catch {
-          // ignore
         }
+      } catch {
+        // ignore
       }
       return DEMO_USERS[demoRole] || DEMO_USERS.student;
     }

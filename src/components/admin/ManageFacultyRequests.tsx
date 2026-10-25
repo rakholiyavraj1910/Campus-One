@@ -55,6 +55,24 @@ const SAMPLE_PENDING_REQUESTS: PendingFacultyRequest[] = [
   }
 ];
 
+const getStoredPendingRequests = (): PendingFacultyRequest[] => {
+  try {
+    const raw = localStorage.getItem('campusone_pending_faculty_requests');
+    if (!raw) return [];
+    return JSON.parse(raw);
+  } catch {
+    return [];
+  }
+};
+
+const saveStoredPendingRequests = (reqs: PendingFacultyRequest[]) => {
+  try {
+    localStorage.setItem('campusone_pending_faculty_requests', JSON.stringify(reqs));
+  } catch {
+    // ignore
+  }
+};
+
 export const ManageFacultyRequests: React.FC = () => {
   const { addNotification } = useNotifications();
   const [requests, setRequests] = useState<PendingFacultyRequest[]>([]);
@@ -90,20 +108,19 @@ export const ManageFacultyRequests: React.FC = () => {
           if (mapped.length > 0) {
             setRequests(mapped);
           } else {
-            // Read local storage
-            const local = JSON.parse(localStorage.getItem('campusone_pending_faculty_requests') || '[]');
+            const local = getStoredPendingRequests();
             setRequests(local.length > 0 ? local : SAMPLE_PENDING_REQUESTS);
           }
         } else {
-          const local = JSON.parse(localStorage.getItem('campusone_pending_faculty_requests') || '[]');
+          const local = getStoredPendingRequests();
           setRequests(local.length > 0 ? local : SAMPLE_PENDING_REQUESTS);
         }
       } catch (e) {
-        const local = JSON.parse(localStorage.getItem('campusone_pending_faculty_requests') || '[]');
+        const local = getStoredPendingRequests();
         setRequests(local.length > 0 ? local : SAMPLE_PENDING_REQUESTS);
       }
     } else {
-      const local = JSON.parse(localStorage.getItem('campusone_pending_faculty_requests') || '[]');
+      const local = getStoredPendingRequests();
       setRequests(local.length > 0 ? local : SAMPLE_PENDING_REQUESTS);
     }
 
@@ -154,9 +171,9 @@ export const ManageFacultyRequests: React.FC = () => {
       setRequests(prev => prev.filter(r => r.id !== req.id));
 
       // Update local storage
-      const existing = JSON.parse(localStorage.getItem('campusone_pending_faculty_requests') || '[]');
+      const existing = getStoredPendingRequests();
       const filtered = existing.filter((r: any) => r.id !== req.id);
-      localStorage.setItem('campusone_pending_faculty_requests', JSON.stringify(filtered));
+      saveStoredPendingRequests(filtered);
 
       addNotification(
         'Faculty Access Approved',
@@ -190,9 +207,9 @@ export const ManageFacultyRequests: React.FC = () => {
 
       setRequests(prev => prev.filter(r => r.id !== req.id));
 
-      const existing = JSON.parse(localStorage.getItem('campusone_pending_faculty_requests') || '[]');
+      const existing = getStoredPendingRequests();
       const filtered = existing.filter((r: any) => r.id !== req.id);
-      localStorage.setItem('campusone_pending_faculty_requests', JSON.stringify(filtered));
+      saveStoredPendingRequests(filtered);
 
       addNotification(
         'Request Declined',

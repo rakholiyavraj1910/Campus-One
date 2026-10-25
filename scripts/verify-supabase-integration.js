@@ -287,6 +287,29 @@ const loginLogoPagePath = path.join(rootDir, 'src', 'components', 'auth', 'Login
 const loginLogoPageContent = fs.readFileSync(loginLogoPagePath, 'utf8');
 assert(loginLogoPageContent.includes('CampusOneIcon'), 'LoginPage.tsx integrates CampusOneIcon');
 
+console.log('\n10. Checking Desktop White-Screen Resilience & Error Recovery:');
+const errorBoundaryPath = path.join(rootDir, 'src', 'components', 'common', 'ErrorBoundary.tsx');
+assert(fs.existsSync(errorBoundaryPath), 'ErrorBoundary.tsx exists');
+const errorBoundaryContent = fs.readFileSync(errorBoundaryPath, 'utf8');
+assert(errorBoundaryContent.includes('class ErrorBoundary extends Component'), 'ErrorBoundary exports class component');
+assert(errorBoundaryContent.includes('handleClearCacheAndReset'), 'ErrorBoundary implements emergency cache & session reset');
+
+const mainTsxPath = path.join(rootDir, 'src', 'main.tsx');
+const mainTsxContent = fs.readFileSync(mainTsxPath, 'utf8');
+assert(mainTsxContent.includes('<ErrorBoundary>'), 'main.tsx wraps App in ErrorBoundary');
+
+const vercelJsonPath = path.join(rootDir, 'vercel.json');
+const vercelJsonContent = fs.readFileSync(vercelJsonPath, 'utf8');
+assert(vercelJsonContent.includes('(?!assets/|favicon.svg|manifest.json|sw.js)'), 'vercel.json prevents rewriting assets/ to index.html');
+
+const swPath = path.join(rootDir, 'public', 'sw.js');
+const swContent = fs.readFileSync(swPath, 'utf8');
+assert(swContent.includes('skipWaiting') && !swContent.includes("return cached || fetch"), 'public/sw.js never does stale cache-first on index.html');
+
+const indexHtmlPath2 = path.join(rootDir, 'index.html');
+const indexHtmlContent2 = fs.readFileSync(indexHtmlPath2, 'utf8');
+assert(indexHtmlContent2.includes('serviceWorker.getRegistrations'), 'index.html includes legacy serviceWorker purge script');
+
 console.log('\n====================================================');
 console.log(`Results: ${passedTests}/${totalTests} tests passed (${Math.round((passedTests / totalTests) * 100)}%)`);
 console.log('====================================================\n');

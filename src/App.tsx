@@ -111,9 +111,13 @@ const MainLayout: React.FC = () => {
   const [authMode, setAuthMode] = useState<'signin' | 'register'>(initialLoc.authMode || 'signin');
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('campusone_sidebar_open');
-      if (saved !== null) return saved === 'true';
-      return window.innerWidth >= 1024;
+      try {
+        const saved = localStorage.getItem('campusone_sidebar_open');
+        if (saved !== null) return saved === 'true';
+        return window.innerWidth >= 1024;
+      } catch {
+        return window.innerWidth >= 1024;
+      }
     }
     return true;
   });
@@ -122,7 +126,11 @@ const MainLayout: React.FC = () => {
     setIsSidebarOpen(prev => {
       const next = !prev;
       if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
-        localStorage.setItem('campusone_sidebar_open', String(next));
+        try {
+          localStorage.setItem('campusone_sidebar_open', String(next));
+        } catch {
+          // ignore storage error in private browsing
+        }
       }
       return next;
     });
@@ -381,6 +389,26 @@ const MainLayout: React.FC = () => {
               onRefreshEvents={loadData}
               onNavigate={handleNavigate}
             />
+          )}
+
+          {/* Default fallback for authenticated views if currentPage is portal-select or unknown */}
+          {!['home', 'about', 'contact', 'faculty-portal', 'student', 'campus', 'notices', 'events', 'admin'].includes(currentPage) && (
+            role === 'admin' ? (
+              <AdminDashboard
+                notices={notices}
+                events={events}
+                onRefreshNotices={loadData}
+                onRefreshEvents={loadData}
+                onNavigate={handleNavigate}
+              />
+            ) : role === 'faculty' ? (
+              <FacultyPortal />
+            ) : (
+              <StudentDashboard
+                currentSubTab={currentSubTab || 'profile'}
+                onNavigateSubTab={(sub) => setCurrentSubTab(sub)}
+              />
+            )
           )}
         </main>
       </div>
