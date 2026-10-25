@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { COLLEGE_DEPARTMENTS } from '../../types';
+import { supabase, isSupabaseConfigured } from '../../lib/supabaseClient';
+import { parseAuthUrlState, cleanAuthUrlParams, processAuthRedirectCode } from '../../lib/authRedirect';
 import { 
   Users, 
   Lock, 
@@ -45,6 +47,45 @@ export const FacultyAuthPage: React.FC<FacultyAuthPageProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Inspect incoming URL parameters for email confirmation tokens, PKCE codes, or errors
+  useEffect(() => {
+    const handleUrlState = async () => {
+      const authState = parseAuthUrlState();
+
+      if (authState.error) {
+        setFormError(
+          authState.errorDescription || 
+          'Email verification link is invalid or has expired. Please sign in or request a new verification link.'
+        );
+        cleanAuthUrlParams();
+        return;
+      }
+
+      if (authState.code && isSupabaseConfigured && supabase) {
+        setIsSubmitting(true);
+        const res = await processAuthRedirectCode(supabase);
+        setIsSubmitting(false);
+        if (res.success) {
+          setSuccessMessage('Email verified successfully! Loading your institutional portal...');
+          setTimeout(() => {
+            onLoginSuccess();
+          }, 800);
+        } else if (res.error) {
+          setFormError(res.error);
+        }
+        return;
+      }
+
+      if (authState.isConfirmed) {
+        setMode('signin');
+        setSuccessMessage('Email confirmed successfully! Your faculty account is verified and awaiting administrative approval.');
+        cleanAuthUrlParams();
+      }
+    };
+
+    handleUrlState();
+  }, [onLoginSuccess]);
 
   const designationsList = [
     'Professor',
@@ -111,10 +152,15 @@ export const FacultyAuthPage: React.FC<FacultyAuthPageProps> = ({
     setIsSubmitting(false);
 
     if (result.success) {
-      setSuccessMessage('Faculty access request submitted! Your application is awaiting departmental administrative verification.');
-      setTimeout(() => {
-        onLoginSuccess();
-      }, 1200);
+      if (result.needsEmailConfirmation) {
+        setSuccessMessage(`Faculty access request submitted! A verification link has been sent to ${email.trim()}. Please tap "Confirm email address" in your email to activate your account for administrative review.`);
+        setMode('signin');
+      } else {
+        setSuccessMessage('Faculty access request submitted! Your application is awaiting departmental administrative verification.');
+        setTimeout(() => {
+          onLoginSuccess();
+        }, 1200);
+      }
     } else {
       setFormError(result.error || 'Request submission failed. Please try again.');
     }

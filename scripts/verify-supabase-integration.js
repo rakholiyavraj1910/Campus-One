@@ -139,9 +139,21 @@ assert(fs.existsSync(authContextPath), 'src/context/AuthContext.tsx exists');
 const authContent = fs.readFileSync(authContextPath, 'utf8');
 assert(authContent.includes('signInWithPassword'), 'AuthContext implements signInWithPassword');
 assert(authContent.includes('signUp'), 'AuthContext implements signUp');
+assert(authContent.includes('emailRedirectTo: redirectUrl'), 'AuthContext passes emailRedirectTo in signUp');
 assert(authContent.includes('resetPassword'), 'AuthContext implements resetPassword');
 assert(authContent.includes('onAuthStateChange'), 'AuthContext listens to onAuthStateChange');
 assert(authContent.includes('from(\'profiles\')'), 'AuthContext loads verified profiles from Supabase');
+
+// Check Email Redirect & Auth Callback Helper
+const authRedirectPath = path.join(rootDir, 'src', 'lib', 'authRedirect.ts');
+assert(fs.existsSync(authRedirectPath), 'src/lib/authRedirect.ts exists');
+const authRedirectContent = fs.readFileSync(authRedirectPath, 'utf8');
+assert(authRedirectContent.includes('getSiteUrl'), 'authRedirect exports getSiteUrl');
+assert(authRedirectContent.includes('getAuthRedirectUrl'), 'authRedirect exports getAuthRedirectUrl');
+assert(authRedirectContent.includes('parseAuthUrlState'), 'authRedirect exports parseAuthUrlState');
+assert(authRedirectContent.includes('cleanAuthUrlParams'), 'authRedirect exports cleanAuthUrlParams');
+assert(authRedirectContent.includes('https://campus-oneweb.vercel.app'), 'authRedirect defaults to https://campus-oneweb.vercel.app canonical URL');
+assert(!authRedirectContent.includes('localhost:3000'), 'authRedirect NEVER hardcodes localhost:3000');
 
 // 5. Verify Storage Service & Real Database CRUD
 console.log('\n5. Checking Storage Service CRUD Operations & Guest Security:');

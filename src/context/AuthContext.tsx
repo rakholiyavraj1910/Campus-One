@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { UserProfile, UserRole } from '../types';
 import { DEMO_USERS } from '../lib/mockData';
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
+import { getAuthRedirectUrl } from '../lib/authRedirect';
 
 export interface AuthContextType {
   user: UserProfile;
@@ -24,7 +25,7 @@ export interface AuthContextType {
     name: string, 
     department?: string,
     studentDetails?: { rollNumber?: string; prn?: string; division?: string }
-  ) => Promise<{ success: boolean; error?: string }>;
+  ) => Promise<{ success: boolean; error?: string; needsEmailConfirmation?: boolean }>;
   requestFacultyAccess: (
     email: string,
     password: string,
@@ -33,7 +34,7 @@ export interface AuthContextType {
     designation: string,
     cabin?: string,
     specialization?: string
-  ) => Promise<{ success: boolean; error?: string }>;
+  ) => Promise<{ success: boolean; error?: string; needsEmailConfirmation?: boolean }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
   // Compatibility & Demo mode methods
@@ -260,7 +261,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     name: string,
     department: string = 'Computer Science & Engineering',
     studentDetails?: { rollNumber?: string; prn?: string; division?: string }
-  ): Promise<{ success: boolean; error?: string }> => {
+  ): Promise<{ success: boolean; error?: string; needsEmailConfirmation?: boolean }> => {
     setAuthError(null);
 
     if (!isSupabaseConfigured || !supabase) {
@@ -282,10 +283,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
+      const redirectUrl = getAuthRedirectUrl('/student/login?confirmed=true');
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password,
         options: {
+          emailRedirectTo: redirectUrl,
           data: {
             name: name.trim(),
             department,
@@ -302,6 +305,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { success: false, error: error.message };
       }
 
+      const needsEmailConfirmation = !data.session;
+
       if (data.user) {
         try {
           await supabase
@@ -317,11 +322,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch (e) {
           console.warn('Initial student profile sync non-blocking notice:', e);
         }
-        const profile = await fetchProfile(data.user.id, data.user.email);
-        if (profile) setCurrentUser(profile);
+        if (data.session) {
+          const profile = await fetchProfile(data.user.id, data.user.email);
+          if (profile) setCurrentUser(profile);
+        }
       }
 
-      return { success: true };
+      return { success: true, needsEmailConfirmation };
     } catch (err: any) {
       const msg = err.message || 'Registration failed. Please try again.';
       setAuthError(msg);
@@ -338,7 +345,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     designation: string,
     cabin?: string,
     specialization?: string
-  ): Promise<{ success: boolean; error?: string }> => {
+  ): Promise<{ success: boolean; error?: string; needsEmailConfirmation?: boolean }> => {
     setAuthError(null);
 
     if (!isSupabaseConfigured || !supabase) {
@@ -375,10 +382,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
+      const redirectUrl = getAuthRedirectUrl('/faculty/login?confirmed=true');
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password,
         options: {
+          emailRedirectTo: redirectUrl,
           data: {
             name: name.trim(),
             department,
@@ -397,6 +406,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { success: false, error: error.message };
       }
 
+      const needsEmailConfirmation = !data.session;
+
       if (data.user) {
         try {
           await supabase
@@ -413,11 +424,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch (e) {
           console.warn('Initial faculty profile sync non-blocking notice:', e);
         }
-        const profile = await fetchProfile(data.user.id, data.user.email);
-        if (profile) setCurrentUser(profile);
+        if (data.session) {
+          const profile = await fetchProfile(data.user.id, data.user.email);
+          if (profile) setCurrentUser(profile);
+        }
       }
 
-      return { success: true };
+      return { success: true, needsEmailConfirmation };
     } catch (err: any) {
       const msg = err.message || 'Faculty access request failed. Please try again.';
       setAuthError(msg);
@@ -450,8 +463,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
+      const redirectUrl = getAuthRedirectUrl('/login?mode=reset');
       const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: redirectUrl,
       });
 
       if (error) {

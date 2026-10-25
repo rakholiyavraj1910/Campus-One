@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { COLLEGE_DEPARTMENTS } from '../../types';
+import { supabase, isSupabaseConfigured } from '../../lib/supabaseClient';
+import { parseAuthUrlState, cleanAuthUrlParams, processAuthRedirectCode } from '../../lib/authRedirect';
 import { 
   GraduationCap, 
   Users, 
@@ -69,6 +71,45 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Inspect incoming URL parameters for email confirmation tokens, PKCE codes, or errors
+  useEffect(() => {
+    const handleUrlState = async () => {
+      const authState = parseAuthUrlState();
+
+      if (authState.error) {
+        setFormError(
+          authState.errorDescription || 
+          'Email verification link is invalid or has expired. Please sign in or request a new verification link.'
+        );
+        cleanAuthUrlParams();
+        return;
+      }
+
+      if (authState.code && isSupabaseConfigured && supabase) {
+        setIsSubmitting(true);
+        const res = await processAuthRedirectCode(supabase);
+        setIsSubmitting(false);
+        if (res.success) {
+          setSuccessMessage('Email verified successfully! Loading your institutional portal...');
+          setTimeout(() => {
+            onLoginSuccess();
+          }, 800);
+        } else if (res.error) {
+          setFormError(res.error);
+        }
+        return;
+      }
+
+      if (authState.isConfirmed) {
+        setMode('signin');
+        setSuccessMessage('Email confirmed successfully! Your account is now verified. Please sign in below.');
+        cleanAuthUrlParams();
+      }
+    };
+
+    handleUrlState();
+  }, [onLoginSuccess]);
 
   const switchPortal = (portal: 'student' | 'faculty') => {
     setActivePortal(portal);
@@ -140,10 +181,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     setIsSubmitting(false);
 
     if (result.success) {
-      setSuccessMessage('Student registration successful! Your verified student profile has been provisioned.');
-      setTimeout(() => {
-        onLoginSuccess();
-      }, 1000);
+      if (result.needsEmailConfirmation) {
+        setSuccessMessage(`Registration successful! A verification link has been sent to ${email.trim()}. Please tap "Confirm email address" in your email to activate your account.`);
+        setMode('signin');
+      } else {
+        setSuccessMessage('Student registration successful! Your verified student profile has been provisioned.');
+        setTimeout(() => {
+          onLoginSuccess();
+        }, 1000);
+      }
     } else {
       setFormError(result.error || 'Registration failed. Please try a different email address.');
     }
@@ -184,10 +230,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     setIsSubmitting(false);
 
     if (result.success) {
-      setSuccessMessage('Faculty access request submitted! Your account is awaiting administrative approval before privileges activate.');
-      setTimeout(() => {
-        onLoginSuccess();
-      }, 1200);
+      if (result.needsEmailConfirmation) {
+        setSuccessMessage(`Faculty access request submitted! A verification link has been sent to ${email.trim()}. Please confirm your email address to enable administrative review.`);
+        setMode('signin');
+      } else {
+        setSuccessMessage('Faculty access request submitted! Your account is awaiting administrative approval before privileges activate.');
+        setTimeout(() => {
+          onLoginSuccess();
+        }, 1200);
+      }
     } else {
       setFormError(result.error || 'Faculty access request submission failed. Please try again.');
     }
