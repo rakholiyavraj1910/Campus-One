@@ -97,7 +97,25 @@ const MainLayout: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<string>(initialLoc.page);
   const [currentSubTab, setCurrentSubTab] = useState<string | undefined>(initialLoc.subTab);
   const [authMode, setAuthMode] = useState<'signin' | 'register'>(initialLoc.authMode || 'signin');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('campusone_sidebar_open');
+      if (saved !== null) return saved === 'true';
+      return window.innerWidth >= 1024;
+    }
+    return true;
+  });
+
+  const handleToggleSidebar = () => {
+    setIsSidebarOpen(prev => {
+      const next = !prev;
+      if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
+        localStorage.setItem('campusone_sidebar_open', String(next));
+      }
+      return next;
+    });
+  };
+
   const [selectedNoticeModal, setSelectedNoticeModal] = useState<Notice | null>(null);
 
   const [notices, setNotices] = useState<Notice[]>([]);
@@ -254,12 +272,12 @@ const MainLayout: React.FC = () => {
 
       {/* 2. Sticky SaaS Navbar */}
       <Navbar
-        onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+        onToggleSidebar={handleToggleSidebar}
         onNavigate={handleNavigate}
         currentPage={currentPage}
       />
 
-      <div className="flex-1 flex max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+      <div className={`flex-1 flex max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 transition-all duration-300 ${isSidebarOpen ? 'lg:gap-6' : 'gap-0'}`}>
         {/* 3. Collapsible Sidebar Navigation */}
         <Sidebar
           isOpen={isSidebarOpen}
@@ -269,8 +287,8 @@ const MainLayout: React.FC = () => {
           onNavigate={handleNavigate}
         />
 
-        {/* 4. Main Page Area */}
-        <main className="flex-1 lg:pl-72 transition-all duration-300 w-full min-w-0">
+        {/* 4. Main Page Area (Reclaims full 100% width when sidebar is collapsed; zero overlap) */}
+        <main className="flex-1 min-w-0 transition-all duration-300 w-full">
           <Breadcrumbs
             currentPage={currentPage}
             currentSubTab={currentSubTab}
