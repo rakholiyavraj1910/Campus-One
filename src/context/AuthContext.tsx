@@ -11,6 +11,7 @@ export interface AuthContextType {
   isFaculty: boolean;
   isStudent: boolean;
   isGuest: boolean;
+  isPending: boolean;
   canManageContent: boolean;
   isLiveMode: boolean;
   loading: boolean;
@@ -106,12 +107,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return mapDbProfile(data);
       }
 
-      // If profile hasn't been created yet by trigger, return fallback with email
+      // If user is authenticated in GoTrue but has no row in public.profiles yet,
+      // assign 'pending' role to prevent premature authorization elevation
       return {
         id: userId,
         email: userEmail || '',
         name: userEmail ? userEmail.split('@')[0] : 'CampusOne User',
-        role: 'student',
+        role: 'pending',
       };
     } catch (e: any) {
       console.error('Error fetching Supabase profile:', e);
@@ -298,6 +300,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
     setCurrentUser(GUEST_USER);
+    localStorage.removeItem('campusone_active_role');
+    localStorage.removeItem('campusone_user_profile');
+    localStorage.removeItem('campusone_auth_token');
   };
 
   // Live Supabase Password Reset
@@ -323,8 +328,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Demo Mode Switchers (for testing and offline demo)
+  // Role Switcher: In live mode, authorization is strictly bound to PostgreSQL profiles
   const switchRole = (newRole: UserRole) => {
+    if (isSupabaseConfigured) {
+      console.warn('Role escalation prevented. In live Supabase mode, role is resolved from public.profiles in PostgreSQL.');
+      return;
+    }
     setDemoRole(newRole);
     setCurrentUser(DEMO_USERS[newRole] || GUEST_USER);
   };
@@ -342,11 +351,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
-    if (isSupabaseConfigured && supabase) {
-      signOut();
-    } else {
-      switchRole('guest');
-    }
+    signOut();
   };
 
   const refreshProfile = async () => {
@@ -357,10 +362,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const role = currentUser.role;
+  const isPending = role === 'pending';
   const isAdmin = role === 'admin';
   const isFaculty = role === 'faculty';
   const isStudent = role === 'student';
   const isGuest = role === 'guest';
+  const isAuthenticated = role !== 'guest' && role !== 'pending';
   const canManageContent = isAdmin || isFaculty;
 
   return (
@@ -368,11 +375,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         user: currentUser,
         role,
-        isAuthenticated: role !== 'guest',
+        isAuthenticated,
         isAdmin,
         isFaculty,
         isStudent,
         isGuest,
+        isPending,
         canManageContent,
         isLiveMode,
         loading,

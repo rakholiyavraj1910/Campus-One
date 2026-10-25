@@ -63,51 +63,59 @@ export const ManageNotices: React.FC<ManageNoticesProps> = ({ notices, onRefresh
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (modalMode === 'create') {
-      await addNotice({
-        title,
-        category,
-        department,
-        semester: 'All',
-        date: new Date().toISOString().split('T')[0],
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        author: user.name,
-        authorRole: user.role === 'admin' ? 'Dean Admin' : 'Faculty In-Charge',
-        isUrgent,
-        content,
-        attachmentName: attachmentName ? attachmentName : undefined,
-        attachmentSize: attachmentName ? attachmentSize : undefined,
-      });
+    try {
+      if (modalMode === 'create') {
+        await addNotice({
+          title,
+          category,
+          department,
+          semester: 'All',
+          date: new Date().toISOString().split('T')[0],
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          author: user.name,
+          authorRole: user.role === 'admin' ? 'Dean Admin' : 'Faculty In-Charge',
+          isUrgent,
+          content,
+          attachmentName: attachmentName ? attachmentName : undefined,
+          attachmentSize: attachmentName ? attachmentSize : undefined,
+        });
 
-      addNotification(
-        'New Circular Published',
-        `Notice "${title}" was published to all campus portals.`,
-        isUrgent ? 'alert' : 'notice'
-      );
-    } else if (modalMode === 'edit' && editingNotice) {
-      await updateNotice({
-        ...editingNotice,
-        title,
-        category,
-        department,
-        isUrgent,
-        content,
-        attachmentName: attachmentName ? attachmentName : undefined,
-        attachmentSize: attachmentName ? attachmentSize : undefined,
-      });
+        addNotification(
+          'New Circular Published',
+          `Notice "${title}" was published to all campus portals.`,
+          isUrgent ? 'alert' : 'notice'
+        );
+      } else if (modalMode === 'edit' && editingNotice) {
+        await updateNotice({
+          ...editingNotice,
+          title,
+          category,
+          department,
+          isUrgent,
+          content,
+          attachmentName: attachmentName ? attachmentName : undefined,
+          attachmentSize: attachmentName ? attachmentSize : undefined,
+        });
 
-      addNotification('Notice Updated', `Changes to "${title}" were saved.`, 'notice');
+        addNotification('Notice Updated', `Changes to "${title}" were saved.`, 'notice');
+      }
+
+      setModalMode(null);
+      onRefreshNotices();
+    } catch (err: any) {
+      addNotification('Error Saving Notice', err.message || 'Failed to save notice.', 'alert');
     }
-
-    setModalMode(null);
-    onRefreshNotices();
   };
 
   const handleDelete = async (id: string, noticeTitle: string) => {
     if (confirm(`Are you sure you want to delete notice "${noticeTitle}"?`)) {
-      await deleteNotice(id);
-      addNotification('Notice Removed', `Notice "${noticeTitle}" was removed.`, 'alert');
-      onRefreshNotices();
+      try {
+        await deleteNotice(id);
+        addNotification('Notice Removed', `Notice "${noticeTitle}" was removed.`, 'alert');
+        onRefreshNotices();
+      } catch (err: any) {
+        addNotification('Error Deleting Notice', err.message || 'Failed to delete notice.', 'alert');
+      }
     }
   };
 

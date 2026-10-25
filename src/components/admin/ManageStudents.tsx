@@ -1,68 +1,112 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserProfile, UserRole } from '../../types';
 import { Users, Shield, Edit3, Check, Search, ShieldCheck } from 'lucide-react';
 import { useNotifications } from '../../context/NotificationContext';
+import { supabase, isSupabaseConfigured } from '../../lib/supabaseClient';
+
+const DEFAULT_STUDENTS: UserProfile[] = [
+  {
+    id: 'st-1',
+    name: 'Aarav Sharma',
+    email: 'aarav.sharma@campusone.edu',
+    role: 'student',
+    rollNumber: '21CS104',
+    prn: '2021016400987654',
+    department: 'Computer Science & Engineering',
+    semester: 6,
+    division: 'Div A',
+    cgpa: 8.92,
+  },
+  {
+    id: 'st-2',
+    name: 'Pooja Iyer',
+    email: 'pooja.iyer@campusone.edu',
+    role: 'student',
+    rollNumber: '21CS105',
+    prn: '2021016400987655',
+    department: 'Computer Science & Engineering',
+    semester: 6,
+    division: 'Div A',
+    cgpa: 9.25,
+  },
+  {
+    id: 'st-3',
+    name: 'Rohan Mehra',
+    email: 'rohan.mehra@campusone.edu',
+    role: 'student',
+    rollNumber: '21AI042',
+    prn: '2021016400987680',
+    department: 'Artificial Intelligence & Data Science',
+    semester: 6,
+    division: 'Div B',
+    cgpa: 8.45,
+  },
+  {
+    id: 'st-4',
+    name: 'Ananya Deshmukh',
+    email: 'ananya.d@campusone.edu',
+    role: 'student',
+    rollNumber: '21EC019',
+    prn: '2021016400987712',
+    department: 'Electronics & Telecommunications',
+    semester: 6,
+    division: 'Div A',
+    cgpa: 8.12,
+  }
+];
 
 export const ManageStudents: React.FC = () => {
   const { addNotification } = useNotifications();
 
-  const [students, setStudents] = useState<UserProfile[]>([
-    {
-      id: 'st-1',
-      name: 'Aarav Sharma',
-      email: 'aarav.sharma@campusone.edu',
-      role: 'student',
-      rollNumber: '21CS104',
-      prn: '2021016400987654',
-      department: 'Computer Science & Engineering',
-      semester: 6,
-      division: 'Div A',
-      cgpa: 8.92,
-    },
-    {
-      id: 'st-2',
-      name: 'Pooja Iyer',
-      email: 'pooja.iyer@campusone.edu',
-      role: 'student',
-      rollNumber: '21CS105',
-      prn: '2021016400987655',
-      department: 'Computer Science & Engineering',
-      semester: 6,
-      division: 'Div A',
-      cgpa: 9.25,
-    },
-    {
-      id: 'st-3',
-      name: 'Rohan Mehra',
-      email: 'rohan.mehra@campusone.edu',
-      role: 'student',
-      rollNumber: '21AI042',
-      prn: '2021016400987680',
-      department: 'Artificial Intelligence & Data Science',
-      semester: 6,
-      division: 'Div B',
-      cgpa: 8.45,
-    },
-    {
-      id: 'st-4',
-      name: 'Ananya Deshmukh',
-      email: 'ananya.d@campusone.edu',
-      role: 'student',
-      rollNumber: '21EC019',
-      prn: '2021016400987712',
-      department: 'Electronics & Telecommunications',
-      semester: 6,
-      division: 'Div A',
-      cgpa: 8.12,
+  const [students, setStudents] = useState<UserProfile[]>(() => {
+    try {
+      const saved = localStorage.getItem('campusone_students_directory');
+      return saved ? JSON.parse(saved) : DEFAULT_STUDENTS;
+    } catch {
+      return DEFAULT_STUDENTS;
     }
-  ]);
+  });
+
+  useEffect(() => {
+    if (isSupabaseConfigured && supabase) {
+      supabase.from('profiles').select('*').then(({ data, error }) => {
+        if (!error && data && data.length > 0) {
+          const mapped: UserProfile[] = data.map((d: any) => ({
+            id: d.id,
+            name: d.name,
+            email: d.email,
+            role: d.role as UserRole,
+            rollNumber: d.roll_number || 'N/A',
+            prn: d.prn || 'N/A',
+            department: d.department || 'Computer Science & Engineering',
+            semester: d.semester || 6,
+            division: d.division || 'Div A',
+            cgpa: d.cgpa ? Number(d.cgpa) : 8.5,
+          }));
+          setStudents(mapped);
+          localStorage.setItem('campusone_students_directory', JSON.stringify(mapped));
+        }
+      });
+    }
+  }, []);
 
   const [search, setSearch] = useState('');
 
-  const toggleStudentRole = (id: string, currentRole: UserRole) => {
+  const toggleStudentRole = async (id: string, currentRole: UserRole) => {
     const nextRole: UserRole = currentRole === 'student' ? 'faculty' : 'student';
-    setStudents(prev => prev.map(s => s.id === id ? { ...s, role: nextRole } : s));
-    addNotification('Access Level Modified', `Role changed for student ID ${id}`, 'alert');
+    const updated = students.map(s => s.id === id ? { ...s, role: nextRole } : s);
+    setStudents(updated);
+    localStorage.setItem('campusone_students_directory', JSON.stringify(updated));
+
+    if (isSupabaseConfigured && supabase && !id.startsWith('st-')) {
+      try {
+        await supabase.from('profiles').update({ role: nextRole }).eq('id', id);
+      } catch (err: any) {
+        console.warn('Failed to sync role change to Supabase profiles:', err);
+      }
+    }
+
+    addNotification('Access Level Modified', `Role changed for student ID ${id} to ${nextRole.toUpperCase()}`, 'alert');
   };
 
   const filtered = students.filter(s => {

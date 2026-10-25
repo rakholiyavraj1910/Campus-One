@@ -88,7 +88,7 @@ export const FacultyPortal: React.FC = () => {
     setRoster(prev => prev.map(s => ({ ...s, status: 'present' })));
   };
 
-  const handleSaveAttendance = (e: React.FormEvent) => {
+  const handleSaveAttendance = async (e: React.FormEvent) => {
     e.preventDefault();
     setAttendanceError(null);
 
@@ -106,33 +106,37 @@ export const FacultyPortal: React.FC = () => {
 
     const presentCount = roster.filter(s => s.status === 'present' || s.status === 'late').length;
 
-    const session = saveAttendanceSession(
-      {
-        facultyName: user.name,
-        subjectCode: selectedClass.subjectCode,
-        subjectName: selectedClass.subjectName,
-        date: attendanceDate,
-        slot: attendanceSlot,
-        topic: lectureTopic,
-        presentCount,
-        totalCount: roster.length,
-      },
-      roster
-    );
+    try {
+      await saveAttendanceSession(
+        {
+          facultyName: user.name,
+          subjectCode: selectedClass.subjectCode,
+          subjectName: selectedClass.subjectName,
+          date: attendanceDate,
+          slot: attendanceSlot,
+          topic: lectureTopic,
+          presentCount,
+          totalCount: roster.length,
+        },
+        roster
+      );
 
-    setPastSessions(getAttendanceSessions());
+      setPastSessions(getAttendanceSessions());
 
-    confetti({
-      particleCount: 60,
-      spread: 50,
-      origin: { y: 0.6 }
-    });
+      confetti({
+        particleCount: 60,
+        spread: 50,
+        origin: { y: 0.6 }
+      });
 
-    addNotification(
-      'Attendance Committed',
-      `Session recorded for ${selectedClass.subjectCode}: ${presentCount}/${roster.length} students marked present.`,
-      'academic'
-    );
+      addNotification(
+        'Attendance Committed',
+        `Session recorded for ${selectedClass.subjectCode}: ${presentCount}/${roster.length} students marked present.`,
+        'academic'
+      );
+    } catch (err: any) {
+      setAttendanceError(err.message || 'Failed to save attendance session.');
+    }
   };
 
   const handleBroadcastAnnouncement = async (e: React.FormEvent) => {

@@ -58,52 +58,60 @@ export const ManageEvents: React.FC<ManageEventsProps> = ({ events, onRefreshEve
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const tagList = tags.split(',').map(t => t.trim()).filter(Boolean);
+    try {
+      const tagList = tags.split(',').map(t => t.trim()).filter(Boolean);
 
-    if (modalMode === 'create') {
-      await addEvent({
-        title,
-        category,
-        date,
-        time,
-        venue,
-        organizer,
-        description,
-        bannerImage: bannerImage || 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80',
-        maxCapacity: Number(maxCapacity),
-        registrationOpen: true,
-        registrationDeadline: date,
-        tags: tagList,
-        contactPerson: 'Event Coordinator',
-        contactEmail: 'events@campusone.edu',
-      });
-      addNotification('New Event Created', `Event "${title}" opened for registrations.`, 'event');
-    } else if (modalMode === 'edit' && editingEvent) {
-      await updateEvent({
-        ...editingEvent,
-        title,
-        category,
-        date,
-        time,
-        venue,
-        organizer,
-        description,
-        bannerImage,
-        maxCapacity: Number(maxCapacity),
-        tags: tagList,
-      });
-      addNotification('Event Updated', `Event "${title}" was updated.`, 'event');
+      if (modalMode === 'create') {
+        await addEvent({
+          title,
+          category,
+          date,
+          time,
+          venue,
+          organizer,
+          description,
+          bannerImage: bannerImage || 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80',
+          maxCapacity: Number(maxCapacity),
+          registrationOpen: true,
+          registrationDeadline: date,
+          tags: tagList,
+          contactPerson: 'Event Coordinator',
+          contactEmail: 'events@campusone.edu',
+        });
+        addNotification('New Event Created', `Event "${title}" opened for registrations.`, 'event');
+      } else if (modalMode === 'edit' && editingEvent) {
+        await updateEvent({
+          ...editingEvent,
+          title,
+          category,
+          date,
+          time,
+          venue,
+          organizer,
+          description,
+          bannerImage,
+          maxCapacity: Number(maxCapacity),
+          tags: tagList,
+        });
+        addNotification('Event Updated', `Event "${title}" was updated.`, 'event');
+      }
+
+      setModalMode(null);
+      onRefreshEvents();
+    } catch (err: any) {
+      addNotification('Error Saving Event', err.message || 'Failed to save event.', 'alert');
     }
-
-    setModalMode(null);
-    onRefreshEvents();
   };
 
   const handleDelete = async (id: string, eventTitle: string) => {
     if (confirm(`Delete event "${eventTitle}"?`)) {
-      await deleteEvent(id);
-      addNotification('Event Removed', `Deleted event: ${eventTitle}`, 'alert');
-      onRefreshEvents();
+      try {
+        await deleteEvent(id);
+        addNotification('Event Removed', `Deleted event: ${eventTitle}`, 'alert');
+        onRefreshEvents();
+      } catch (err: any) {
+        addNotification('Error Deleting Event', err.message || 'Failed to delete event.', 'alert');
+      }
     }
   };
 

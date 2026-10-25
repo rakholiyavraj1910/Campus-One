@@ -262,47 +262,29 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onNavigate, cur
                     )}
                   </div>
 
-                  <div className="border-t border-slate-100 dark:border-navy-800 py-1">
-                    <div className="px-4 py-1 text-[10px] font-semibold uppercase text-slate-400 tracking-wider">
-                      Simulate Persona
+                  <div className="border-t border-slate-100 dark:border-navy-800 py-1.5 px-4 text-xs">
+                    <p className="text-[10px] font-semibold uppercase text-slate-400 tracking-wider">
+                      Verified Identity
+                    </p>
+                    <p className="font-bold text-slate-800 dark:text-white truncate mt-0.5">
+                      {user.name}
+                    </p>
+                    <p className="text-[11px] text-slate-500 truncate">
+                      {user.email}
+                    </p>
+                    <div className="mt-1 flex items-center space-x-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                      <span className="text-[10px] uppercase font-extrabold text-brand-cyan">{role}</span>
                     </div>
-                    <button
-                      onClick={() => switchRole('student')}
-                      className="w-full text-left px-4 py-1.5 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-navy-800 flex items-center justify-between"
-                    >
-                      <span>Student (Aarav Sharma)</span>
-                      {role === 'student' && <span className="text-[10px] text-brand-cyan font-bold">Active</span>}
-                    </button>
-                    <button
-                      onClick={() => switchRole('faculty')}
-                      className="w-full text-left px-4 py-1.5 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-navy-800 flex items-center justify-between"
-                    >
-                      <span>Faculty (Dr. Radhika Sen)</span>
-                      {role === 'faculty' && <span className="text-[10px] text-brand-cyan font-bold">Active</span>}
-                    </button>
-                    <button
-                      onClick={() => switchRole('admin')}
-                      className="w-full text-left px-4 py-1.5 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-navy-800 flex items-center justify-between"
-                    >
-                      <span>Admin (Prof. K. Verma)</span>
-                      {role === 'admin' && <span className="text-[10px] text-brand-cyan font-bold">Active</span>}
-                    </button>
                   </div>
 
                   <div className="border-t border-slate-100 dark:border-navy-800 pt-1">
-                    <button
-                      onClick={() => setIsAuthModalOpen(true)}
-                      className="w-full text-left px-4 py-2 text-xs text-brand-cyan hover:bg-slate-50 dark:hover:bg-navy-800 flex items-center space-x-2 font-medium"
-                    >
-                      <Sparkles className="w-4 h-4" />
-                      <span>Sign In / Custom Account</span>
-                    </button>
                     <button
                       onClick={logout}
                       className="w-full text-left px-4 py-2 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-navy-800 flex items-center space-x-2 font-medium"
                     >
                       <LogOut className="w-4 h-4" />
-                      <span>Sign Out (Guest View)</span>
+                      <span>Sign Out</span>
                     </button>
                   </div>
                 </div>

@@ -12,7 +12,7 @@ import {
   FileCode2,
   ExternalLink
 } from 'lucide-react';
-import { isSupabaseConfigured, getBackendStatus, testSupabaseConnection, ConnectionHealthStatus } from '../../lib/supabaseClient';
+import { isSupabaseConfigured, getBackendStatus, testSupabaseConnection, ConnectionHealthStatus, supabaseUrl, supabaseKey } from '../../lib/supabaseClient';
 import { resetToInitialDemoData } from '../../lib/storageService';
 import { useNotifications } from '../../context/NotificationContext';
 
@@ -70,7 +70,7 @@ export const SystemSettings: React.FC = () => {
   };
 
   const handleCopyEnv = () => {
-    const envSnippet = `VITE_SUPABASE_URL=https://bbtjbazbeyedxjfgnfcm.supabase.co\nVITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_YKpH-uVxnGsgXxV0oJzdDQ_g9ELtjeD`;
+    const envSnippet = `VITE_SUPABASE_URL=${supabaseUrl}\nVITE_SUPABASE_PUBLISHABLE_KEY=${supabaseKey}`;
     navigator.clipboard?.writeText(envSnippet);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);

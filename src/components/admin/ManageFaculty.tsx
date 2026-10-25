@@ -59,49 +59,57 @@ export const ManageFaculty: React.FC = () => {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (modalMode === 'create') {
-      const created = await addFacultyMember({
-        name,
-        designation,
-        department,
-        qualification,
-        experienceYears: 10,
-        email,
-        phone,
-        cabin,
-        consultationHours,
-        specialization: ['Computing', 'Algorithms'],
-        subjectsTaught: ['CS601', 'CS602'],
-        avatar: avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
-        researchPapersCount: 15,
-      });
-      setFacultyList(await getFacultyList());
-      addNotification('Faculty Profile Added', `Added ${name} to ${department}.`, 'alert');
-    } else if (modalMode === 'edit' && editingFac) {
-      await updateFacultyMember({
-        ...editingFac,
-        name,
-        designation,
-        department,
-        qualification,
-        email,
-        phone,
-        cabin,
-        consultationHours,
-        avatar,
-      });
-      setFacultyList(await getFacultyList());
-      addNotification('Faculty Profile Updated', `Updated profile for ${name}.`, 'notice');
-    }
+    try {
+      if (modalMode === 'create') {
+        await addFacultyMember({
+          name,
+          designation,
+          department,
+          qualification,
+          experienceYears: 10,
+          email,
+          phone,
+          cabin,
+          consultationHours,
+          specialization: ['Computing', 'Algorithms'],
+          subjectsTaught: ['CS601', 'CS602'],
+          avatar: avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+          researchPapersCount: 15,
+        });
+        setFacultyList(await getFacultyList());
+        addNotification('Faculty Profile Added', `Added ${name} to ${department}.`, 'alert');
+      } else if (modalMode === 'edit' && editingFac) {
+        await updateFacultyMember({
+          ...editingFac,
+          name,
+          designation,
+          department,
+          qualification,
+          email,
+          phone,
+          cabin,
+          consultationHours,
+          avatar,
+        });
+        setFacultyList(await getFacultyList());
+        addNotification('Faculty Profile Updated', `Updated profile for ${name}.`, 'notice');
+      }
 
-    setModalMode(null);
+      setModalMode(null);
+    } catch (err: any) {
+      addNotification('Error Saving Faculty', err.message || 'Failed to save faculty record.', 'alert');
+    }
   };
 
   const handleDelete = async (id: string, facName: string) => {
     if (confirm(`Remove faculty member ${facName}?`)) {
-      await deleteFacultyMember(id);
-      setFacultyList(await getFacultyList());
-      addNotification('Faculty Removed', `Removed ${facName} from directory.`, 'alert');
+      try {
+        await deleteFacultyMember(id);
+        setFacultyList(await getFacultyList());
+        addNotification('Faculty Removed', `Removed ${facName} from directory.`, 'alert');
+      } catch (err: any) {
+        addNotification('Error Removing Faculty', err.message || 'Failed to delete faculty record.', 'alert');
+      }
     }
   };
 

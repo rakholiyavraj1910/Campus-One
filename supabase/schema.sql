@@ -3,6 +3,8 @@
 -- Complete College Campus Management, Student Information System & RLS Security
 -- ==============================================================================
 
+BEGIN;
+
 -- 1. EXTENSIONS
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
@@ -520,7 +522,8 @@ CREATE POLICY "departments_write_policy" ON public.departments FOR ALL USING (is
 
 DROP POLICY IF EXISTS "programs_read_policy" ON public.programs;
 CREATE POLICY "programs_read_policy" ON public.programs FOR SELECT USING (true);
-DROP POLICY IF EXISTS "programs_write_policy" ON public.programs FOR ALL USING (is_admin());
+DROP POLICY IF EXISTS "programs_write_policy" ON public.programs;
+CREATE POLICY "programs_write_policy" ON public.programs FOR ALL USING (is_admin());
 
 DROP POLICY IF EXISTS "faculty_dir_read_policy" ON public.faculty_directory;
 CREATE POLICY "faculty_dir_read_policy" ON public.faculty_directory FOR SELECT USING (true);
@@ -679,3 +682,8 @@ CREATE POLICY "submissions_select" ON storage.objects FOR SELECT
 DROP POLICY IF EXISTS "submissions_insert" ON storage.objects;
 CREATE POLICY "submissions_insert" ON storage.objects FOR INSERT
   WITH CHECK (bucket_id = 'assignment_submissions' AND auth.uid() IS NOT NULL);
+
+-- Refresh PostgREST schema cache immediately on commit
+NOTIFY pgrst, 'reload schema';
+
+COMMIT;

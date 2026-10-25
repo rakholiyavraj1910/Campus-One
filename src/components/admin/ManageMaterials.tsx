@@ -31,31 +31,39 @@ export const ManageMaterials: React.FC = () => {
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    await addStudyMaterial({
-      title,
-      subjectCode,
-      subjectName,
-      department,
-      semester: Number(semester),
-      type,
-      year: '2026',
-      uploadedBy: user.name,
-      uploadDate: new Date().toISOString().split('T')[0],
-      fileSize,
-      fileFormat,
-      fileUrl: '#',
-    });
+    try {
+      await addStudyMaterial({
+        title,
+        subjectCode,
+        subjectName,
+        department,
+        semester: Number(semester),
+        type,
+        year: '2026',
+        uploadedBy: user.name,
+        uploadDate: new Date().toISOString().split('T')[0],
+        fileSize,
+        fileFormat,
+        fileUrl: '#',
+      });
 
-    setMaterials(await getStudyMaterials());
-    setIsModalOpen(false);
-    addNotification('Study Document Uploaded', `Uploaded: ${title}`, 'notice');
+      setMaterials(await getStudyMaterials());
+      setIsModalOpen(false);
+      addNotification('Study Document Uploaded', `Uploaded: ${title}`, 'notice');
+    } catch (err: any) {
+      addNotification('Error Uploading Material', err.message || 'Failed to save material record.', 'alert');
+    }
   };
 
   const handleDelete = async (id: string, matTitle: string) => {
     if (confirm(`Delete document "${matTitle}"?`)) {
-      await deleteStudyMaterial(id);
-      setMaterials(await getStudyMaterials());
-      addNotification('Document Deleted', `Removed ${matTitle}`, 'alert');
+      try {
+        await deleteStudyMaterial(id);
+        setMaterials(await getStudyMaterials());
+        addNotification('Document Deleted', `Removed ${matTitle}`, 'alert');
+      } catch (err: any) {
+        addNotification('Error Deleting Material', err.message || 'Failed to delete material.', 'alert');
+      }
     }
   };
 
