@@ -14,6 +14,7 @@ import {
   Server,
   KeyRound
 } from 'lucide-react';
+import { CampusOneLogo } from '../common/CampusOneLogo';
 
 interface AdminAuthPageProps {
   onLoginSuccess?: () => void;
@@ -126,14 +127,7 @@ export const AdminAuthPage: React.FC<AdminAuthPageProps> = ({
           <span>All Campus Portals</span>
         </button>
 
-        <div className="flex items-center space-x-2">
-          <div className="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold">
-            <ShieldCheck className="w-4 h-4" />
-          </div>
-          <span className="font-extrabold text-sm text-white">
-            Admin<span className="text-amber-400">Center</span>
-          </span>
-        </div>
+        <CampusOneLogo variant="standard" size="sm" withBadge theme="dark" />
 
         <div className="flex items-center space-x-3 text-xs">
           <button

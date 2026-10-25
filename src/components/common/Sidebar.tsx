@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { CampusOneLogo } from './CampusOneLogo';
 import { 
   Home, 
   GraduationCap, 
@@ -266,12 +267,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       >
         {/* Mobile Header */}
         <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-navy-800 shrink-0">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-lg bg-navy-900 dark:bg-brand-cyan flex items-center justify-center text-white dark:text-navy-950 font-bold shadow-xs">
-              <GraduationCap className="w-5 h-5" />
-            </div>
-            <span className="font-extrabold text-lg text-navy-900 dark:text-white">CampusOne</span>
-          </div>
+          <CampusOneLogo variant="standard" size="sm" withBadge />
           <button
             type="button"
             onClick={onClose}

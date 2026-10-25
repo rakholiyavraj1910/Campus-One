@@ -17,6 +17,7 @@ import {
   Layers,
   FileText
 } from 'lucide-react';
+import { CampusOneLogo } from '../common/CampusOneLogo';
 
 interface PortalSelectHubProps {
   onSelectPortal: (portal: 'student' | 'faculty' | 'admin', mode?: 'signin' | 'register') => void;
@@ -33,22 +34,12 @@ export const PortalSelectHub: React.FC<PortalSelectHubProps> = ({
       {/* Institutional Top Navbar */}
       <header className="border-b border-slate-200/80 dark:border-navy-800 bg-white/80 dark:bg-navy-900/80 backdrop-blur-md sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-navy-900 to-navy-700 dark:from-brand-cyan dark:to-blue-600 flex items-center justify-center text-white dark:text-navy-950 shadow-md">
-              <GraduationCap className="w-6 h-6" />
-            </div>
-            <div>
-              <div className="flex items-center space-x-1.5">
-                <span className="font-extrabold text-xl tracking-tight text-navy-900 dark:text-white">
-                  Campus<span className="text-brand-cyan">One</span>
-                </span>
-                <span className="inline-block w-2 h-2 rounded-full bg-brand-cyan animate-pulse" />
-              </div>
-              <p className="text-[10px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">
-                Apex Institute of Tech &amp; Science • NAAC A++
-              </p>
-            </div>
-          </div>
+          <CampusOneLogo
+            variant="full"
+            size="md"
+            withBadge
+            subtext="Apex Institute of Tech & Science • NAAC A++"
+          />
 
           <div className="flex items-center space-x-3 text-xs">
             <button 

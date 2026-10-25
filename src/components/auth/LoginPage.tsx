@@ -22,6 +22,7 @@ import {
   Hash,
   BookOpen
 } from 'lucide-react';
+import { CampusOneIcon, CampusOneLogo } from '../common/CampusOneLogo';
 
 export interface LoginPageProps {
   initialPortal?: 'student' | 'faculty';
@@ -287,17 +288,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-md py-4 px-6 relative z-10">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-extrabold shadow-md transition-all duration-300 ${
-              isStudent 
-                ? 'bg-gradient-to-tr from-brand-cyan to-blue-600 text-slate-950 shadow-brand-cyan/20' 
-                : 'bg-gradient-to-tr from-emerald-500 to-teal-600 text-white shadow-emerald-500/20'
-            }`}>
-              {isStudent ? <GraduationCap className="w-6 h-6 text-slate-950" /> : <Users className="w-6 h-6 text-white" />}
-            </div>
+            <CampusOneIcon size={40} withBadge />
             <div>
               <div className="flex items-center space-x-2">
-                <span className="font-extrabold text-xl tracking-tight text-white">
-                  Campus<span className={isStudent ? 'text-brand-cyan' : 'text-emerald-400'}>One</span>
+                <span className="font-extrabold text-xl tracking-tight text-white font-sans">
+                  Campus<span className="text-brand-cyan">One</span>
                 </span>
                 <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border transition-colors ${
                   isStudent 

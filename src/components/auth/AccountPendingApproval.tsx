@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { ShieldAlert, LogOut, Clock, Mail, Building2, User, RefreshCw } from 'lucide-react';
+import { CampusOneLogo } from '../common/CampusOneLogo';
 
 export const AccountPendingApproval: React.FC = () => {
   const { user, signOut, refreshProfile } = useAuth();
@@ -18,6 +19,11 @@ export const AccountPendingApproval: React.FC = () => {
     <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 relative font-sans">
       <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 text-center space-y-6 shadow-2xl relative z-10">
         
+        {/* Brand Logo */}
+        <div className="flex justify-center">
+          <CampusOneLogo variant="standard" size="sm" withBadge theme="dark" />
+        </div>
+
         {/* Emblem */}
         <div className="w-16 h-16 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center mx-auto shadow-lg">
           <ShieldAlert className="w-8 h-8" />

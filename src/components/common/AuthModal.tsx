@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { DEMO_USERS } from '../../lib/mockData';
 import { isSupabaseConfigured } from '../../lib/supabaseClient';
+import { CampusOneIcon } from './CampusOneLogo';
 
 export const AuthModal: React.FC = () => {
   const { 
@@ -123,9 +124,7 @@ export const AuthModal: React.FC = () => {
         {/* Header */}
         <div className="p-5 border-b border-slate-100 dark:border-navy-800 flex items-center justify-between">
           <div className="flex items-center space-x-2.5">
-            <div className="w-9 h-9 rounded-xl bg-navy-900 dark:bg-brand-cyan flex items-center justify-center text-white dark:text-navy-950 font-bold shadow-md">
-              <GraduationCap className="w-5 h-5" />
-            </div>
+            <CampusOneIcon size={36} withBadge />
             <div>
               <h3 className="font-bold text-slate-900 dark:text-white text-base">CampusOne Single Sign-On</h3>
               <div className="flex items-center space-x-1.5 text-xs">

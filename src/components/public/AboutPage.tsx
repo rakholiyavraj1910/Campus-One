@@ -12,6 +12,7 @@ import {
   TrendingUp,
   Award
 } from 'lucide-react';
+import { CampusOneIcon } from '../common/CampusOneLogo';
 
 interface AboutPageProps {
   onNavigate: (page: string, subTab?: string) => void;
@@ -25,10 +26,13 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 rounded-full bg-brand-cyan/20 blur-3xl pointer-events-none" />
 
         <div className="relative z-10 max-w-3xl space-y-4">
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-brand-cyan/20 text-brand-cyan border border-brand-cyan/30">
-            <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-            Empowering Higher Education Digitalization
-          </span>
+          <div className="flex items-center space-x-3 mb-1">
+            <CampusOneIcon size={44} withBadge className="shadow-lg" />
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-brand-cyan/20 text-brand-cyan border border-brand-cyan/30">
+              <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+              Empowering Higher Education Digitalization
+            </span>
+          </div>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
             Your Entire Campus. <br />

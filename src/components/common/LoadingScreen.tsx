@@ -1,5 +1,5 @@
 import React from 'react';
-import { GraduationCap } from 'lucide-react';
+import { CampusOneIcon } from './CampusOneLogo';
 
 interface LoadingScreenProps {
   message?: string;
@@ -17,8 +17,8 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
       <div className="relative z-10 flex flex-col items-center text-center space-y-5 max-w-sm">
         {/* Animated Emblem */}
         <div className="relative">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-cyan to-blue-600 flex items-center justify-center text-slate-950 font-black shadow-xl shadow-brand-cyan/25 animate-pulse">
-            <GraduationCap className="w-9 h-9" />
+          <div className="w-16 h-16 rounded-2xl bg-navy-900 border border-brand-cyan/40 flex items-center justify-center shadow-xl shadow-brand-cyan/25 animate-pulse">
+            <CampusOneIcon size={44} theme="dark" />
           </div>
           <div className="absolute -inset-1.5 rounded-2xl border border-brand-cyan/40 animate-ping opacity-30 pointer-events-none" />
         </div>

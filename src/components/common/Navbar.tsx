@@ -22,6 +22,7 @@ import {
   AlertTriangle,
   CheckCircle2
 } from 'lucide-react';
+import { CampusOneLogo } from './CampusOneLogo';
 import { getBackendStatus, BackendStatus, subscribeToBackendHealth } from '../../lib/supabaseClient';
 
 interface NavbarProps {
@@ -67,25 +68,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onNavigate, cur
               <Menu className="w-5 h-5" />
             </button>
 
-            <button 
-              onClick={() => onNavigate('home')} 
-              className="flex items-center space-x-2.5 text-left group focus:outline-none"
-            >
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-navy-900 to-navy-700 dark:from-brand-cyan dark:to-blue-600 flex items-center justify-center text-white dark:text-navy-950 shadow-md group-hover:scale-105 transition-transform">
-                <GraduationCap className="w-6 h-6" />
-              </div>
-              <div>
-                <div className="flex items-center space-x-1.5">
-                  <span className="font-extrabold text-xl tracking-tight text-navy-900 dark:text-white">
-                    Campus<span className="text-brand-cyan">One</span>
-                  </span>
-                  <span className="inline-block w-2 h-2 rounded-full bg-brand-cyan animate-pulse" />
-                </div>
-                <p className="text-[10px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">
-                  Apex Institute of Tech
-                </p>
-              </div>
-            </button>
+            <CampusOneLogo
+              variant="full"
+              size="md"
+              interactive
+              withBadge
+              onClick={() => onNavigate('home')}
+              subtext="Apex Institute of Tech"
+            />
           </div>
 
           {/* Middle: Global Search Trigger Button */}

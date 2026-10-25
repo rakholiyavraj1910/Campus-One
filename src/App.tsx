@@ -34,6 +34,7 @@ import { ContactPage } from './components/public/ContactPage';
 import { Notice, EventItem } from './types';
 import { getNotices, getEvents } from './lib/storageService';
 import { GraduationCap } from 'lucide-react';
+import { CampusOneLogo } from './components/common/CampusOneLogo';
 
 interface ParsedLocation {
   page: string;
@@ -388,19 +389,13 @@ const MainLayout: React.FC = () => {
       <footer className="mt-auto bg-white dark:bg-navy-900 border-t border-slate-200 dark:border-navy-800 py-8 text-xs text-slate-500 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 rounded-lg bg-navy-900 dark:bg-brand-cyan flex items-center justify-center text-white dark:text-navy-950 font-bold">
-                <GraduationCap className="w-4 h-4" />
-              </div>
-              <div>
-                <p className="font-extrabold text-sm text-navy-900 dark:text-white">
-                  CampusOne Digital Portal
-                </p>
-                <p className="text-[11px] text-slate-400">
-                  Apex Institute of Technology &amp; Science • NAAC A++ Autonomous College
-                </p>
-              </div>
-            </div>
+            <CampusOneLogo
+              variant="full"
+              size="sm"
+              withBadge
+              onClick={() => handleNavigate('portal-select')}
+              subtext="Apex Institute of Technology & Science • NAAC A++"
+            />
 
             <div className="flex flex-wrap items-center justify-center gap-4 text-xs">
               <button onClick={() => handleNavigate('portal-select')} className="hover:text-brand-cyan transition-colors font-medium">

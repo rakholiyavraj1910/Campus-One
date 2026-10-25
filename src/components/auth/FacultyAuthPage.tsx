@@ -20,6 +20,7 @@ import {
   Clock,
   ShieldAlert
 } from 'lucide-react';
+import { CampusOneIcon, CampusOneLogo } from '../common/CampusOneLogo';
 
 interface FacultyAuthPageProps {
   initialMode?: 'signin' | 'register';
@@ -200,14 +201,7 @@ export const FacultyAuthPage: React.FC<FacultyAuthPageProps> = ({
           <span>All Campus Portals</span>
         </button>
 
-        <div className="flex items-center space-x-2">
-          <div className="w-7 h-7 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
-            <Users className="w-4 h-4" />
-          </div>
-          <span className="font-extrabold text-sm text-navy-900 dark:text-white">
-            Faculty<span className="text-emerald-500">Suite</span>
-          </span>
-        </div>
+        <CampusOneLogo variant="standard" size="sm" withBadge />
 
         <div className="flex items-center space-x-3 text-xs">
           <button
@@ -231,8 +225,8 @@ export const FacultyAuthPage: React.FC<FacultyAuthPageProps> = ({
           
           {/* Header */}
           <div className="text-center space-y-2 mb-6">
-            <div className="w-14 h-14 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center justify-center mx-auto shadow-md">
-              <Users className="w-7 h-7" />
+            <div className="flex justify-center mb-1">
+              <CampusOneIcon size={56} withBadge className="shadow-xl" />
             </div>
             
             <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">

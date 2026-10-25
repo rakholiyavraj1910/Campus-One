@@ -252,6 +252,41 @@ const deptDirectoryContent = fs.readFileSync(deptDirectoryPath, 'utf8');
 assert(deptDirectoryContent.includes('getDepartments'), 'DepartmentDirectory loads departments via storageService');
 
 
+console.log('\n9. Checking CampusOne Dual-Colour Brand Identity & Logo System:');
+const logoPath = path.join(rootDir, 'src', 'components', 'common', 'CampusOneLogo.tsx');
+assert(fs.existsSync(logoPath), 'CampusOneLogo.tsx exists');
+const logoContent = fs.readFileSync(logoPath, 'utf8');
+assert(logoContent.includes('export const CampusOneLogo'), 'CampusOneLogo exports CampusOneLogo component');
+assert(logoContent.includes('export const CampusOneIcon'), 'CampusOneLogo exports CampusOneIcon mark');
+assert(logoContent.includes('#0B192C') || logoContent.includes('fill-navy-900'), 'CampusOneLogo uses Midnight Navy (#0B192C) brand color');
+assert(logoContent.includes('#00ADB5') || logoContent.includes('fill-brand-cyan'), 'CampusOneLogo uses Vibrant Turquoise (#00ADB5) brand color');
+assert(logoContent.includes('withBadge'), 'CampusOneLogo supports squircle badge mode');
+
+const faviconPath = path.join(rootDir, 'public', 'favicon.svg');
+assert(fs.existsSync(faviconPath), 'public/favicon.svg exists');
+const faviconContent = fs.readFileSync(faviconPath, 'utf8');
+assert(faviconContent.includes('<svg') && faviconContent.includes('#00ADB5'), 'favicon.svg contains valid dual-colour SVG markup');
+
+const indexHtmlPath = path.join(rootDir, 'index.html');
+const indexHtmlContent = fs.readFileSync(indexHtmlPath, 'utf8');
+assert(indexHtmlContent.includes('href="/favicon.svg"'), 'index.html references /favicon.svg');
+
+const manifestPath = path.join(rootDir, 'public', 'manifest.json');
+const manifestContent = fs.readFileSync(manifestPath, 'utf8');
+assert(manifestContent.includes('/favicon.svg'), 'manifest.json references /favicon.svg');
+
+const navbarBrandPath = path.join(rootDir, 'src', 'components', 'common', 'Navbar.tsx');
+const navbarBrandContent = fs.readFileSync(navbarBrandPath, 'utf8');
+assert(navbarBrandContent.includes('CampusOneLogo'), 'Navbar.tsx integrates CampusOneLogo');
+
+const sidebarLogoPath = path.join(rootDir, 'src', 'components', 'common', 'Sidebar.tsx');
+const sidebarLogoContent = fs.readFileSync(sidebarLogoPath, 'utf8');
+assert(sidebarLogoContent.includes('CampusOneLogo'), 'Sidebar.tsx integrates CampusOneLogo');
+
+const loginLogoPagePath = path.join(rootDir, 'src', 'components', 'auth', 'LoginPage.tsx');
+const loginLogoPageContent = fs.readFileSync(loginLogoPagePath, 'utf8');
+assert(loginLogoPageContent.includes('CampusOneIcon'), 'LoginPage.tsx integrates CampusOneIcon');
+
 console.log('\n====================================================');
 console.log(`Results: ${passedTests}/${totalTests} tests passed (${Math.round((passedTests / totalTests) * 100)}%)`);
 console.log('====================================================\n');
