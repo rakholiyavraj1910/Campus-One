@@ -11,8 +11,12 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- 2. ENUMS
 DO $$ BEGIN
-  CREATE TYPE user_role_type AS ENUM ('student', 'faculty', 'admin', 'guest');
-EXCEPTION WHEN duplicate_object THEN null;
+  CREATE TYPE public.user_role_type AS ENUM ('student', 'faculty', 'admin', 'guest', 'pending');
+EXCEPTION WHEN duplicate_object THEN
+  BEGIN
+    ALTER TYPE public.user_role_type ADD VALUE IF NOT EXISTS 'pending';
+  EXCEPTION WHEN others THEN null;
+  END;
 END $$;
 
 DO $$ BEGIN
@@ -370,34 +374,46 @@ CREATE INDEX IF NOT EXISTS idx_assignment_submissions_student ON public.assignme
 -- ==============================================================================
 
 CREATE OR REPLACE FUNCTION public.is_admin() 
-RETURNS BOOLEAN AS $$
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
 BEGIN
   RETURN EXISTS (
     SELECT 1 FROM public.profiles 
-    WHERE id = auth.uid() AND role = 'admin'
+    WHERE id = auth.uid() AND role = 'admin'::public.user_role_type
   );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 CREATE OR REPLACE FUNCTION public.is_faculty() 
-RETURNS BOOLEAN AS $$
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
 BEGIN
   RETURN EXISTS (
     SELECT 1 FROM public.profiles 
-    WHERE id = auth.uid() AND role IN ('faculty', 'admin')
+    WHERE id = auth.uid() AND role IN ('faculty'::public.user_role_type, 'admin'::public.user_role_type)
   );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 CREATE OR REPLACE FUNCTION public.current_user_role() 
-RETURNS TEXT AS $$
+RETURNS TEXT
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
 DECLARE
   v_role TEXT;
 BEGIN
   SELECT role::TEXT INTO v_role FROM public.profiles WHERE id = auth.uid();
   RETURN COALESCE(v_role, 'guest');
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- ==============================================================================
 -- SECURE USER PROVISIONING TRIGGER
@@ -405,9 +421,13 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- ==============================================================================
 
 CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
 DECLARE
-  assigned_role user_role_type := 'student';
+  assigned_role public.user_role_type := 'student'::public.user_role_type;
   initial_admin_email TEXT := 'admin@campusone.edu';
   candidate_role TEXT;
 BEGIN
@@ -415,10 +435,10 @@ BEGIN
 
   -- Rule 1: Explicit institutional root administrator check
   IF NEW.email = initial_admin_email THEN
-    assigned_role := 'admin';
+    assigned_role := 'admin'::public.user_role_type;
   -- Rule 2: Institutional faculty domain check
   ELSIF candidate_role = 'faculty' AND (NEW.email LIKE '%@faculty.campusone.edu' OR NEW.email LIKE '%@campusone.edu') THEN
-    assigned_role := 'faculty';
+    assigned_role := 'faculty'::public.user_role_type;
   -- Rule 3: Default public registrations are strictly assigned 'student'
   ELSE
     assigned_role := 'student';
@@ -431,8 +451,12 @@ BEGIN
     role,
     department,
     roll_number,
+    prn,
     semester,
     division,
+    designation,
+    cabin,
+    admin_level,
     created_at,
     updated_at
   )
@@ -443,18 +467,24 @@ BEGIN
     assigned_role,
     COALESCE(NEW.raw_user_meta_data->>'department', 'Computer Science & Engineering'),
     COALESCE(NEW.raw_user_meta_data->>'roll_number', 'CS-' || FLOOR(RANDOM() * 9000 + 1000)::TEXT),
+    COALESCE((NEW.raw_user_meta_data->>'prn')::TEXT, '2025' || LPAD(FLOOR(RANDOM() * 100000000)::TEXT, 8, '0')),
     COALESCE((NEW.raw_user_meta_data->>'semester')::INT, 6),
     COALESCE(NEW.raw_user_meta_data->>'division', 'A'),
+    NEW.raw_user_meta_data->>'designation',
+    NEW.raw_user_meta_data->>'cabin',
+    NEW.raw_user_meta_data->>'admin_level',
     NOW(),
     NOW()
   )
   ON CONFLICT (id) DO UPDATE SET
     email = EXCLUDED.email,
+    name = COALESCE(EXCLUDED.name, profiles.name),
+    department = COALESCE(EXCLUDED.department, profiles.department),
     updated_at = NOW();
 
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
@@ -463,15 +493,19 @@ CREATE TRIGGER on_auth_user_created
 
 -- Trigger to prevent self-role escalation on profile updates
 CREATE OR REPLACE FUNCTION public.prevent_role_escalation()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
 BEGIN
-  IF (OLD.role IS DISTINCT FROM NEW.role) AND NOT is_admin() THEN
+  IF (OLD.role IS DISTINCT FROM NEW.role) AND NOT public.is_admin() THEN
     RAISE EXCEPTION 'Unauthorized: Only institutional administrators can change account roles.';
   END IF;
   NEW.updated_at := NOW();
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 DROP TRIGGER IF EXISTS trg_prevent_role_escalation ON public.profiles;
 CREATE TRIGGER trg_prevent_role_escalation
