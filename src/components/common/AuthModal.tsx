@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
-import { UserRole } from '../../types';
+import { UserRole, COLLEGE_DEPARTMENTS } from '../../types';
 import { 
   X, 
   GraduationCap, 
@@ -254,20 +254,21 @@ export const AuthModal: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Department
+                <label htmlFor="auth-modal-dept" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Department <span className="text-brand-cyan">*</span>
                 </label>
                 <div className="relative">
-                  <Building2 className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                  <Building2 className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
                   <select
+                    id="auth-modal-dept"
+                    required
                     value={department}
                     onChange={(e) => setDepartment(e.target.value)}
                     className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 dark:bg-navy-800 border border-slate-200 dark:border-navy-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-brand-cyan"
                   >
-                    <option value="Computer Science & Engineering">Computer Science & Engineering</option>
-                    <option value="Electronics & Communication Engineering">Electronics & Communication Engineering</option>
-                    <option value="Mechanical Engineering">Mechanical Engineering</option>
-                    <option value="Information Technology">Information Technology</option>
+                    {COLLEGE_DEPARTMENTS.map((dept) => (
+                      <option key={dept} value={dept}>{dept}</option>
+                    ))}
                   </select>
                 </div>
               </div>

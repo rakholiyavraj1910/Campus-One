@@ -16,6 +16,7 @@ import { AccountPendingApproval } from './components/auth/AccountPendingApproval
 
 // Three Distinct Portal Auth Components & Hub
 import { PortalSelectHub } from './components/auth/PortalSelectHub';
+import { LoginPage } from './components/auth/LoginPage';
 import { StudentAuthPage } from './components/auth/StudentAuthPage';
 import { FacultyAuthPage } from './components/auth/FacultyAuthPage';
 import { AdminAuthPage } from './components/auth/AdminAuthPage';
@@ -73,8 +74,18 @@ function getPageFromLocation(): ParsedLocation {
     };
   }
 
+  // Dual-portal unified login page (/login or /login?portal=faculty)
+  if (first === 'login') {
+    const portalParam = searchParams.get('portal');
+    return { 
+      page: 'login', 
+      authMode: mode || 'signin', 
+      subTab: portalParam === 'faculty' ? 'faculty' : 'student' 
+    };
+  }
+
   // 2. Hub / Root / Public routes
-  if (!first || first === 'portal-select' || first === 'portals' || first === 'login') {
+  if (!first || first === 'portal-select' || first === 'portals') {
     return { page: 'portal-select', subTab: tab };
   }
   if (first === 'home') return { page: 'home', subTab: tab };
@@ -137,6 +148,7 @@ const MainLayout: React.FC = () => {
     if (isAuthenticated && !loading) {
       if (
         currentPage === 'portal-select' || 
+        currentPage === 'login' ||
         currentPage === 'student-auth' || 
         currentPage === 'faculty-auth' || 
         currentPage === 'admin-auth'
@@ -211,6 +223,21 @@ const MainLayout: React.FC = () => {
 
   // 3. Unauthenticated / Logged-Out Routing Gate
   if (!isAuthenticated) {
+    // Unified Dual-Portal Login (/login)
+    if (currentPage === 'login') {
+      return (
+        <LoginPage
+          initialPortal={currentSubTab === 'faculty' ? 'faculty' : 'student'}
+          initialMode={authMode}
+          onLoginSuccess={() => {
+            const defaultPage = role === 'admin' ? 'admin' : role === 'faculty' ? 'faculty-portal' : 'student';
+            handleNavigate(defaultPage);
+          }}
+          onSwitchToAdmin={() => handleNavigate('admin-auth')}
+        />
+      );
+    }
+
     // Dedicated Student Auth
     if (currentPage === 'student-auth' || currentPage === 'student') {
       return (

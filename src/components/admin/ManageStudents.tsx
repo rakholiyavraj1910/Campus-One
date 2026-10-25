@@ -73,7 +73,7 @@ export const ManageStudents: React.FC = () => {
         if (!error && data && data.length > 0) {
           const mapped: UserProfile[] = data.map((d: any) => ({
             id: d.id,
-            name: d.name,
+            name: d.name || d.full_name || 'Enrolled Student',
             email: d.email,
             role: d.role as UserRole,
             rollNumber: d.roll_number || 'N/A',

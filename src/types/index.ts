@@ -1,5 +1,24 @@
 export type UserRole = 'student' | 'faculty' | 'admin' | 'guest' | 'pending';
 
+export const COLLEGE_DEPARTMENTS = [
+  'Architecture',
+  'Automation and Robotics',
+  'Automobile Engineering',
+  'Biomedical Engineering',
+  'Civil Engineering',
+  'Computer Engineering',
+  'Electrical Engineering',
+  'Electronics & Communication Engineering',
+  'Information & Communication Technology (ICT)',
+  'Information Technology (IT)',
+  'Instrumentation & Control Engineering',
+  'Mechanical Engineering',
+  'Mechanical CAD/CAM',
+  'Plastic Engineering (Sandwich Pattern)',
+] as const;
+
+export type CollegeDepartment = (typeof COLLEGE_DEPARTMENTS)[number];
+
 export interface UserProfile {
   id: string;
   name: string;

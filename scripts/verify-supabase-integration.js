@@ -160,6 +160,62 @@ const sidebarPath = path.join(rootDir, 'src', 'components', 'common', 'Sidebar.t
 const sidebarContent = fs.readFileSync(sidebarPath, 'utf8');
 assert(sidebarContent.includes("role === 'admin' ? 'Authorized' : 'Admin Only'"), 'Sidebar marks Administration as Admin Only for non-admins');
 
+// 7. Verify Dual-Portal Login & 14 College Departments
+console.log('\n7. Checking Dual-Portal Login & College Departments:');
+const typesPath = path.join(rootDir, 'src', 'types', 'index.ts');
+assert(fs.existsSync(typesPath), 'src/types/index.ts exists');
+const typesContent = fs.readFileSync(typesPath, 'utf8');
+
+const expectedDepartments = [
+  'Architecture',
+  'Automation and Robotics',
+  'Automobile Engineering',
+  'Biomedical Engineering',
+  'Civil Engineering',
+  'Computer Engineering',
+  'Electrical Engineering',
+  'Electronics & Communication Engineering',
+  'Information & Communication Technology (ICT)',
+  'Information Technology (IT)',
+  'Instrumentation & Control Engineering',
+  'Mechanical Engineering',
+  'Mechanical CAD/CAM',
+  'Plastic Engineering (Sandwich Pattern)'
+];
+
+assert(typesContent.includes('COLLEGE_DEPARTMENTS'), 'types/index.ts exports COLLEGE_DEPARTMENTS');
+expectedDepartments.forEach(dept => {
+  assert(typesContent.includes(`'${dept}'`), `COLLEGE_DEPARTMENTS contains: ${dept}`);
+});
+
+const loginPagePath = path.join(rootDir, 'src', 'components', 'auth', 'LoginPage.tsx');
+assert(fs.existsSync(loginPagePath), 'src/components/auth/LoginPage.tsx exists');
+const loginPageContent = fs.readFileSync(loginPagePath, 'utf8');
+assert(loginPageContent.includes('Student Portal'), 'LoginPage contains Student Portal option');
+assert(loginPageContent.includes('Faculty Portal'), 'LoginPage contains Faculty Portal option');
+assert(loginPageContent.includes('COLLEGE_DEPARTMENTS'), 'LoginPage imports COLLEGE_DEPARTMENTS');
+assert(loginPageContent.includes('id="login-department-select"'), 'LoginPage has required Department select dropdown');
+assert(loginPageContent.includes('requestFacultyAccess'), 'LoginPage implements pending faculty approval request');
+assert(loginPageContent.includes('Institutional Approval Required'), 'LoginPage alerts that faculty access requires admin approval');
+
+const studentAuthPath = path.join(rootDir, 'src', 'components', 'auth', 'StudentAuthPage.tsx');
+const studentAuthContent = fs.readFileSync(studentAuthPath, 'utf8');
+assert(studentAuthContent.includes('COLLEGE_DEPARTMENTS'), 'StudentAuthPage imports and utilizes COLLEGE_DEPARTMENTS');
+assert(studentAuthContent.includes('Department'), 'StudentAuthPage has Department dropdown');
+
+const facultyAuthPath = path.join(rootDir, 'src', 'components', 'auth', 'FacultyAuthPage.tsx');
+const facultyAuthContent = fs.readFileSync(facultyAuthPath, 'utf8');
+assert(facultyAuthContent.includes('COLLEGE_DEPARTMENTS'), 'FacultyAuthPage imports and utilizes COLLEGE_DEPARTMENTS');
+
+const profileCardPath = path.join(rootDir, 'src', 'components', 'student', 'ProfileCard.tsx');
+const profileCardContent = fs.readFileSync(profileCardPath, 'utf8');
+assert(profileCardContent.includes('user.department'), 'Student profile displays student department');
+
+const manageStudentsPath = path.join(rootDir, 'src', 'components', 'admin', 'ManageStudents.tsx');
+const manageStudentsContent = fs.readFileSync(manageStudentsPath, 'utf8');
+assert(manageStudentsContent.includes('s.department'), 'Admin ManageStudents displays student department');
+
+
 console.log('\n====================================================');
 console.log(`Results: ${passedTests}/${totalTests} tests passed (${Math.round((passedTests / totalTests) * 100)}%)`);
 console.log('====================================================\n');

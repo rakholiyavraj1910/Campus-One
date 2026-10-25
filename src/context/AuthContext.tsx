@@ -303,6 +303,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (data.user) {
+        try {
+          await supabase
+            .from('profiles')
+            .update({ 
+              department,
+              name: name.trim(),
+              roll_number: studentDetails?.rollNumber || '',
+              prn: studentDetails?.prn || '',
+              division: studentDetails?.division || 'A'
+            })
+            .eq('id', data.user.id);
+        } catch (e) {
+          console.warn('Initial student profile sync non-blocking notice:', e);
+        }
         const profile = await fetchProfile(data.user.id, data.user.email);
         if (profile) setCurrentUser(profile);
       }
@@ -384,6 +398,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (data.user) {
+        try {
+          await supabase
+            .from('profiles')
+            .update({ 
+              department,
+              name: name.trim(),
+              designation,
+              cabin: cabin || 'Faculty Tower',
+              specialization: specialization ? specialization.split(',').map(s => s.trim()) : [],
+              admin_level: 'pending_faculty'
+            })
+            .eq('id', data.user.id);
+        } catch (e) {
+          console.warn('Initial faculty profile sync non-blocking notice:', e);
+        }
         const profile = await fetchProfile(data.user.id, data.user.email);
         if (profile) setCurrentUser(profile);
       }

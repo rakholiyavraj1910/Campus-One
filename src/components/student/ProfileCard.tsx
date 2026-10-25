@@ -96,6 +96,10 @@ export const ProfileCard: React.FC = () => {
 
           <div className="space-y-3 text-sm divide-y divide-slate-100 dark:divide-navy-800">
             <div className="flex justify-between py-2">
+              <span className="text-slate-500 dark:text-slate-400">Department</span>
+              <span className="font-bold text-slate-800 dark:text-white">{user.department || 'Computer Science & Engineering'}</span>
+            </div>
+            <div className="flex justify-between py-2">
               <span className="text-slate-500 dark:text-slate-400">Degree Program</span>
               <span className="font-bold text-slate-800 dark:text-white">Bachelor of Technology (B.Tech)</span>
             </div>

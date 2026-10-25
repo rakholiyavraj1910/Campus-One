@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { COLLEGE_DEPARTMENTS } from '../../types';
 import { 
   Users, 
   Lock, 
@@ -37,22 +38,13 @@ export const FacultyAuthPage: React.FC<FacultyAuthPageProps> = ({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [department, setDepartment] = useState('Computer Science & Engineering');
+  const [department, setDepartment] = useState<string>(COLLEGE_DEPARTMENTS[0]);
   const [designation, setDesignation] = useState('Associate Professor');
   const [cabin, setCabin] = useState('Tech Tower, Room 402');
   const [specialization, setSpecialization] = useState('Distributed Systems, Cloud Architecture');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
-  const departmentsList = [
-    'Computer Science & Engineering',
-    'Electronics & Communication Engineering',
-    'Mechanical Engineering',
-    'Information Technology',
-    'Civil Engineering',
-    'Electrical & Electronics Engineering'
-  ];
 
   const designationsList = [
     'Professor',
@@ -91,6 +83,10 @@ export const FacultyAuthPage: React.FC<FacultyAuthPageProps> = ({
 
     if (!name.trim()) {
       setFormError('Please enter your academic title and full name.');
+      return;
+    }
+    if (!department || !COLLEGE_DEPARTMENTS.includes(department as any)) {
+      setFormError('Please select a valid college department.');
       return;
     }
     if (!email.trim() || !password) {
@@ -386,15 +382,17 @@ export const FacultyAuthPage: React.FC<FacultyAuthPageProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Department
+                  <label htmlFor="faculty-reg-dept" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Department <span className="text-emerald-500">*</span>
                   </label>
                   <select
+                    id="faculty-reg-dept"
+                    required
                     value={department}
                     onChange={(e) => setDepartment(e.target.value)}
                     className="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-navy-950 border border-slate-200 dark:border-navy-700 text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
                   >
-                    {departmentsList.map(dept => (
+                    {COLLEGE_DEPARTMENTS.map((dept) => (
                       <option key={dept} value={dept}>{dept}</option>
                     ))}
                   </select>

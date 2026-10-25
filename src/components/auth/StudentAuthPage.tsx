@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { COLLEGE_DEPARTMENTS } from '../../types';
 import { 
   GraduationCap, 
   Lock, 
@@ -36,22 +37,13 @@ export const StudentAuthPage: React.FC<StudentAuthPageProps> = ({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [department, setDepartment] = useState('Computer Science & Engineering');
+  const [department, setDepartment] = useState<string>(COLLEGE_DEPARTMENTS[0]);
   const [rollNumber, setRollNumber] = useState('');
   const [prn, setPrn] = useState('');
   const [division, setDivision] = useState('A');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
-  const departmentsList = [
-    'Computer Science & Engineering',
-    'Electronics & Communication Engineering',
-    'Mechanical Engineering',
-    'Information Technology',
-    'Civil Engineering',
-    'Electrical & Electronics Engineering'
-  ];
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,6 +73,10 @@ export const StudentAuthPage: React.FC<StudentAuthPageProps> = ({
 
     if (!name.trim()) {
       setFormError('Please enter your full student name.');
+      return;
+    }
+    if (!department || !COLLEGE_DEPARTMENTS.includes(department as any)) {
+      setFormError('Please select a valid college department.');
       return;
     }
     if (!email.trim() || !password) {
@@ -374,17 +370,19 @@ export const StudentAuthPage: React.FC<StudentAuthPageProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Department
+                <label htmlFor="student-reg-dept" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Department <span className="text-brand-cyan">*</span>
                 </label>
                 <div className="relative">
-                  <Building2 className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                  <Building2 className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
                   <select
+                    id="student-reg-dept"
+                    required
                     value={department}
                     onChange={(e) => setDepartment(e.target.value)}
                     className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-navy-950 border border-slate-200 dark:border-navy-700 text-slate-900 dark:text-white focus:outline-none focus:border-brand-cyan"
                   >
-                    {departmentsList.map(dept => (
+                    {COLLEGE_DEPARTMENTS.map((dept) => (
                       <option key={dept} value={dept}>{dept}</option>
                     ))}
                   </select>
