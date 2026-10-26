@@ -32,7 +32,7 @@ export const UpcomingEventsCarousel: React.FC<UpcomingEventsCarouselProps> = ({
       addNotification('Event Pass Generated', `You are confirmed for ${evt.title}! Entry pass ready.`, 'event');
       if (onRefreshEvents) onRefreshEvents();
     } else {
-      alert(result.message);
+      addNotification('Event Registration', result.message, 'alert');
     }
   };
 

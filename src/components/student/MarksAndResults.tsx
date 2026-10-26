@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useNotifications } from '../../context/NotificationContext';
 import { getStudentMarks } from '../../lib/storageService';
 import { 
   Award, 
@@ -16,6 +17,7 @@ import {
 
 export const MarksAndResults: React.FC = () => {
   const { user } = useAuth();
+  const { addNotification } = useNotifications();
   const [marks, setMarks] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -62,7 +64,12 @@ export const MarksAndResults: React.FC = () => {
     : 0;
 
   const handleDownloadReport = () => {
-    alert('Academic transcript generated for ' + (user.name || 'Student') + '. In an upcoming update, this will export as a cryptographically signed GTU PDF.');
+    addNotification(
+      'Academic Record Ready',
+      `Official assessment transcript ready for ${user.name || 'Student'}. Opening printable grade sheet.`,
+      'academic'
+    );
+    window.print();
   };
 
   if (isLoading) {

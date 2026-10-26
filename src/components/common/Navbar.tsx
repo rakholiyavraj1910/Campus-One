@@ -61,7 +61,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onNavigate, cur
             <button
               type="button"
               onClick={onToggleSidebar}
-              className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-navy-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-navy-800 focus:outline-none focus:ring-2 focus:ring-brand-cyan/40 transition-colors"
+              className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-navy-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-navy-800 focus:outline-none focus:ring-2 focus:ring-brand-cyan/40 btn-tactile active:scale-95 transition-all"
               aria-label="Toggle navigation menu"
               title="Toggle sidebar navigation"
             >
@@ -99,8 +99,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onNavigate, cur
             {/* Mobile search icon */}
             <button
               onClick={() => setIsSearchOpen(true)}
-              className="md:hidden p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-navy-800"
-              aria-label="Search"
+              className="md:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-navy-800 btn-tactile active:scale-95 transition-all"
+              aria-label="Open search dialog"
             >
               <Search className="w-5 h-5" />
             </button>
@@ -108,13 +108,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onNavigate, cur
             {/* Bookmarks */}
             <button
               onClick={() => setIsBookmarksOpen(true)}
-              className="relative p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-navy-800 transition-colors"
+              className="relative p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-navy-800 btn-tactile active:scale-95 transition-all"
               title="Saved Bookmarks"
-              aria-label="Bookmarks"
+              aria-label="Saved Bookmarks"
             >
               <Bookmark className="w-5 h-5" />
               {bookmarks.length > 0 && (
-                <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-brand-cyan text-navy-950 font-bold text-[10px] flex items-center justify-center">
+                <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-brand-cyan text-navy-950 font-bold text-[10px] flex items-center justify-center shadow-xs">
                   {bookmarks.length}
                 </span>
               )}
@@ -123,13 +123,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onNavigate, cur
             {/* Notifications */}
             <button
               onClick={() => setIsNotificationsOpen(true)}
-              className="relative p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-navy-800 transition-colors"
+              className="relative p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-navy-800 btn-tactile active:scale-95 transition-all"
               title="Notifications"
               aria-label="Notifications"
             >
               <Bell className="w-5 h-5" />
               {unreadCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-rose-500 text-white font-bold text-[10px] flex items-center justify-center animate-bounce">
+                <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-rose-500 text-white font-bold text-[10px] flex items-center justify-center animate-bounce shadow-xs">
                   {unreadCount}
                 </span>
               )}
@@ -138,9 +138,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onNavigate, cur
             {/* Dark / Light Toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-navy-800 transition-colors"
+              className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-navy-800 btn-tactile active:scale-95 transition-all"
               title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
-              aria-label="Toggle theme"
+              aria-label={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
             >
               {theme === 'dark' ? (
                 <Sun className="w-5 h-5 text-amber-400 hover:rotate-45 transition-transform" />
@@ -152,7 +152,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onNavigate, cur
             {/* Backend Connection Diagnostic Pill */}
             <div 
               onClick={() => onNavigate('admin', 'system')}
-              className={`hidden xl:flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border cursor-pointer transition-all ${
+              className={`hidden xl:flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border cursor-pointer btn-tactile active:scale-95 transition-all ${
                 backendStatus.status === 'connected'
                   ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/25 hover:bg-emerald-500/20'
                   : backendStatus.status === 'schema_missing'
@@ -183,15 +183,26 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onNavigate, cur
             {role === 'guest' || user.id === 'guest' ? (
               <button
                 onClick={() => onNavigate('portal-select')}
-                className="px-3.5 py-1.5 rounded-xl bg-navy-900 hover:bg-navy-800 dark:bg-brand-cyan dark:hover:bg-cyan-400 text-white dark:text-navy-950 font-bold text-xs shadow-sm transition-all flex items-center space-x-1.5"
+                className="px-3.5 py-1.5 rounded-xl bg-navy-900 hover:bg-navy-800 dark:bg-brand-cyan dark:hover:bg-cyan-400 text-white dark:text-navy-950 font-bold text-xs shadow-sm btn-tactile transition-all flex items-center space-x-1.5"
               >
                 <span>Enter Portal</span>
               </button>
             ) : (
               <div className="relative">
+                {/* Backdrop overlay to dismiss dropdown on outside click */}
+                {profileDropdownOpen && (
+                  <div
+                    onClick={() => setProfileDropdownOpen(false)}
+                    className="fixed inset-0 z-40 bg-transparent"
+                    aria-hidden="true"
+                  />
+                )}
                 <button
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center space-x-2 p-1.5 pl-2 rounded-xl hover:bg-slate-100 dark:hover:bg-navy-800 border border-transparent hover:border-slate-200 dark:hover:border-navy-700 transition-all focus:outline-none"
+                  aria-expanded={profileDropdownOpen}
+                  aria-haspopup="true"
+                  aria-label="User profile menu"
+                  className="relative z-50 flex items-center space-x-2 p-1.5 pl-2 rounded-xl hover:bg-slate-100 dark:hover:bg-navy-800 border border-transparent hover:border-slate-200 dark:hover:border-navy-700 btn-tactile transition-all focus:outline-none"
                 >
                 <img
                   src={user.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80'}
@@ -207,13 +218,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onNavigate, cur
                     {role === 'admin' && <ShieldCheck className="w-3 h-3 text-amber-400" />}
                   </div>
                 </div>
-                <ChevronDown className="w-4 h-4 text-slate-400 hidden sm:block" />
+                <ChevronDown className={`w-4 h-4 text-slate-400 hidden sm:block transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {/* Dropdown Menu */}
               {profileDropdownOpen && (
                 <div 
-                  className="absolute right-0 mt-2 w-64 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-navy-800 shadow-xl py-2 z-50 animate-slide-up"
+                  className="absolute right-0 mt-2 w-64 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-navy-800 shadow-2xl py-2 z-50 animate-scale-in"
                   onClick={() => setProfileDropdownOpen(false)}
                 >
                   <div className="px-4 py-3 border-b border-slate-100 dark:border-navy-800">

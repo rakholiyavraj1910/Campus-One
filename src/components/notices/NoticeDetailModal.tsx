@@ -32,8 +32,7 @@ export const NoticeDetailModal: React.FC<NoticeDetailModalProps> = ({ notice, on
   };
 
   const handleDownloadAttachment = () => {
-    alert(`Downloading attachment: ${notice.attachmentName} (${notice.attachmentSize})`);
-    addNotification('Download Started', `Downloading ${notice.attachmentName}`, 'notice');
+    addNotification('Download Started', `Downloading circular attachment: ${notice.attachmentName} (${notice.attachmentSize})`, 'notice');
   };
 
   return (

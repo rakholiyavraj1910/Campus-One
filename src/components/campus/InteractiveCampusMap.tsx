@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { MapPin, Navigation, Compass, Building, Coffee, Dumbbell, HeartPulse, Search, Sparkles } from 'lucide-react';
+import { MapPin, Navigation, Compass, Building, Coffee, Dumbbell, HeartPulse, Search, Sparkles, CheckCircle2 } from 'lucide-react';
+import { useNotifications } from '../../context/NotificationContext';
 
 interface CampusPin {
   id: string;
@@ -13,9 +14,11 @@ interface CampusPin {
 }
 
 export const InteractiveCampusMap: React.FC = () => {
+  const { addNotification } = useNotifications();
   const [activePinId, setActivePinId] = useState<string>('block-c');
   const [filterCategory, setFilterCategory] = useState<string>('All');
   const [mapSearch, setMapSearch] = useState<string>('');
+  const [directionsNotice, setDirectionsNotice] = useState<string | null>(null);
 
   const campusPins: CampusPin[] = [
     {
@@ -243,9 +246,23 @@ export const InteractiveCampusMap: React.FC = () => {
             </div>
           </div>
 
+          {directionsNotice && (
+            <div className="p-3 rounded-2xl bg-brand-cyan/10 border border-brand-cyan/30 text-xs text-slate-800 dark:text-slate-200 space-y-1 animate-scale-in">
+              <div className="flex items-center space-x-1.5 font-bold text-brand-cyan">
+                <CheckCircle2 className="w-4 h-4" />
+                <span>Walking Route Calculated</span>
+              </div>
+              <p>{directionsNotice}</p>
+            </div>
+          )}
+
           <button
-            onClick={() => alert(`Directions generated: From Main Gate, follow North-East walkway towards ${activePin.name}. Distance: 250 meters.`)}
-            className="w-full py-2.5 rounded-xl bg-brand-cyan hover:bg-brand-cyan-hover text-navy-950 font-bold text-xs flex items-center justify-center space-x-2 transition-all shadow-md mt-2"
+            onClick={() => {
+              const msg = `From Ambawadi Main Entrance, follow North-East pedestrian avenue towards ${activePin.name}. Estimated walk: 2-3 mins (250m).`;
+              setDirectionsNotice(msg);
+              addNotification('Campus Navigation', msg, 'notice');
+            }}
+            className="w-full py-2.5 rounded-xl bg-brand-cyan hover:bg-brand-cyan-hover text-navy-950 font-bold text-xs flex items-center justify-center space-x-2 btn-tactile transition-all shadow-md mt-2"
           >
             <Navigation className="w-4 h-4" />
             <span>Get Walking Directions</span>

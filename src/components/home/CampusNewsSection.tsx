@@ -50,7 +50,7 @@ export const CampusNewsSection: React.FC = () => {
         {newsItems.map((news) => (
           <div
             key={news.id}
-            className="group bg-white dark:bg-navy-900 rounded-3xl border border-slate-200/80 dark:border-navy-800 overflow-hidden shadow-sm hover:shadow-card-hover transition-all duration-300 flex flex-col"
+            className="group bg-white dark:bg-navy-900 rounded-3xl border border-slate-200/80 dark:border-navy-800 overflow-hidden shadow-sm hover:shadow-card-hover card-hover-lift transition-all duration-300 flex flex-col"
           >
             <div className="h-44 overflow-hidden relative">
               <img

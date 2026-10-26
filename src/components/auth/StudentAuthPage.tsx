@@ -155,7 +155,12 @@ export const StudentAuthPage: React.FC<StudentAuthPageProps> = ({
         }, 1000);
       }
     } else {
-      setFormError(result.error || 'Student registration failed. Please try a different email address.');
+      const err = result.error || 'Student registration failed. Please try a different email address.';
+      if (err.toLowerCase().includes('rate limit') || err.toLowerCase().includes('too many requests')) {
+        setFormError('Security rate limit reached: please wait 60 seconds before requesting another confirmation email, or check your spam/inbox if an email was already dispatched.');
+      } else {
+        setFormError(err);
+      }
     }
   };
 

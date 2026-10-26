@@ -50,7 +50,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
             <button
               key={t.id}
               onClick={() => onNavigateSubTab(t.id)}
-              className={`flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+              className={`flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap btn-tactile transition-all ${
                 isActive
                   ? 'bg-navy-900 text-white dark:bg-brand-cyan dark:text-navy-950 shadow-sm'
                   : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-navy-800'

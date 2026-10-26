@@ -1152,44 +1152,52 @@ export const INITIAL_NOTIFICATIONS: AppNotification[] = [
 
 export const CAMPUS_OFFICES = [
   {
-    title: 'Office of the Registrar',
-    head: 'Dr. S. K. Mahapatra',
-    email: 'registrar@campusone.edu',
-    phone: '+91 (022) 2854-1001',
-    location: 'Admin Block, Suite 102',
-    hours: 'Mon - Fri: 09:30 AM - 05:00 PM'
+    title: 'Principal & Administrative Office',
+    head: 'Office of the Principal',
+    email: 'principal@gpahmedabad.ac.in',
+    phone: '+91 (079) 2630-0490',
+    location: 'Main Admin Building, Ground Floor',
+    hours: 'Mon - Fri: 10:30 AM - 05:30 PM'
   },
   {
-    title: 'Controller of Examinations (CoE)',
-    head: 'Prof. H. R. Joshi',
-    email: 'coe@campusone.edu',
-    phone: '+91 (022) 2854-1005',
-    location: 'Exam Block, 1st Floor',
-    hours: 'Mon - Fri: 10:00 AM - 04:30 PM'
+    title: 'Student Section & Admissions',
+    head: 'Student Section In-Charge',
+    email: 'studentsection@gpahmedabad.ac.in',
+    phone: '+91 (079) 2630-5516',
+    location: 'Admin Block, Counters 1-4',
+    hours: 'Mon - Fri: 11:00 AM - 04:30 PM'
   },
   {
-    title: 'Training & Placement Office',
-    head: 'Dr. Ananya Mukherjee (Dean Placements)',
-    email: 'placements@campusone.edu',
-    phone: '+91 (022) 2854-1012',
-    location: 'Corporate Relations Wing, 2nd Floor',
-    hours: 'Mon - Sat: 09:00 AM - 06:00 PM'
+    title: 'Examination Section (GTU Coordinator)',
+    head: 'GTU Exam Coordinator',
+    email: 'exam@gpahmedabad.ac.in',
+    phone: '+91 (079) 2630-5516',
+    location: 'Examination Wing, 1st Floor',
+    hours: 'Mon - Fri: 10:30 AM - 05:00 PM'
   },
   {
-    title: 'Student Grievance & Anti-Ragging Cell',
-    head: 'Prof. Neelam Tandon (Chairperson)',
-    email: 'antiragging@campusone.edu',
-    phone: '+91 98200 99999 (24/7 Helpline)',
-    location: 'Student Welfare Center',
-    hours: '24x7 Emergency Contact'
+    title: 'Training & Placement Cell (TPO)',
+    head: 'Training & Placement Officer',
+    email: 'tpo@gpahmedabad.ac.in',
+    phone: '+91 (079) 2630-0490',
+    location: 'Placement & Industry Liaison Wing',
+    hours: 'Mon - Fri: 10:30 AM - 05:30 PM'
   },
   {
-    title: 'Accounts & Scholarships Section',
-    head: 'Mr. Arvind Gupta (Finance Officer)',
-    email: 'accounts@campusone.edu',
-    phone: '+91 (022) 2854-1008',
-    location: 'Admin Block, Ground Floor Counter 3-5',
-    hours: 'Mon - Fri: 10:00 AM - 03:30 PM'
+    title: 'Student Grievance & Anti-Ragging Committee',
+    head: 'Institutional Redressal Committee',
+    email: 'grievance@gpahmedabad.ac.in',
+    phone: '1800-180-5522 (National AICTE Toll Free)',
+    location: 'Student Welfare Cell, Ambawadi Campus',
+    hours: 'Working Hours & 24x7 National Helpline'
+  },
+  {
+    title: 'Scholarships & Accounts Section',
+    head: 'Accounts Officer (Digital Gujarat / MYSY)',
+    email: 'accounts@gpahmedabad.ac.in',
+    phone: '+91 (079) 2630-5516',
+    location: 'Main Building, Counters 5-6',
+    hours: 'Mon - Fri: 11:00 AM - 03:30 PM'
   }
 ];
 

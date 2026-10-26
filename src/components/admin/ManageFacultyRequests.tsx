@@ -244,7 +244,7 @@ export const ManageFacultyRequests: React.FC = () => {
                 <button
                   onClick={() => handleReject(req)}
                   disabled={actionInProgress === req.id}
-                  className="px-3.5 py-2 rounded-xl border border-rose-200 dark:border-rose-900/50 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-xs font-bold transition-colors disabled:opacity-50 flex items-center space-x-1.5"
+                  className="px-3.5 py-2 rounded-xl border border-rose-200 dark:border-rose-900/50 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-xs font-bold btn-tactile transition-colors disabled:opacity-50 flex items-center space-x-1.5"
                 >
                   <XCircle className="w-4 h-4" />
                   <span>Decline</span>
@@ -252,7 +252,7 @@ export const ManageFacultyRequests: React.FC = () => {
                 <button
                   onClick={() => handleApprove(req)}
                   disabled={actionInProgress === req.id}
-                  className="px-4 py-2 rounded-xl bg-brand-cyan hover:bg-brand-cyan-hover text-navy-950 text-xs font-bold shadow-xs transition-all disabled:opacity-50 flex items-center space-x-1.5"
+                  className="px-4 py-2 rounded-xl bg-brand-cyan hover:bg-brand-cyan-hover text-navy-950 text-xs font-bold shadow-xs btn-tactile transition-all disabled:opacity-50 flex items-center space-x-1.5"
                 >
                   <CheckCircle2 className="w-4 h-4" />
                   <span>{actionInProgress === req.id ? 'Approving...' : 'Approve Faculty'}</span>

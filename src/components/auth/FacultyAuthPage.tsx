@@ -163,7 +163,12 @@ export const FacultyAuthPage: React.FC<FacultyAuthPageProps> = ({
         }, 1200);
       }
     } else {
-      setFormError(result.error || 'Request submission failed. Please try again.');
+      const err = result.error || 'Request submission failed. Please try again.';
+      if (err.toLowerCase().includes('rate limit') || err.toLowerCase().includes('too many requests')) {
+        setFormError('Security rate limit reached: please wait 60 seconds before requesting another confirmation email, or check your spam/inbox if an email was already dispatched.');
+      } else {
+        setFormError(err);
+      }
     }
   };
 

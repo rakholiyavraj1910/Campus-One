@@ -5,7 +5,6 @@ import { TodayScheduleWidget } from './TodayScheduleWidget';
 import { UrgentNoticesTicker } from './UrgentNoticesTicker';
 import { UpcomingEventsCarousel } from './UpcomingEventsCarousel';
 import { CampusNewsSection } from './CampusNewsSection';
-import { QuickContactBar } from './QuickContactBar';
 import { Notice, EventItem } from '../../types';
 
 interface HomePageProps {
@@ -54,9 +53,6 @@ export const HomePage: React.FC<HomePageProps> = ({
 
       {/* 5. Campus News & Achievements */}
       <CampusNewsSection />
-
-      {/* 6. Emergency & Office Contact Bar */}
-      <QuickContactBar onNavigate={onNavigate} />
     </div>
   );
 };

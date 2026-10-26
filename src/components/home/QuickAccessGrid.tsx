@@ -20,88 +20,88 @@ export const QuickAccessGrid: React.FC<QuickAccessGridProps> = ({ onNavigate }) 
     {
       id: 'timetable',
       title: 'Class Timetable',
-      desc: 'Today: 4 lectures & 1 lab slot',
+      desc: 'View daily schedule, slots & room allocations',
       icon: Clock,
       page: 'student',
       subTab: 'timetable',
       accentColor: 'from-blue-500/10 to-blue-500/5',
       iconColor: 'text-blue-500',
-      badge: 'Active Now'
+      badge: 'Schedule'
     },
     {
       id: 'attendance',
       title: 'Attendance Tracker',
-      desc: '84.6% Aggregate (5 Safe, 1 Warning)',
+      desc: 'Real-time subject tracking & 75% threshold monitor',
       icon: CheckCircle2,
       page: 'student',
       subTab: 'attendance',
       accentColor: 'from-emerald-500/10 to-emerald-500/5',
       iconColor: 'text-emerald-500',
-      badge: 'Threshold 75%'
+      badge: 'Min 75%'
     },
     {
       id: 'notices',
       title: 'Official Circulars',
-      desc: '6 active notices, 2 urgent exams',
+      desc: 'Official GTU & institutional notifications',
       icon: Bell,
       page: 'notices',
       accentColor: 'from-rose-500/10 to-rose-500/5',
       iconColor: 'text-rose-500',
-      badge: '2 Urgent'
+      badge: 'Circulars'
     },
     {
       id: 'results',
       title: 'Marks & Results',
-      desc: 'Midterms, quiz scores & SGPA 8.92',
+      desc: 'Continuous Internal Evaluation (CIE) & SGPA',
       icon: Award,
       page: 'student',
       subTab: 'marks',
       accentColor: 'from-amber-500/10 to-amber-500/5',
       iconColor: 'text-amber-500',
-      badge: 'Midterms Out'
+      badge: 'Assessments'
     },
     {
       id: 'events',
       title: 'Events & Fests',
-      desc: 'HackNova 2026, Aura Fest, Keynotes',
+      desc: 'Institutional workshops, hackathons & seminars',
       icon: Calendar,
       page: 'events',
       accentColor: 'from-purple-500/10 to-purple-500/5',
       iconColor: 'text-purple-500',
-      badge: 'Register'
+      badge: 'Calendar'
     },
     {
       id: 'faculty',
       title: 'Faculty Directory',
-      desc: 'Find cabins, emails & office hours',
+      desc: 'Cabin locations, official emails & designations',
       icon: Users,
       page: 'campus',
       subTab: 'faculty',
       accentColor: 'from-brand-cyan/15 to-brand-cyan/5',
       iconColor: 'text-brand-cyan',
-      badge: 'Search'
+      badge: 'Directory'
     },
     {
       id: 'library',
       title: 'Central Library',
-      desc: 'Search 65,000+ books & digital journals',
+      desc: 'Digital book catalog, journals & OPAC services',
       icon: BookOpen,
       page: 'campus',
       subTab: 'library',
       accentColor: 'from-indigo-500/10 to-indigo-500/5',
       iconColor: 'text-indigo-500',
-      badge: '24x7 Open'
+      badge: 'OPAC'
     },
     {
       id: 'map',
       title: 'Interactive Campus Map',
-      desc: 'Floor navigations, blocks & facilities',
+      desc: 'Blocks, laboratories & administrative sections',
       icon: MapPin,
       page: 'campus',
       subTab: 'map',
       accentColor: 'from-teal-500/10 to-teal-500/5',
       iconColor: 'text-teal-500',
-      badge: 'Vector Map'
+      badge: 'Ambawadi'
     }
   ];
 
@@ -126,7 +126,7 @@ export const QuickAccessGrid: React.FC<QuickAccessGridProps> = ({ onNavigate }) 
             <div
               key={card.id}
               onClick={() => onNavigate(card.page, card.subTab)}
-              className="group relative bg-white dark:bg-navy-900 rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-navy-800 hover:border-brand-cyan/60 dark:hover:border-brand-cyan/60 shadow-sm hover:shadow-card-hover cursor-pointer transition-all duration-200 hover:-translate-y-1 overflow-hidden"
+              className="group relative bg-white dark:bg-navy-900 rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-navy-800 hover:border-brand-cyan/60 dark:hover:border-brand-cyan/60 shadow-sm hover:shadow-card-hover cursor-pointer transition-all duration-200 hover:-translate-y-1 btn-tactile overflow-hidden"
             >
               {/* Subtle gradient hover wash */}
               <div className={`absolute inset-0 bg-gradient-to-br ${card.accentColor} opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`} />

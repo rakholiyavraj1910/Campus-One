@@ -36,6 +36,7 @@ export const EventRegisterModal: React.FC<EventRegisterModalProps> = ({
   const [teamName, setTeamName] = useState('');
   const [dietary, setDietary] = useState('Standard Vegetarian');
   const [isSuccess, setIsSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   if (!event) return null;
 
@@ -43,6 +44,7 @@ export const EventRegisterModal: React.FC<EventRegisterModalProps> = ({
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
     const res = await registerForEvent(event.id, studentEmail, studentName);
     if (res.success || alreadyRegistered) {
       setIsSuccess(true);
@@ -58,7 +60,8 @@ export const EventRegisterModal: React.FC<EventRegisterModalProps> = ({
       );
       if (onRefreshEvents) onRefreshEvents();
     } else {
-      alert(res.message);
+      setErrorMessage(res.message);
+      addNotification('Registration Notice', res.message, 'alert');
     }
   };
 
@@ -158,6 +161,12 @@ export const EventRegisterModal: React.FC<EventRegisterModalProps> = ({
                 </div>
               )}
 
+              {errorMessage && (
+                <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-semibold">
+                  {errorMessage}
+                </div>
+              )}
+
               <div className="flex items-center space-x-2 pt-2">
                 <button
                   type="button"
@@ -200,6 +209,12 @@ export const EventRegisterModal: React.FC<EventRegisterModalProps> = ({
                   <p className="col-span-2 text-emerald-500 font-semibold">Pass ID: #CAMPUS-EVT-{event.id.toUpperCase()}-PASS</p>
                 </div>
               </div>
+
+              {errorMessage && (
+                <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-semibold">
+                  {errorMessage}
+                </div>
+              )}
 
               <div className="flex items-center space-x-2 pt-2">
                 <button

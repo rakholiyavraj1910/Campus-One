@@ -277,7 +277,7 @@ export const FacultyPortal: React.FC = () => {
     e.preventDefault();
     setMarksSuccessMsg(null);
     if (!marksStudentId) {
-      alert('Please select a student to grade.');
+      addNotification('Grading Required', 'Please select a student from the roster to enter marks.', 'alert');
       return;
     }
 
@@ -301,10 +301,11 @@ export const FacultyPortal: React.FC = () => {
       );
       setMarksSaving(false);
       setMarksSuccessMsg(`Marks committed successfully for student. Total score: ${total}/100 (Grade: ${marksGrade}).`);
+      addNotification('Marks Recorded', `Assessment marks committed (${total}/100, Grade: ${marksGrade}).`, 'academic');
       confetti({ particleCount: 40, spread: 50, origin: { y: 0.6 } });
     } catch (e: any) {
       setMarksSaving(false);
-      alert(e.message || 'Failed to commit marks.');
+      addNotification('Marks Error', e.message || 'Failed to commit marks.', 'alert');
     }
   };
 
@@ -329,16 +330,15 @@ export const FacultyPortal: React.FC = () => {
 
       addNotification(
         'Course Announcement Published',
-        `Published announcement to ${attendanceDept} students.`,
+        `Broadcasted official circular to ${attendanceDept} semester ${attendanceSem} students.`,
         isAnnounceUrgent ? 'alert' : 'notice'
       );
 
       setAnnounceTitle('');
       setAnnounceContent('');
       setIsAnnounceUrgent(false);
-      alert('Course circular broadcasted successfully.');
     } catch (e: any) {
-      alert(e.message || 'Failed to broadcast announcement.');
+      addNotification('Broadcast Error', e.message || 'Failed to broadcast announcement.', 'alert');
     }
   };
 
@@ -364,11 +364,10 @@ export const FacultyPortal: React.FC = () => {
       });
 
       setMaterialsList(prev => [added, ...prev]);
-      addNotification('Study Material Uploaded', `Uploaded ${newMatTitle} for ${attendanceDept}.`, 'academic');
+      addNotification('Study Material Uploaded', `Published "${newMatTitle}" for ${attendanceDept}.`, 'academic');
       setNewMatTitle('');
-      alert('Material published successfully.');
     } catch (err: any) {
-      alert(err.message || 'Failed to upload study material.');
+      addNotification('Upload Error', err.message || 'Failed to upload study material.', 'alert');
     }
   };
 

@@ -24,7 +24,7 @@ export const UrgentNoticesTicker: React.FC<UrgentNoticesTickerProps> = ({
   onNavigate,
   onOpenNotice
 }) => {
-  const { toggleBookmark, isBookmarked } = useNotifications();
+  const { toggleBookmark, isBookmarked, addNotification } = useNotifications();
 
   // Top 4 notices, with urgent prioritized
   const displayNotices = [...notices].sort((a, b) => {
@@ -118,7 +118,11 @@ export const UrgentNoticesTicker: React.FC<UrgentNoticesTickerProps> = ({
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        alert(`Downloading circular attachment: ${notice.attachmentName}`);
+                        addNotification(
+                          'Attachment Download',
+                          `Downloading official circular attachment: ${notice.attachmentName}`,
+                          'notice'
+                        );
                       }}
                       className="inline-flex items-center space-x-1 text-brand-cyan font-semibold hover:underline"
                     >

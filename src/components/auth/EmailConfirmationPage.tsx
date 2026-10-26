@@ -307,7 +307,7 @@ export const EmailConfirmationPage: React.FC<EmailConfirmationPageProps> = ({
               <div className="pt-2">
                 <button
                   onClick={() => onNavigateLogin('student')}
-                  className="w-full py-3.5 px-4 rounded-xl bg-brand-cyan hover:bg-brand-cyan-hover text-navy-950 font-extrabold text-sm shadow-md shadow-brand-cyan/20 transition-all flex items-center justify-center space-x-2"
+                  className="w-full py-3.5 px-4 rounded-xl bg-brand-cyan hover:bg-brand-cyan-hover text-navy-950 font-extrabold text-sm shadow-md shadow-brand-cyan/20 btn-tactile transition-all flex items-center justify-center space-x-2"
                 >
                   <span>Continue to Student Login</span>
                   <ArrowRight className="w-4 h-4" />

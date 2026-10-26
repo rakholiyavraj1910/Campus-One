@@ -5,6 +5,30 @@
 @layer base {
   html {
     font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+    scroll-behavior: smooth;
+  }
+
+  /* Accessible focus indicators across the entire application */
+  :focus-visible {
+    outline: 2px solid #00ADB5;
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  /* Tactile button press feedback */
+  .btn-tactile {
+    @apply active:scale-[0.98] transition-transform duration-100;
+  }
+
+  /* Micro-interaction card lift */
+  .card-hover-lift {
+    @apply transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card-hover;
+  }
+
+  /* Accessible focus outline utility */
+  .focus-ring-cyan {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 dark:focus-visible:ring-offset-navy-900;
   }
 }
 
@@ -33,4 +57,16 @@
 .scrollbar-none {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Accessibility: Respect user preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

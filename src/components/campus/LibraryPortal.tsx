@@ -37,7 +37,11 @@ export const LibraryPortal: React.FC = () => {
 
   const handleReserveBook = (book: LibraryBook) => {
     if (reservedBookIds.includes(book.id)) {
-      alert('You have already reserved this title.');
+      addNotification(
+        'Library Notice',
+        `You already have an active reservation for "${book.title}". Pick it up at the circulation counter.`,
+        'alert'
+      );
       return;
     }
 
