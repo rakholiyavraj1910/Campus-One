@@ -25,7 +25,7 @@ export interface CampusOneLogoProps {
   iconSize?: number;
   /** Whether to enclose the icon in a midnight navy squircle badge container */
   withBadge?: boolean;
-  /** Custom institutional subtext (defaults to 'Apex Institute of Technology') */
+  /** Custom institutional subtext (defaults to 'FOR GOVERNMENT POLYTECHNIC AHMEDABAD') */
   subtext?: string;
   /** Interactive hover animations (scale + glow) */
   interactive?: boolean;
@@ -46,7 +46,7 @@ export interface CampusOneIconProps {
  * CampusOne Dual-Colour Geometric Icon Mark:
  * - Left Architectural Portal ("C"): Represents the collegiate hall, colonnade, and institutional foundation.
  * - Right Clocktower Spire ("1"): Represents the university landmark, unified portal, and numeral "1".
- * - Connected Apex Pulse Node: Represents the interconnected digital campus network.
+ * - Connected Network Pulse Node: Represents the interconnected digital campus network.
  * - Dual Colours: Midnight Navy (#0B192C) & Vibrant Turquoise (#00ADB5).
  */
 export const CampusOneIcon: React.FC<CampusOneIconProps> = ({
@@ -136,17 +136,17 @@ export const CampusOneLogo: React.FC<CampusOneLogoProps> = ({
   size = 'md',
   iconSize,
   withBadge = false,
-  subtext = 'Apex Institute of Technology',
+  subtext = 'FOR GOVERNMENT POLYTECHNIC AHMEDABAD',
   interactive = false,
   onClick,
   className = '',
 }) => {
   // Preset dimensions
   const dimensions = {
-    sm: { icon: 26, title: 'text-base', sub: 'text-[9px]' },
-    md: { icon: 34, title: 'text-xl', sub: 'text-[10px]' },
-    lg: { icon: 42, title: 'text-2xl', sub: 'text-[11px]' },
-    xl: { icon: 54, title: 'text-3xl', sub: 'text-xs' },
+    sm: { icon: 26, title: 'text-base', sub: 'text-[7.5px] sm:text-[8px] tracking-[0.14em]' },
+    md: { icon: 34, title: 'text-xl', sub: 'text-[8.5px] sm:text-[9.5px] tracking-[0.16em]' },
+    lg: { icon: 42, title: 'text-2xl', sub: 'text-[9.5px] sm:text-[10.5px] tracking-[0.16em]' },
+    xl: { icon: 54, title: 'text-3xl', sub: 'text-[11px] sm:text-[12px] tracking-[0.18em]' },
   }[size];
 
   const actualIconSize = iconSize || dimensions.icon;
@@ -199,7 +199,7 @@ export const CampusOneLogo: React.FC<CampusOneLogoProps> = ({
 
           {variant === 'full' && subtext && (
             <p
-              className={`font-semibold uppercase tracking-wider mt-1 truncate ${dimensions.sub} ${getSubtextColorClass()}`}
+              className={`font-bold uppercase tracking-wider mt-0.5 truncate leading-none ${dimensions.sub} ${getSubtextColorClass()}`}
             >
               {subtext}
             </p>

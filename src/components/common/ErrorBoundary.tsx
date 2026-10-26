@@ -109,7 +109,7 @@ export class ErrorBoundary extends Component<Props, State> {
             
             {/* Brand Logo */}
             <div className="flex justify-center">
-              <CampusOneLogo variant="standard" size="md" withBadge theme="dark" />
+              <CampusOneLogo variant="full" size="md" withBadge theme="dark" />
             </div>
 
             {/* Error Emblem */}

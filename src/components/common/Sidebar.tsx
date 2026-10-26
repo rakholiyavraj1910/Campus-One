@@ -267,7 +267,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       >
         {/* Mobile Header */}
         <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-navy-800 shrink-0">
-          <CampusOneLogo variant="standard" size="sm" withBadge />
+          <CampusOneLogo variant="full" size="sm" withBadge />
           <button
             type="button"
             onClick={onClose}

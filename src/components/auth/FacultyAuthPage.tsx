@@ -201,7 +201,7 @@ export const FacultyAuthPage: React.FC<FacultyAuthPageProps> = ({
           <span>All Campus Portals</span>
         </button>
 
-        <CampusOneLogo variant="standard" size="sm" withBadge />
+        <CampusOneLogo variant="full" size="sm" withBadge />
 
         <div className="flex items-center space-x-3 text-xs">
           <button

@@ -310,6 +310,46 @@ const indexHtmlPath2 = path.join(rootDir, 'index.html');
 const indexHtmlContent2 = fs.readFileSync(indexHtmlPath2, 'utf8');
 assert(indexHtmlContent2.includes('serviceWorker.getRegistrations'), 'index.html includes legacy serviceWorker purge script');
 
+// 11. Checking Government Polytechnic Ahmedabad Branding & Supabase Email Templates:
+console.log('\n11. Checking Institutional Branding (Government Polytechnic Ahmedabad) & Email Templates:');
+assert(logoContent.includes("subtext = 'FOR GOVERNMENT POLYTECHNIC AHMEDABAD'"), 'CampusOneLogo defaults subtext to FOR GOVERNMENT POLYTECHNIC AHMEDABAD');
+assert(navbarBrandContent.includes('FOR GOVERNMENT POLYTECHNIC AHMEDABAD'), 'Navbar features FOR GOVERNMENT POLYTECHNIC AHMEDABAD subtitle');
+
+const portalSelectPath = path.join(rootDir, 'src', 'components', 'auth', 'PortalSelectHub.tsx');
+const portalSelectContent = fs.readFileSync(portalSelectPath, 'utf8');
+assert(portalSelectContent.includes('FOR GOVERNMENT POLYTECHNIC AHMEDABAD'), 'PortalSelectHub features FOR GOVERNMENT POLYTECHNIC AHMEDABAD subtitle');
+assert(portalSelectContent.includes('Government Polytechnic Ahmedabad'), 'PortalSelectHub footer attributes Government Polytechnic Ahmedabad');
+
+const loginPagePath2 = path.join(rootDir, 'src', 'components', 'auth', 'LoginPage.tsx');
+const loginPageContent2 = fs.readFileSync(loginPagePath2, 'utf8');
+assert(loginPageContent2.includes('Government Polytechnic Ahmedabad'), 'LoginPage features Government Polytechnic Ahmedabad');
+
+const loadingScreenPath = path.join(rootDir, 'src', 'components', 'common', 'LoadingScreen.tsx');
+const loadingScreenContent = fs.readFileSync(loadingScreenPath, 'utf8');
+assert(loadingScreenContent.includes('FOR GOVERNMENT POLYTECHNIC AHMEDABAD'), 'LoadingScreen displays FOR GOVERNMENT POLYTECHNIC AHMEDABAD');
+
+const appTsxPath = path.join(rootDir, 'src', 'App.tsx');
+const appTsxContent = fs.readFileSync(appTsxPath, 'utf8');
+assert(appTsxContent.includes('FOR GOVERNMENT POLYTECHNIC AHMEDABAD'), 'App footer features FOR GOVERNMENT POLYTECHNIC AHMEDABAD');
+assert(appTsxContent.includes('Government Polytechnic Ahmedabad'), 'App footer copyright references Government Polytechnic Ahmedabad');
+
+// Supabase Email Templates
+const emailHtmlPath = path.join(rootDir, 'supabase', 'templates', 'confirm_signup.html');
+const emailTxtPath = path.join(rootDir, 'supabase', 'templates', 'confirm_signup.txt');
+assert(fs.existsSync(emailHtmlPath), 'supabase/templates/confirm_signup.html exists');
+assert(fs.existsSync(emailTxtPath), 'supabase/templates/confirm_signup.txt exists');
+
+const emailHtml = fs.readFileSync(emailHtmlPath, 'utf8');
+assert(emailHtml.includes('{{ .ConfirmationURL }}'), 'Email HTML template preserves {{ .ConfirmationURL }} for Supabase Auth verification');
+assert(emailHtml.includes('FOR GOVERNMENT POLYTECHNIC AHMEDABAD'), 'Email HTML template includes FOR GOVERNMENT POLYTECHNIC AHMEDABAD subtitle');
+assert(emailHtml.includes('#0B192C'), 'Email HTML template uses deep midnight navy brand colour (#0B192C)');
+assert(emailHtml.includes('#00ADB5'), 'Email HTML template uses vibrant turquoise brand colour (#00ADB5)');
+assert(emailHtml.includes('Verify Your CampusOne Account'), 'Email HTML template includes heading Verify Your CampusOne Account');
+
+const emailTxt = fs.readFileSync(emailTxtPath, 'utf8');
+assert(emailTxt.includes('{{ .ConfirmationURL }}'), 'Email text template preserves {{ .ConfirmationURL }}');
+assert(emailTxt.includes('Government Polytechnic Ahmedabad'), 'Email text template references Government Polytechnic Ahmedabad');
+
 console.log('\n====================================================');
 console.log(`Results: ${passedTests}/${totalTests} tests passed (${Math.round((passedTests / totalTests) * 100)}%)`);
 console.log('====================================================\n');

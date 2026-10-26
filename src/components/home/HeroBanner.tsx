@@ -47,7 +47,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ onNavigate }) => {
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-brand-cyan/20 text-brand-cyan border border-brand-cyan/30 backdrop-blur-xs">
               <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-              Apex Institute of Technology & Science
+              Government Polytechnic Ahmedabad
             </span>
             <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-navy-800/80 text-slate-300 border border-navy-700">
               <Calendar className="w-3.5 h-3.5 mr-1.5 text-slate-400" />

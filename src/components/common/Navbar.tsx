@@ -74,7 +74,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onNavigate, cur
               interactive
               withBadge
               onClick={() => onNavigate('home')}
-              subtext="Apex Institute of Tech"
+              subtext="FOR GOVERNMENT POLYTECHNIC AHMEDABAD"
             />
           </div>
 

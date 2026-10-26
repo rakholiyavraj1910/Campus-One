@@ -154,7 +154,7 @@ export const ExamCenter: React.FC = () => {
             {/* University Hall Ticket Layout */}
             <div className="text-center space-y-1 border-b pb-4">
               <p className="text-[11px] font-bold tracking-widest text-slate-500 uppercase">
-                Apex Institute of Technology & Science
+                Government Polytechnic Ahmedabad
               </p>
               <h2 className="text-xl font-extrabold text-navy-900 tracking-tight">
                 END-SEMESTER / MID-TERM EXAMINATION ADMIT CARD

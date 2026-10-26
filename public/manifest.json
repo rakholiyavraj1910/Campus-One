@@ -1,11 +1,11 @@
 {
-  "name": "CampusOne — All Your Campus Information in One Place",
+  "name": "CampusOne — Government Polytechnic Ahmedabad",
   "short_name": "CampusOne",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0B192C",
   "theme_color": "#00ADB5",
-  "description": "Centralized college campus management, student intelligence portal, timetables, attendance, notices and results.",
+  "description": "Centralized college campus management, student intelligence portal, timetables, attendance, notices and results for Government Polytechnic Ahmedabad.",
   "icons": [
     {
       "src": "/favicon.svg",

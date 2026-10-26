@@ -143,7 +143,7 @@ export const NoticeDetailModal: React.FC<NoticeDetailModalProps> = ({ notice, on
 
         {/* Footer */}
         <div className="p-4 border-t border-slate-100 dark:border-navy-800 bg-slate-50 dark:bg-navy-950/60 flex items-center justify-between text-xs text-slate-400">
-          <span>Official Apex Institute Document ID: #{notice.id}</span>
+          <span>Official GP Ahmedabad Document ID: #{notice.id}</span>
           <button
             onClick={onClose}
             className="px-4 py-2 rounded-xl bg-navy-900 text-white dark:bg-slate-800 font-bold hover:bg-navy-800"

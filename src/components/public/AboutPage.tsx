@@ -93,21 +93,21 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
         </div>
       </div>
 
-      {/* 3. About the Institution (Apex Institute) */}
+      {/* 3. About the Institution (Government Polytechnic Ahmedabad) */}
       <div className="bg-white dark:bg-navy-900 rounded-3xl p-6 sm:p-8 border border-slate-200/80 dark:border-navy-800 shadow-sm space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-navy-800 pb-5">
           <div>
             <span className="text-xs font-bold uppercase tracking-wider text-brand-cyan">Institutional Heritage</span>
             <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">
-              Apex Institute of Technology & Science
+              Government Polytechnic Ahmedabad
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Autonomous Engineering & Research Institution • Established in 1994</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Premier Polytechnic &amp; Technical Institution • Directorate of Technical Education, Gujarat</p>
           </div>
 
           <div className="flex items-center space-x-2">
             <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-500/20 text-emerald-500 border border-emerald-500/30 flex items-center space-x-1">
               <Award className="w-4 h-4" />
-              <span>NAAC A++ Accredited</span>
+              <span>NBA Accredited Programs</span>
             </span>
           </div>
         </div>
@@ -115,10 +115,10 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
           <div className="space-y-3">
             <p>
-              Founded with the vision to cultivate world-class engineers, computer scientists, and innovative entrepreneurs, Apex Institute spans 45 acres of state-of-the-art academic complexes, smart IoT laboratories, and supercomputing research centers.
+              Founded with the vision to cultivate skilled engineers, innovative technicians, and industrial leaders, Government Polytechnic Ahmedabad spans a vibrant campus with state-of-the-art laboratories, technical workshops, and modern computing facilities.
             </p>
             <p>
-              Ranked among the top 25 technical institutions nationwide for research output and student innovation, Apex partners with global industry leaders including Google, Microsoft, NVIDIA, AWS, and Texas Instruments.
+              As one of the foremost polytechnic institutions in Gujarat, GP Ahmedabad fosters direct industry partnerships, student innovation, and technical skill development across all engineering disciplines.
             </p>
           </div>
 

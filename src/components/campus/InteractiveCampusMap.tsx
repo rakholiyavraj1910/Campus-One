@@ -146,7 +146,7 @@ export const InteractiveCampusMap: React.FC = () => {
           <div className="relative z-10 flex items-center justify-between text-xs text-white">
             <div className="flex items-center space-x-2 bg-navy-950/80 px-3 py-1.5 rounded-xl border border-navy-700">
               <Compass className="w-4 h-4 text-brand-cyan animate-spin-slow" />
-              <span className="font-bold">Main Campus Quadrangle (Apex-54)</span>
+              <span className="font-bold">Main Campus Quadrangle (GPA-Main)</span>
             </div>
             <span className="text-[11px] text-slate-300 font-mono">Scale 1:500m</span>
           </div>

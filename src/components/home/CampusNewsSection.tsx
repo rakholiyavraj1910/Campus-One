@@ -5,12 +5,12 @@ export const CampusNewsSection: React.FC = () => {
   const newsItems = [
     {
       id: 'news-1',
-      title: 'Apex Institute Secures NAAC A++ Accreditation & Top 25 NIRF Innovation Rank',
+      title: 'Government Polytechnic Ahmedabad Secures Top Ranking & NBA Accreditation',
       category: 'Institutional Achievement',
       date: 'Oct 22, 2026',
       readTime: '3 min read',
       image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=600&q=80',
-      summary: 'With cutting-edge research laboratories, high-impact patent filings, and a 96% placement record, Apex Institute has been awarded the prestigious NAAC A++ rating.'
+      summary: 'With cutting-edge engineering laboratories, high-impact technical initiatives, and an outstanding placement record, Government Polytechnic Ahmedabad continues to lead technical education excellence.'
     },
     {
       id: 'news-2',

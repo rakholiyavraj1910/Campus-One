@@ -28,8 +28,8 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
           <h2 className="text-2xl font-black tracking-tight text-white">
             Campus<span className="text-brand-cyan">One</span>
           </h2>
-          <p className="text-xs text-slate-400 font-medium tracking-wide">
-            Apex Institute of Technology &amp; Science
+          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.16em]">
+            FOR GOVERNMENT POLYTECHNIC AHMEDABAD
           </p>
         </div>
 

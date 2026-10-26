@@ -127,7 +127,7 @@ export const AdminAuthPage: React.FC<AdminAuthPageProps> = ({
           <span>All Campus Portals</span>
         </button>
 
-        <CampusOneLogo variant="standard" size="sm" withBadge theme="dark" />
+        <CampusOneLogo variant="full" size="sm" withBadge theme="dark" />
 
         <div className="flex items-center space-x-3 text-xs">
           <button

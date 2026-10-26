@@ -1,0 +1,17 @@
+Verify Your CampusOne Account — Government Polytechnic Ahmedabad
+================================================================
+
+Welcome to CampusOne, the centralized digital campus management platform for Government Polytechnic Ahmedabad.
+
+Your institutional user profile has been registered. To activate your account, verify your college email address, and gain access to your student or faculty academic services, please confirm your email address by visiting the link below:
+
+{{ .ConfirmationURL }}
+
+(This link will expire in 24 hours.)
+
+If you did not create this account on CampusOne, you can safely ignore this email. No account will be activated without email verification.
+
+----------------------------------------------------------------
+CampusOne Digital Portal • Government Polytechnic Ahmedabad
+Directorate of Technical Education, Gujarat
+https://campus-oneweb.vercel.app

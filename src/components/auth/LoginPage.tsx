@@ -303,7 +303,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 font-medium">
-                Apex Institute of Technology &amp; Science • NAAC A++ Autonomous College
+                Government Polytechnic Ahmedabad • Directorate of Technical Education
               </p>
             </div>
           </div>

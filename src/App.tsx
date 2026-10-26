@@ -422,7 +422,7 @@ const MainLayout: React.FC = () => {
               size="sm"
               withBadge
               onClick={() => handleNavigate('portal-select')}
-              subtext="Apex Institute of Technology & Science • NAAC A++"
+              subtext="FOR GOVERNMENT POLYTECHNIC AHMEDABAD"
             />
 
             <div className="flex flex-wrap items-center justify-center gap-4 text-xs">
@@ -456,7 +456,7 @@ const MainLayout: React.FC = () => {
             </div>
 
             <p className="text-[11px] text-slate-400 text-center md:text-right">
-              &copy; {new Date().getFullYear()} CampusOne. All Rights Reserved.
+              &copy; {new Date().getFullYear()} CampusOne • Government Polytechnic Ahmedabad. All Rights Reserved.
             </p>
           </div>
         </div>

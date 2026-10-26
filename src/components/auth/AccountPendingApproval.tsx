@@ -21,7 +21,7 @@ export const AccountPendingApproval: React.FC = () => {
         
         {/* Brand Logo */}
         <div className="flex justify-center">
-          <CampusOneLogo variant="standard" size="sm" withBadge theme="dark" />
+          <CampusOneLogo variant="full" size="sm" withBadge theme="dark" />
         </div>
 
         {/* Emblem */}
