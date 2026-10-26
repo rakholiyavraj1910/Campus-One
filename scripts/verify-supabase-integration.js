@@ -418,6 +418,33 @@ const assignmentTrackerPath = path.join(rootDir, 'src', 'components', 'student',
 const assignmentTrackerContent = fs.readFileSync(assignmentTrackerPath, 'utf8');
 assert(assignmentTrackerContent.includes('getAssignments'), 'AssignmentTracker fetches real assignments');
 
+console.log('\n13. Checking Dedicated Email Confirmation Page & Absolute Production URLs:');
+const confirmPagePath = path.join(rootDir, 'src', 'components', 'auth', 'EmailConfirmationPage.tsx');
+assert(fs.existsSync(confirmPagePath), 'EmailConfirmationPage.tsx exists');
+const confirmPageContent = fs.readFileSync(confirmPagePath, 'utf8');
+assert(confirmPageContent.includes('verifyOtp'), 'EmailConfirmationPage implements token_hash verification via verifyOtp');
+assert(confirmPageContent.includes('exchangeCodeForSession'), 'EmailConfirmationPage implements PKCE code exchange');
+assert(confirmPageContent.includes('resend'), 'EmailConfirmationPage implements resend confirmation action');
+assert(confirmPageContent.includes('FOR GOVERNMENT POLYTECHNIC AHMEDABAD'), 'EmailConfirmationPage features institutional subtitle');
+assert(confirmPageContent.includes('Email Verified Successfully'), 'EmailConfirmationPage has verified success state');
+assert(confirmPageContent.includes('Faculty Request Under Review'), 'EmailConfirmationPage has faculty pending approval state');
+
+const freshAppContent = fs.readFileSync(appTsxPath, 'utf8');
+assert(freshAppContent.includes('auth/confirm') || freshAppContent.includes('auth-confirm'), 'App.tsx parses and routes /auth/confirm');
+assert(freshAppContent.includes('EmailConfirmationPage'), 'App.tsx renders EmailConfirmationPage');
+
+const freshAuthRedirectContent = fs.readFileSync(authRedirectPath, 'utf8');
+assert(freshAuthRedirectContent.includes('/auth/confirm'), 'authRedirect defaults to /auth/confirm route');
+
+const updatedAuthContent = fs.readFileSync(authContextPath, 'utf8');
+assert(updatedAuthContent.includes('/auth/confirm'), 'AuthContext sets emailRedirectTo to /auth/confirm');
+assert(updatedAuthContent.includes('resendConfirmationEmail'), 'AuthContext implements resendConfirmationEmail');
+
+const freshEmailHtml = fs.readFileSync(emailHtmlPath, 'utf8');
+const freshEmailTxt = fs.readFileSync(emailTxtPath, 'utf8');
+assert(freshEmailHtml.includes('/auth/confirm?token_hash={{ .TokenHash }}&type=signup'), 'Email HTML template links directly to production /auth/confirm with token_hash');
+assert(freshEmailTxt.includes('/auth/confirm?token_hash={{ .TokenHash }}&type=signup'), 'Email text template links directly to production /auth/confirm with token_hash');
+
 console.log('\n====================================================');
 console.log(`Results: ${passedTests}/${totalTests} tests passed (${Math.round((passedTests / totalTests) * 100)}%)`);
 console.log('====================================================\n');

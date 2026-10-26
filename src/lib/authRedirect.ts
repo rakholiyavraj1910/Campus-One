@@ -37,10 +37,10 @@ export const getSiteUrl = (): string => {
 
 /**
  * Constructs the exact callback URL for Supabase Auth operations.
- * Example: getAuthRedirectUrl('/student/login?confirmed=true')
- * Produces: https://campus-oneweb.vercel.app/student/login?confirmed=true
+ * Example: getAuthRedirectUrl('/auth/confirm')
+ * Produces: https://campus-oneweb.vercel.app/auth/confirm
  */
-export const getAuthRedirectUrl = (path: string = '/student/login?confirmed=true'): string => {
+export const getAuthRedirectUrl = (path: string = '/auth/confirm'): string => {
   const base = getSiteUrl();
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   return `${base}${normalizedPath}`;

@@ -81,7 +81,7 @@
                     <table role="presentation" cellpadding="0" cellspacing="0" border="0">
                       <tr>
                         <td align="center" bgcolor="#00ADB5" style="border-radius: 12px; background-color: #00ADB5; box-shadow: 0 4px 14px rgba(0, 173, 181, 0.35);">
-                          <a href="{{ .ConfirmationURL }}" target="_blank" style="display: inline-block; padding: 15px 42px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 15px; font-weight: 800; color: #060E19; text-decoration: none; border-radius: 12px; letter-spacing: 0.3px;">
+                          <a href="https://campus-oneweb.vercel.app/auth/confirm?token_hash={{ .TokenHash }}&type=signup" target="_blank" style="display: inline-block; padding: 15px 42px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 15px; font-weight: 800; color: #060E19; text-decoration: none; border-radius: 12px; letter-spacing: 0.3px;">
                             Verify Email Address &rarr;
                           </a>
                         </td>
@@ -96,8 +96,11 @@
                 <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600; color: #64748B;">
                   Button not clickable? Copy and paste this URL into your browser:
                 </p>
-                <p style="margin: 0; font-size: 11px; word-break: break-all; color: #007D84; font-family: monospace;">
-                  <a href="{{ .ConfirmationURL }}" target="_blank" style="color: #007D84; text-decoration: underline;">{{ .ConfirmationURL }}</a>
+                <p style="margin: 0 0 10px 0; font-size: 11px; word-break: break-all; color: #007D84; font-family: monospace;">
+                  <a href="https://campus-oneweb.vercel.app/auth/confirm?token_hash={{ .TokenHash }}&type=signup" target="_blank" style="color: #007D84; text-decoration: underline;">https://campus-oneweb.vercel.app/auth/confirm?token_hash={{ .TokenHash }}&type=signup</a>
+                </p>
+                <p style="margin: 0; font-size: 11px; word-break: break-all; color: #94A3B8; font-family: monospace;">
+                  Alternative: <a href="{{ .ConfirmationURL }}" target="_blank" style="color: #94A3B8; text-decoration: underline;">{{ .ConfirmationURL }}</a>
                 </p>
               </div>
 

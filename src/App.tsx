@@ -19,6 +19,7 @@ import { LoginPage } from './components/auth/LoginPage';
 import { StudentAuthPage } from './components/auth/StudentAuthPage';
 import { FacultyAuthPage } from './components/auth/FacultyAuthPage';
 import { AdminAuthPage } from './components/auth/AdminAuthPage';
+import { EmailConfirmationPage } from './components/auth/EmailConfirmationPage';
 
 import { HomePage } from './components/home/HomePage';
 import { StudentDashboard } from './components/student/StudentDashboard';
@@ -50,6 +51,11 @@ function getPageFromLocation(): ParsedLocation {
   const searchParams = new URLSearchParams(window.location.search);
   const tab = searchParams.get('tab') || undefined;
   const mode = (searchParams.get('mode') as 'signin' | 'register') || undefined;
+
+  // Dedicated Email Confirmation Callback Route (/auth/confirm or /confirm)
+  if ((first === 'auth' && second === 'confirm') || first === 'confirm') {
+    return { page: 'auth-confirm', subTab: tab };
+  }
 
   // 1. Dedicated Portal Authentication URLs
   if (first === 'student' && (second === 'login' || second === 'register')) {
@@ -200,6 +206,8 @@ const MainLayout: React.FC = () => {
       targetUrl = (mode || authMode) === 'register' ? '/faculty/login?mode=register' : '/faculty/login';
     } else if (page === 'admin-auth') {
       targetUrl = '/admin/login';
+    } else if (page === 'auth-confirm') {
+      targetUrl = '/auth/confirm';
     } else if (page === 'home') {
       targetUrl = '/home';
     } else {
@@ -218,6 +226,18 @@ const MainLayout: React.FC = () => {
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  // 0. Dedicated Email Confirmation Callback Page (/auth/confirm)
+  if (currentPage === 'auth-confirm') {
+    return (
+      <EmailConfirmationPage
+        onNavigateLogin={(portal) => {
+          handleNavigate(portal === 'faculty' ? 'faculty-auth' : 'student-auth', undefined, undefined, 'signin');
+        }}
+        onNavigateHub={() => handleNavigate('portal-select')}
+      />
+    );
+  }
 
   // 1. Session Restoration Loading Gate
   if (loading) {

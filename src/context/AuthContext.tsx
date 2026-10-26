@@ -37,6 +37,7 @@ export interface AuthContextType {
   ) => Promise<{ success: boolean; error?: string; needsEmailConfirmation?: boolean }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
+  resendConfirmationEmail: (email: string) => Promise<{ success: boolean; error?: string }>;
   // Compatibility & Demo mode methods
   switchRole: (newRole: UserRole) => void;
   login: (email: string, role: UserRole, name?: string) => void;
@@ -287,7 +288,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      const redirectUrl = getAuthRedirectUrl('/student/login?confirmed=true');
+      const redirectUrl = getAuthRedirectUrl('/auth/confirm');
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password,
@@ -386,7 +387,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      const redirectUrl = getAuthRedirectUrl('/faculty/login?confirmed=true');
+      const redirectUrl = getAuthRedirectUrl('/auth/confirm?role=faculty');
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password,
@@ -481,6 +482,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Live Supabase Resend Confirmation Email
+  const resendConfirmationEmail = async (email: string): Promise<{ success: boolean; error?: string }> => {
+    if (!isSupabaseConfigured || !supabase) {
+      return { success: true };
+    }
+
+    try {
+      const redirectUrl = getAuthRedirectUrl('/auth/confirm');
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email.trim(),
+        options: {
+          emailRedirectTo: redirectUrl,
+        },
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Failed to dispatch confirmation email.' };
+    }
+  };
+
   // Role Switcher: In live mode, authorization is strictly bound to PostgreSQL profiles
   const switchRole = (newRole: UserRole) => {
     if (isSupabaseConfigured) {
@@ -543,6 +569,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         requestFacultyAccess,
         signOut,
         resetPassword,
+        resendConfirmationEmail,
         switchRole,
         login,
         logout,

@@ -5,6 +5,10 @@ Welcome to CampusOne, the centralized digital campus management platform for Gov
 
 Your institutional user profile has been registered. To activate your account, verify your college email address, and gain access to your student or faculty academic services, please confirm your email address by visiting the link below:
 
+Direct Verification Link:
+https://campus-oneweb.vercel.app/auth/confirm?token_hash={{ .TokenHash }}&type=signup
+
+Alternative Link:
 {{ .ConfirmationURL }}
 
 (This link will expire in 24 hours.)
