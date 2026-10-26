@@ -267,25 +267,60 @@ export interface FacultyAssignedClass {
   averageAttendancePct: number;
 }
 
+export type AttendanceStatus = 'present' | 'absent' | 'late' | 'leave';
+
 export interface StudentRosterEntry {
   id: string;
   rollNumber: string;
   name: string;
   email: string;
-  status: 'present' | 'absent' | 'late';
-  currentAttendancePct: number;
+  status: AttendanceStatus;
+  currentAttendancePct?: number;
 }
 
 export interface AttendanceSession {
   id: string;
+  facultyId?: string;
   facultyName: string;
+  department?: string;
   subjectCode: string;
   subjectName: string;
   date: string;
   slot: string;
   topic: string;
+  semester?: number;
+  division?: string;
   presentCount: number;
   totalCount: number;
+  createdAt?: string;
+}
+
+export interface AttendanceRecordEntry {
+  id: string;
+  sessionId: string;
+  studentId: string;
+  studentName: string;
+  rollNumber?: string;
+  status: AttendanceStatus;
+  createdAt?: string;
+}
+
+export interface StudentAttendanceSummary {
+  hasData: boolean;
+  totalClasses: number;
+  attendedClasses: number;
+  missedClasses: number;
+  percentage: number;
+  subjects: SubjectAttendance[];
+  dateWiseRecords: {
+    id: string;
+    date: string;
+    subjectCode: string;
+    subjectName: string;
+    slot: string;
+    status: AttendanceStatus;
+    topic: string;
+  }[];
 }
 
 export interface AuditLog {

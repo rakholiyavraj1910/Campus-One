@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StudyMaterial } from '../../types';
-import { INITIAL_STUDY_MATERIALS } from '../../lib/mockData';
 import { getStudyMaterials, incrementMaterialDownload } from '../../lib/storageService';
 import { useNotifications } from '../../context/NotificationContext';
 import { 
@@ -12,23 +11,34 @@ import {
   User, 
   BookOpen, 
   Sparkles,
-  Filter
+  Filter,
+  RefreshCw
 } from 'lucide-react';
 
 export const StudyMaterialsHub: React.FC = () => {
-  const [materials, setMaterials] = useState<StudyMaterial[]>(() => {
-    try {
-      const saved = localStorage.getItem('campusone_materials_v1');
-      return saved ? JSON.parse(saved) : INITIAL_STUDY_MATERIALS;
-    } catch (e) {
-      return INITIAL_STUDY_MATERIALS;
-    }
-  });
-
+  const [materials, setMaterials] = useState<StudyMaterial[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('All');
   const [semFilter, setSemFilter] = useState<string>('All');
   const { toggleBookmark, isBookmarked, addNotification } = useNotifications();
+
+  const fetchMaterials = async () => {
+    setIsLoading(true);
+    try {
+      const data = await getStudyMaterials();
+      setMaterials(data);
+    } catch (e) {
+      console.error('Error fetching study materials:', e);
+      setMaterials([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMaterials();
+  }, []);
 
   const filtered = materials.filter(m => {
     if (typeFilter !== 'All' && m.type !== typeFilter) return false;
@@ -60,41 +70,52 @@ export const StudyMaterialsHub: React.FC = () => {
             Digital Academic Repository
           </span>
           <h2 className="text-xl sm:text-2xl font-extrabold text-navy-900 dark:text-white mt-1">
-            Notes, Syllabus & Previous Question Papers (PYQs)
+            Notes, Lecture Slides &amp; PYQ Question Papers
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Verified study resources uploaded by faculty and departmental toppers
+            Institutional reference materials verified for Government Polytechnic Ahmedabad
           </p>
         </div>
 
-        {/* Search input */}
-        <div className="relative min-w-[260px]">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search notes, PYQs, subjects..."
-            className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 dark:bg-navy-800 border border-slate-200 dark:border-navy-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-brand-cyan"
-          />
+        {/* Search & Refresh Bar */}
+        <div className="flex items-center space-x-2">
+          <div className="relative min-w-[220px]">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search notes, subject, or professor..."
+              className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 dark:bg-navy-800 border border-slate-200 dark:border-navy-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-brand-cyan"
+            />
+          </div>
+
+          <button
+            onClick={fetchMaterials}
+            disabled={isLoading}
+            className="p-2 rounded-xl bg-slate-50 dark:bg-navy-800 border border-slate-200 dark:border-navy-700 text-slate-600 dark:text-slate-300 hover:text-brand-cyan transition-colors"
+            title="Refresh Materials"
+          >
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+          </button>
         </div>
       </div>
 
-      {/* Filter Bar */}
+      {/* Filter Row */}
       <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
         {/* Type Filter */}
-        <div className="flex items-center space-x-1.5 overflow-x-auto pb-1">
-          {['All', 'Notes', 'Question Paper', 'Syllabus', 'Lab Manual', 'Reference'].map((t) => (
+        <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 scrollbar-none">
+          {['All', 'Lecture Notes', 'PYQ Question Papers', 'Lab Manuals', 'Reference Sheets'].map((type) => (
             <button
-              key={t}
-              onClick={() => setTypeFilter(t)}
+              key={type}
+              onClick={() => setTypeFilter(type)}
               className={`px-3 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap ${
-                typeFilter === t
+                typeFilter === type
                   ? 'bg-navy-900 text-white dark:bg-brand-cyan dark:text-navy-950 shadow-sm'
-                  : 'bg-white dark:bg-navy-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-navy-800'
+                  : 'bg-white dark:bg-navy-900 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-navy-800'
               }`}
             >
-              {t === 'Question Paper' ? 'PYQs' : t}
+              {type}
             </button>
           ))}
         </div>
@@ -102,7 +123,7 @@ export const StudyMaterialsHub: React.FC = () => {
         {/* Semester Filter */}
         <div className="flex items-center space-x-1">
           <span className="text-slate-400 font-semibold mr-1">Semester:</span>
-          {['All', '5', '6', '7'].map((sem) => (
+          {['All', '1', '2', '3', '4', '5', '6'].map((sem) => (
             <button
               key={sem}
               onClick={() => setSemFilter(sem)}
@@ -118,15 +139,27 @@ export const StudyMaterialsHub: React.FC = () => {
         </div>
       </div>
 
-      {/* Materials Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filtered.length === 0 ? (
-          <div className="col-span-full py-16 text-center text-slate-400 bg-white dark:bg-navy-900 rounded-3xl border border-slate-200/80 dark:border-navy-800">
-            <FileText className="w-10 h-10 mx-auto mb-2 opacity-30 text-brand-cyan" />
-            <p className="text-sm font-semibold">No materials match your query</p>
-          </div>
-        ) : (
-          filtered.map((mat) => {
+      {/* Materials Grid or Empty State */}
+      {isLoading ? (
+        <div className="bg-white dark:bg-navy-900 rounded-3xl p-12 text-center text-slate-400 space-y-3 border border-slate-200/80 dark:border-navy-800">
+          <RefreshCw className="w-8 h-8 mx-auto animate-spin text-brand-cyan" />
+          <p className="text-xs font-semibold">Loading verified study materials from database...</p>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="col-span-full py-16 text-center text-slate-400 bg-white dark:bg-navy-900 rounded-3xl border border-slate-200/80 dark:border-navy-800 space-y-2">
+          <FileText className="w-10 h-10 mx-auto opacity-30 text-brand-cyan" />
+          <h4 className="font-bold text-sm text-slate-800 dark:text-white">
+            {materials.length === 0 ? 'No Study Materials Published Yet' : 'No Materials Match Your Query'}
+          </h4>
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+            {materials.length === 0 
+              ? 'Department professors upload syllabi, lecture slides, previous year question papers, and lab manuals using the Faculty portal.'
+              : 'Try selecting a different category or clearing the search query.'}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filtered.map((mat) => {
             const bookmarked = isBookmarked(mat.id);
 
             return (
@@ -189,9 +222,9 @@ export const StudyMaterialsHub: React.FC = () => {
                 </div>
               </div>
             );
-          })
-        )}
-      </div>
+          })}
+        </div>
+      )}
     </div>
   );
 };

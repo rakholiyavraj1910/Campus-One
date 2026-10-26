@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { STUDENT_TIMETABLE } from '../../lib/mockData';
 import { Clock, MapPin, User, ChevronRight, BookOpen, Sparkles } from 'lucide-react';
 
@@ -7,6 +8,7 @@ interface TodayScheduleWidgetProps {
 }
 
 export const TodayScheduleWidget: React.FC<TodayScheduleWidgetProps> = ({ onNavigate }) => {
+  const { user } = useAuth();
   const [selectedDay, setSelectedDay] = useState<'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday'>('Monday');
 
   const days: Array<'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday'> = [
@@ -43,7 +45,7 @@ export const TodayScheduleWidget: React.FC<TodayScheduleWidgetProps> = ({ onNavi
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            B.Tech CSE Sem 6 • Section A (Tech Tower LH-302)
+            {user.department ? `${user.department} • Semester ${user.semester || 1}` : 'Academic Schedule • Government Polytechnic Ahmedabad'}
           </p>
         </div>
 

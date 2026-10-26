@@ -10,9 +10,14 @@ import {
   FacultyAssignedClass,
   StudentRosterEntry,
   AttendanceSession,
+  AttendanceStatus,
+  AttendanceRecordEntry,
+  StudentAttendanceSummary,
   AuditLog,
   FeedbackItem,
-  DepartmentInfo
+  DepartmentInfo,
+  UserProfile,
+  UserRole
 } from '../types';
 import { 
   INITIAL_NOTICES, 
@@ -195,6 +200,29 @@ const mapDepartmentFromDb = (row: any): DepartmentInfo => ({
   bannerImage: row.banner_image || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80',
 });
 
+export const mapProfileFromDb = (row: any): UserProfile => ({
+  id: row.id,
+  name: row.name || 'CampusOne User',
+  email: row.email,
+  role: row.admin_level === 'pending_faculty' ? 'pending' : ((row.role as UserRole) || 'student'),
+  avatar: row.avatar_url || undefined,
+  phone: row.phone || undefined,
+  department: row.department || undefined,
+  rollNumber: row.roll_number || undefined,
+  prn: row.prn || undefined,
+  semester: row.semester ? Number(row.semester) : undefined,
+  academicYear: row.academic_year || undefined,
+  division: row.division || undefined,
+  cgpa: row.cgpa ? Number(row.cgpa) : undefined,
+  mentorName: row.mentor_name || undefined,
+  mentorEmail: row.mentor_email || undefined,
+  designation: row.designation || undefined,
+  cabin: row.cabin || undefined,
+  specialization: row.specialization || undefined,
+  consultationHours: row.consultation_hours || undefined,
+  adminLevel: row.admin_level || undefined,
+});
+
 // ----------------- NOTICES CRUD -----------------
 export const getNotices = async (): Promise<Notice[]> => {
   if (isSupabaseConfigured && supabase) {
@@ -209,15 +237,16 @@ export const getNotices = async (): Promise<Notice[]> => {
       }
 
       if (error) {
-        console.warn(`[CampusOne Supabase Notice Fetch] Status ${error.code}: ${error.message}. Using demo fallback.`);
+        console.warn(`[CampusOne Supabase Notice Fetch] Status ${error.code}: ${error.message}.`);
       }
+      return [];
     } catch (e) {
       console.warn('[CampusOne Supabase Notice Fetch Failure]:', e);
+      return [];
     }
   }
 
-  // Fallback to local demo records
-  return loadFromStorage<Notice[]>(STORAGE_KEYS.NOTICES, INITIAL_NOTICES);
+  return [];
 };
 
 export const addNotice = async (notice: Omit<Notice, 'id' | 'views'>): Promise<Notice> => {
@@ -363,14 +392,16 @@ export const getEvents = async (): Promise<EventItem[]> => {
       }
 
       if (error) {
-        console.warn(`[CampusOne Supabase Event Fetch] Status ${error.code}: ${error.message}. Using demo fallback.`);
+        console.warn(`[CampusOne Supabase Event Fetch] Status ${error.code}: ${error.message}.`);
       }
+      return [];
     } catch (e) {
       console.warn('[CampusOne Supabase Event Fetch Failure]:', e);
+      return [];
     }
   }
 
-  return loadFromStorage<EventItem[]>(STORAGE_KEYS.EVENTS, INITIAL_EVENTS);
+  return [];
 };
 
 export const addEvent = async (event: Omit<EventItem, 'id' | 'registeredCount'>): Promise<EventItem> => {
@@ -552,14 +583,16 @@ export const getFacultyList = async (): Promise<FacultyMember[]> => {
       }
 
       if (error) {
-        console.warn(`[CampusOne Supabase Faculty Fetch] Status ${error.code}: ${error.message}. Using demo fallback.`);
+        console.warn(`[CampusOne Supabase Faculty Fetch] Status ${error.code}: ${error.message}.`);
       }
+      return [];
     } catch (e) {
       console.warn('[CampusOne Supabase Faculty Fetch Failure]:', e);
+      return [];
     }
   }
 
-  return loadFromStorage<FacultyMember[]>(STORAGE_KEYS.FACULTY, INITIAL_FACULTY);
+  return [];
 };
 
 export const addFacultyMember = async (fac: Omit<FacultyMember, 'id'>): Promise<FacultyMember> => {
@@ -685,14 +718,16 @@ export const getStudyMaterials = async (): Promise<StudyMaterial[]> => {
       }
 
       if (error) {
-        console.warn(`[CampusOne Supabase Materials Fetch] Status ${error.code}: ${error.message}. Using demo fallback.`);
+        console.warn(`[CampusOne Supabase Materials Fetch] Status ${error.code}: ${error.message}.`);
       }
+      return [];
     } catch (e) {
       console.warn('[CampusOne Supabase Materials Fetch Failure]:', e);
+      return [];
     }
   }
 
-  return loadFromStorage<StudyMaterial[]>(STORAGE_KEYS.MATERIALS, INITIAL_STUDY_MATERIALS);
+  return [];
 };
 
 export const addStudyMaterial = async (mat: Omit<StudyMaterial, 'id' | 'downloadsCount'>): Promise<StudyMaterial> => {
@@ -768,13 +803,598 @@ export const incrementMaterialDownload = (id: string): void => {
   saveToStorage(STORAGE_KEYS.MATERIALS, updated);
 };
 
+// ----------------- REAL STUDENT DIRECTORY & PROFILES -----------------
+export const getStudents = async (filters?: {
+  department?: string;
+  semester?: number | string;
+  division?: string;
+  search?: string;
+}): Promise<UserProfile[]> => {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      let query = supabase
+        .from('profiles')
+        .select('*')
+        .eq('role', 'student');
+
+      if (filters?.department && filters.department !== 'All') {
+        query = query.eq('department', filters.department);
+      }
+      if (filters?.semester && filters.semester !== 'All') {
+        query = query.eq('semester', Number(filters.semester));
+      }
+      if (filters?.division && filters.division !== 'All') {
+        query = query.eq('division', filters.division);
+      }
+      if (filters?.search && filters.search.trim()) {
+        const s = `%${filters.search.trim()}%`;
+        query = query.or(`name.ilike.${s},email.ilike.${s},roll_number.ilike.${s},prn.ilike.${s}`);
+      }
+
+      const { data, error } = await query.order('name', { ascending: true });
+      if (error) {
+        console.warn('Error fetching students from Supabase:', error.message);
+        return [];
+      }
+      return (data || []).map(mapProfileFromDb);
+    } catch (e) {
+      console.error('Exception fetching students:', e);
+      return [];
+    }
+  }
+  return [];
+};
+
+export const getStudentById = async (studentId: string): Promise<UserProfile | null> => {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', studentId)
+        .maybeSingle();
+      if (error || !data) return null;
+      return mapProfileFromDb(data);
+    } catch (e) {
+      return null;
+    }
+  }
+  return null;
+};
+
+// ----------------- REAL STUDENT ATTENDANCE CALCULATION -----------------
+export const getStudentAttendanceSummary = async (studentId: string): Promise<StudentAttendanceSummary> => {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data: records, error } = await supabase
+        .from('attendance_records')
+        .select(`
+          id,
+          status,
+          created_at,
+          session_id,
+          attendance_sessions (
+            id,
+            subject_code,
+            subject_name,
+            faculty_name,
+            date,
+            slot,
+            topic,
+            semester,
+            division
+          )
+        `)
+        .eq('student_id', studentId)
+        .order('created_at', { ascending: false });
+
+      if (error || !records || records.length === 0) {
+        return {
+          hasData: false,
+          totalClasses: 0,
+          attendedClasses: 0,
+          missedClasses: 0,
+          percentage: 0,
+          subjects: [],
+          dateWiseRecords: [],
+        };
+      }
+
+      const subjectMap = new Map<string, {
+        subjectCode: string;
+        subjectName: string;
+        facultyName: string;
+        attended: number;
+        total: number;
+      }>();
+
+      const dateWiseRecords: StudentAttendanceSummary['dateWiseRecords'] = [];
+      let totalConducted = 0;
+      let totalAttended = 0;
+
+      for (const r of records) {
+        const session = Array.isArray(r.attendance_sessions) ? r.attendance_sessions[0] : (r.attendance_sessions as any);
+        const subCode = session?.subject_code || 'GEN';
+        const subName = session?.subject_name || 'General Course';
+        const facName = session?.faculty_name || 'Department Faculty';
+        const isAttended = r.status === 'present' || r.status === 'late';
+
+        totalConducted++;
+        if (isAttended) totalAttended++;
+
+        if (!subjectMap.has(subCode)) {
+          subjectMap.set(subCode, {
+            subjectCode: subCode,
+            subjectName: subName,
+            facultyName: facName,
+            attended: 0,
+            total: 0,
+          });
+        }
+        const s = subjectMap.get(subCode)!;
+        s.total++;
+        if (isAttended) s.attended++;
+
+        dateWiseRecords.push({
+          id: r.id,
+          date: session?.date || (r.created_at ? r.created_at.split('T')[0] : new Date().toISOString().split('T')[0]),
+          subjectCode: subCode,
+          subjectName: subName,
+          slot: session?.slot || 'Morning Slot',
+          status: r.status as AttendanceStatus,
+          topic: session?.topic || 'Curriculum Lecture',
+        });
+      }
+
+      const subjects: SubjectAttendance[] = Array.from(subjectMap.values()).map(s => {
+        const pct = s.total > 0 ? Number(((s.attended / s.total) * 100).toFixed(1)) : 0;
+        let status: 'Safe' | 'Warning' | 'Critical' = 'Safe';
+        if (pct < 70) status = 'Critical';
+        else if (pct < 75) status = 'Warning';
+
+        return {
+          subjectCode: s.subjectCode,
+          subjectName: s.subjectName,
+          facultyName: s.facultyName,
+          attendedClasses: s.attended,
+          totalClasses: s.total,
+          percentage: pct,
+          minimumRequired: 75,
+          status,
+        };
+      });
+
+      const overallPercentage = totalConducted > 0 
+        ? Number(((totalAttended / totalConducted) * 100).toFixed(1)) 
+        : 0;
+
+      return {
+        hasData: true,
+        totalClasses: totalConducted,
+        attendedClasses: totalAttended,
+        missedClasses: totalConducted - totalAttended,
+        percentage: overallPercentage,
+        subjects,
+        dateWiseRecords,
+      };
+    } catch (e) {
+      console.error('Error fetching student attendance summary:', e);
+    }
+  }
+
+  return {
+    hasData: false,
+    totalClasses: 0,
+    attendedClasses: 0,
+    missedClasses: 0,
+    percentage: 0,
+    subjects: [],
+    dateWiseRecords: [],
+  };
+};
+
+// ----------------- REAL ATTENDANCE RECORDING & SESSIONS -----------------
+export const saveAttendanceSession = async (
+  sessionData: {
+    facultyId?: string;
+    facultyName: string;
+    department?: string;
+    subjectCode: string;
+    subjectName: string;
+    date: string;
+    slot: string;
+    topic: string;
+    semester?: number;
+    division?: string;
+    presentCount?: number;
+    totalCount?: number;
+  },
+  records: {
+    studentId: string;
+    studentName: string;
+    rollNumber?: string;
+    status: AttendanceStatus;
+  }[]
+): Promise<AttendanceSession> => {
+  if (isSupabaseConfigured && supabase) {
+    const presentCount = records.filter(r => r.status === 'present' || r.status === 'late').length;
+    const totalCount = records.length;
+
+    // 1. Insert session record
+    const payload = {
+      faculty_id: sessionData.facultyId || null,
+      faculty_name: sessionData.facultyName,
+      department: sessionData.department || 'Computer Engineering',
+      subject_code: sessionData.subjectCode,
+      subject_name: sessionData.subjectName,
+      date: sessionData.date,
+      slot: sessionData.slot,
+      topic: sessionData.topic,
+      semester: sessionData.semester || 1,
+      division: sessionData.division || 'A',
+      present_count: presentCount,
+      total_count: totalCount,
+    };
+
+    const { data: sessionRow, error: sessionErr } = await supabase
+      .from('attendance_sessions')
+      .insert([payload])
+      .select()
+      .single();
+
+    if (sessionErr) {
+      console.error('Supabase saveAttendanceSession error:', sessionErr);
+      throw new Error(`Failed to save attendance session: ${sessionErr.message}`);
+    }
+
+    // 2. Insert/upsert individual student records
+    if (records.length > 0) {
+      const recordPayloads = records.map(r => ({
+        session_id: sessionRow.id,
+        student_id: r.studentId,
+        student_name: r.studentName,
+        roll_number: r.rollNumber || null,
+        status: r.status,
+      }));
+
+      const { error: recordsErr } = await supabase
+        .from('attendance_records')
+        .upsert(recordPayloads, { onConflict: 'session_id,student_id' });
+
+      if (recordsErr) {
+        console.error('Supabase attendance_records upsert error:', recordsErr);
+        await supabase.from('attendance_sessions').delete().eq('id', sessionRow.id);
+        throw new Error(`Failed to save student attendance records: ${recordsErr.message}`);
+      }
+    }
+
+    // 3. Log audit event
+    await addAuditLog(
+      sessionData.facultyName,
+      'faculty',
+      'RECORD_ATTENDANCE',
+      'attendance_sessions',
+      sessionRow.id,
+      `Recorded attendance for ${sessionData.subjectCode} (${sessionData.department}): ${presentCount}/${totalCount} students present. Topic: "${sessionData.topic}"`
+    );
+
+    return {
+      id: sessionRow.id,
+      facultyId: sessionRow.faculty_id,
+      facultyName: sessionRow.faculty_name,
+      department: sessionRow.department,
+      subjectCode: sessionRow.subject_code,
+      subjectName: sessionRow.subject_name,
+      date: sessionRow.date,
+      slot: sessionRow.slot,
+      topic: sessionRow.topic,
+      semester: sessionRow.semester,
+      division: sessionRow.division,
+      presentCount,
+      totalCount,
+      createdAt: sessionRow.created_at,
+    };
+  }
+
+  throw new Error('Supabase cloud backend must be configured to persist real institutional attendance.');
+};
+
+export const getAttendanceSessions = async (filters?: {
+  subjectCode?: string;
+  semester?: number;
+  division?: string;
+  department?: string;
+  date?: string;
+}): Promise<AttendanceSession[]> => {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      let query = supabase
+        .from('attendance_sessions')
+        .select('*')
+        .order('date', { ascending: false });
+
+      if (filters?.department && filters.department !== 'All') {
+        query = query.eq('department', filters.department);
+      }
+      if (filters?.subjectCode && filters.subjectCode !== 'All') {
+        query = query.eq('subject_code', filters.subjectCode);
+      }
+      if (filters?.semester) {
+        query = query.eq('semester', filters.semester);
+      }
+      if (filters?.division && filters.division !== 'All') {
+        query = query.eq('division', filters.division);
+      }
+      if (filters?.date) {
+        query = query.eq('date', filters.date);
+      }
+
+      const { data, error } = await query;
+      if (error || !data) return [];
+
+      return data.map((d: any) => ({
+        id: d.id,
+        facultyId: d.faculty_id,
+        facultyName: d.faculty_name,
+        department: d.department,
+        subjectCode: d.subject_code,
+        subjectName: d.subject_name,
+        date: d.date,
+        slot: d.slot,
+        topic: d.topic,
+        semester: d.semester,
+        division: d.division,
+        presentCount: d.present_count || 0,
+        totalCount: d.total_count || 0,
+        createdAt: d.created_at,
+      }));
+    } catch (e) {
+      console.error('Error fetching attendance sessions:', e);
+      return [];
+    }
+  }
+  return [];
+};
+
+export const getAttendanceRecordsForSession = async (sessionId: string): Promise<AttendanceRecordEntry[]> => {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('attendance_records')
+        .select('*')
+        .eq('session_id', sessionId)
+        .order('student_name', { ascending: true });
+
+      if (error || !data) return [];
+      return data.map((d: any) => ({
+        id: d.id,
+        sessionId: d.session_id,
+        studentId: d.student_id,
+        studentName: d.student_name || 'Student',
+        rollNumber: d.roll_number || '',
+        status: d.status as AttendanceStatus,
+        createdAt: d.created_at,
+      }));
+    } catch (e) {
+      console.error('Error fetching session attendance records:', e);
+      return [];
+    }
+  }
+  return [];
+};
+
+export const updateAttendanceRecord = async (
+  recordId: string,
+  newStatus: AttendanceStatus,
+  actorName: string
+): Promise<void> => {
+  if (isSupabaseConfigured && supabase) {
+    const { data: prevRecord, error: getErr } = await supabase
+      .from('attendance_records')
+      .select('session_id, student_name, roll_number, status')
+      .eq('id', recordId)
+      .single();
+
+    if (getErr || !prevRecord) throw new Error('Attendance record not found.');
+
+    const { error } = await supabase
+      .from('attendance_records')
+      .update({ status: newStatus })
+      .eq('id', recordId);
+
+    if (error) throw new Error(`Failed to update attendance status: ${error.message}`);
+
+    const { data: records } = await supabase
+      .from('attendance_records')
+      .select('status')
+      .eq('session_id', prevRecord.session_id);
+
+    if (records) {
+      const presentCount = records.filter((r: any) => r.status === 'present' || r.status === 'late').length;
+      await supabase
+        .from('attendance_sessions')
+        .update({ present_count: presentCount })
+        .eq('id', prevRecord.session_id);
+    }
+
+    await addAuditLog(
+      actorName,
+      'faculty',
+      'EDIT_ATTENDANCE_RECORD',
+      'attendance_records',
+      recordId,
+      `Updated attendance for ${prevRecord.student_name} from ${prevRecord.status} to ${newStatus}`
+    );
+  }
+};
+
+// ----------------- REAL MARKS & ACADEMIC EVALUATION -----------------
+export const getStudentMarks = async (studentId: string): Promise<any[]> => {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('marks')
+        .select('*')
+        .eq('student_id', studentId)
+        .order('subject_code', { ascending: true });
+
+      if (error || !data) return [];
+      return data.map((d: any) => ({
+        id: d.id,
+        studentId: d.student_id,
+        subjectCode: d.subject_code,
+        subjectName: d.subject_name,
+        internal1: Number(d.internal1 || 0),
+        internal2: Number(d.internal2 || 0),
+        quizAverage: Number(d.quiz_avg || 0),
+        labAssignment: Number(d.lab_assignment || 0),
+        attendanceMarks: Number(d.attendance_marks || 0),
+        totalMarks: Number(d.total_marks || 0),
+        grade: d.grade || 'N/A',
+      }));
+    } catch (e) {
+      return [];
+    }
+  }
+  return [];
+};
+
+export const saveStudentMarks = async (
+  studentId: string,
+  subjectCode: string,
+  subjectName: string,
+  marks: {
+    internal1?: number;
+    internal2?: number;
+    quizAverage?: number;
+    labAssignment?: number;
+    attendanceMarks?: number;
+    totalMarks?: number;
+    grade?: string;
+  },
+  actorName: string
+): Promise<void> => {
+  if (isSupabaseConfigured && supabase) {
+    const payload = {
+      student_id: studentId,
+      subject_code: subjectCode,
+      subject_name: subjectName,
+      internal1: marks.internal1 || 0,
+      internal2: marks.internal2 || 0,
+      quiz_avg: marks.quizAverage || 0,
+      lab_assignment: marks.labAssignment || 0,
+      attendance_marks: marks.attendanceMarks || 0,
+      total_marks: marks.totalMarks || 0,
+      grade: marks.grade || 'A',
+    };
+
+    const { error } = await supabase
+      .from('marks')
+      .upsert([payload]);
+
+    if (error) throw new Error(`Failed to save marks: ${error.message}`);
+
+    await addAuditLog(
+      actorName,
+      'faculty',
+      'UPDATE_MARKS',
+      'marks',
+      studentId,
+      `Updated marks for ${subjectCode}: Total ${marks.totalMarks}/100, Grade ${marks.grade}`
+    );
+  }
+};
+
+// ----------------- FACULTY ACCESS REQUESTS & APPROVALS -----------------
+export const getPendingFacultyRequests = async (): Promise<UserProfile[]> => {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .or('admin_level.eq.pending_faculty,role.eq.pending')
+        .order('created_at', { ascending: false });
+
+      if (error || !data) return [];
+      return data.map(mapProfileFromDb);
+    } catch (e) {
+      return [];
+    }
+  }
+  return [];
+};
+
+export const approveFacultyRequest = async (profileId: string, actorName: string): Promise<void> => {
+  if (isSupabaseConfigured && supabase) {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ role: 'faculty', admin_level: null })
+      .eq('id', profileId);
+
+    if (error) throw new Error(`Failed to approve faculty request: ${error.message}`);
+
+    await addAuditLog(
+      actorName,
+      'admin',
+      'APPROVE_FACULTY_REQUEST',
+      'profiles',
+      profileId,
+      `Approved faculty access request. Account role upgraded to faculty.`
+    );
+  }
+};
+
+export const rejectFacultyRequest = async (profileId: string, actorName: string): Promise<void> => {
+  if (isSupabaseConfigured && supabase) {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ admin_level: 'rejected' })
+      .eq('id', profileId);
+
+    if (error) throw new Error(`Failed to reject faculty request: ${error.message}`);
+
+    await addAuditLog(
+      actorName,
+      'admin',
+      'REJECT_FACULTY_REQUEST',
+      'profiles',
+      profileId,
+      `Rejected faculty access request.`
+    );
+  }
+};
+
 // ----------------- ASSIGNMENTS -----------------
-export const getAssignments = (): AssignmentItem[] => {
-  return loadFromStorage<AssignmentItem[]>(STORAGE_KEYS.ASSIGNMENTS, INITIAL_ASSIGNMENTS);
+export const getAssignments = async (): Promise<AssignmentItem[]> => {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('assignments')
+        .select('*')
+        .order('due_date', { ascending: true });
+
+      if (!error && data) {
+        return data.map((d: any) => ({
+          id: d.id,
+          title: d.title,
+          subjectCode: d.subject_code,
+          subjectName: d.subject_name,
+          assignedDate: d.assigned_date,
+          dueDate: d.due_date,
+          status: 'Pending',
+          instructions: d.instructions || '',
+          score: undefined,
+        }));
+      }
+    } catch (e) {
+      return [];
+    }
+  }
+  return [];
 };
 
 export const submitAssignmentSolution = (id: string, fileName: string): AssignmentItem | null => {
-  const list = loadFromStorage<AssignmentItem[]>(STORAGE_KEYS.ASSIGNMENTS, INITIAL_ASSIGNMENTS);
+  const list = loadFromStorage<AssignmentItem[]>(STORAGE_KEYS.ASSIGNMENTS, []);
   let updatedItem: AssignmentItem | null = null;
   const updated = list.map(a => {
     if (a.id === id) {
@@ -794,15 +1414,15 @@ export const submitAssignmentSolution = (id: string, fileName: string): Assignme
 
 // ----------------- TIMETABLE & ATTENDANCE -----------------
 export const getTimetable = (): TimetableSlot[] => {
-  return loadFromStorage<TimetableSlot[]>(STORAGE_KEYS.TIMETABLE, STUDENT_TIMETABLE);
+  return loadFromStorage<TimetableSlot[]>(STORAGE_KEYS.TIMETABLE, []);
 };
 
 export const getAttendanceRecords = (): SubjectAttendance[] => {
-  return loadFromStorage<SubjectAttendance[]>(STORAGE_KEYS.ATTENDANCE, STUDENT_ATTENDANCE);
+  return loadFromStorage<SubjectAttendance[]>(STORAGE_KEYS.ATTENDANCE, []);
 };
 
 export const updateSubjectAttendance = (subjectCode: string, deltaAttended: number, deltaTotal: number): SubjectAttendance[] => {
-  const list = loadFromStorage<SubjectAttendance[]>(STORAGE_KEYS.ATTENDANCE, STUDENT_ATTENDANCE);
+  const list = loadFromStorage<SubjectAttendance[]>(STORAGE_KEYS.ATTENDANCE, []);
   const updated = list.map(item => {
     if (item.subjectCode === subjectCode) {
       const newAttended = Math.max(0, item.attendedClasses + deltaAttended);
@@ -828,11 +1448,11 @@ export const updateSubjectAttendance = (subjectCode: string, deltaAttended: numb
 
 // ----------------- BOOKMARKS -----------------
 export const getBookmarks = (): string[] => {
-  return loadFromStorage<string[]>(STORAGE_KEYS.BOOKMARKS, ['not-1', 'mat-1']);
+  return loadFromStorage<string[]>(STORAGE_KEYS.BOOKMARKS, []);
 };
 
 export const toggleBookmark = (id: string): boolean => {
-  const list = loadFromStorage<string[]>(STORAGE_KEYS.BOOKMARKS, ['not-1', 'mat-1']);
+  const list = loadFromStorage<string[]>(STORAGE_KEYS.BOOKMARKS, []);
   const exists = list.includes(id);
   const updated = exists ? list.filter(item => item !== id) : [...list, id];
   saveToStorage(STORAGE_KEYS.BOOKMARKS, updated);
@@ -840,107 +1460,37 @@ export const toggleBookmark = (id: string): boolean => {
 };
 
 export const isBookmarked = (id: string): boolean => {
-  const list = loadFromStorage<string[]>(STORAGE_KEYS.BOOKMARKS, ['not-1', 'mat-1']);
+  const list = loadFromStorage<string[]>(STORAGE_KEYS.BOOKMARKS, []);
   return list.includes(id);
 };
 
 // ----------------- NOTIFICATIONS -----------------
 export const getNotifications = (): AppNotification[] => {
-  return loadFromStorage<AppNotification[]>(STORAGE_KEYS.NOTIFICATIONS, INITIAL_NOTIFICATIONS);
+  return loadFromStorage<AppNotification[]>(STORAGE_KEYS.NOTIFICATIONS, []);
 };
 
 export const markNotificationRead = (id: string): AppNotification[] => {
-  const list = loadFromStorage<AppNotification[]>(STORAGE_KEYS.NOTIFICATIONS, INITIAL_NOTIFICATIONS);
+  const list = loadFromStorage<AppNotification[]>(STORAGE_KEYS.NOTIFICATIONS, []);
   const updated = list.map(n => n.id === id ? { ...n, read: true } : n);
   saveToStorage(STORAGE_KEYS.NOTIFICATIONS, updated);
   return updated;
 };
 
 export const markAllNotificationsRead = (): AppNotification[] => {
-  const list = loadFromStorage<AppNotification[]>(STORAGE_KEYS.NOTIFICATIONS, INITIAL_NOTIFICATIONS);
+  const list = loadFromStorage<AppNotification[]>(STORAGE_KEYS.NOTIFICATIONS, []);
   const updated = list.map(n => ({ ...n, read: true }));
   saveToStorage(STORAGE_KEYS.NOTIFICATIONS, updated);
   return updated;
 };
 
-// ----------------- FACULTY & ATTENDANCE SESSIONS -----------------
+// ----------------- FACULTY CLASS HELPERS -----------------
 export const getFacultyAssignedClasses = (): FacultyAssignedClass[] => {
-  return loadFromStorage<FacultyAssignedClass[]>(STORAGE_KEYS.FACULTY_CLASSES, FACULTY_ASSIGNED_CLASSES);
+  return loadFromStorage<FacultyAssignedClass[]>(STORAGE_KEYS.FACULTY_CLASSES, []);
 };
 
 export const getStudentRoster = (subjectCode?: string): StudentRosterEntry[] => {
-  return loadFromStorage<StudentRosterEntry[]>(STORAGE_KEYS.STUDENT_ROSTER, INITIAL_STUDENT_ROSTER);
-};
-
-export const getAttendanceSessions = (): AttendanceSession[] => {
-  return loadFromStorage<AttendanceSession[]>(STORAGE_KEYS.ATTENDANCE_SESSIONS, INITIAL_ATTENDANCE_SESSIONS);
-};
-
-export const saveAttendanceSession = async (
-  sessionData: Omit<AttendanceSession, 'id'>,
-  roster: StudentRosterEntry[]
-): Promise<AttendanceSession> => {
-  if (isSupabaseConfigured && supabase) {
-    const payload = {
-      faculty_name: sessionData.facultyName,
-      subject_code: sessionData.subjectCode,
-      subject_name: sessionData.subjectName,
-      date: sessionData.date,
-      slot: sessionData.slot,
-      topic: sessionData.topic,
-      semester: 6,
-      division: 'A',
-      present_count: sessionData.presentCount,
-      total_count: sessionData.totalCount,
-    };
-
-    const { data, error } = await supabase
-      .from('attendance_sessions')
-      .insert([payload])
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Supabase saveAttendanceSession error:', error);
-      throw new Error(`Failed to save attendance session to database: ${error.message}`);
-    }
-
-    // Write audit log
-    await addAuditLog(
-      sessionData.facultyName,
-      'faculty',
-      'RECORD_ATTENDANCE',
-      'attendance_sessions',
-      data.id,
-      `Marked attendance for ${sessionData.subjectCode}: ${sessionData.presentCount}/${sessionData.totalCount} present. Topic: "${sessionData.topic}"`
-    );
-
-    return {
-      ...sessionData,
-      id: data.id,
-    };
-  }
-
-  // Demo Mode
-  const newSession: AttendanceSession = {
-    ...sessionData,
-    id: 'ses-' + Date.now(),
-  };
-
-  const sessions = loadFromStorage<AttendanceSession[]>(STORAGE_KEYS.ATTENDANCE_SESSIONS, INITIAL_ATTENDANCE_SESSIONS);
-  saveToStorage(STORAGE_KEYS.ATTENDANCE_SESSIONS, [newSession, ...sessions]);
-  saveToStorage(STORAGE_KEYS.STUDENT_ROSTER, roster);
-
-  addAuditLog(
-    sessionData.facultyName,
-    'faculty',
-    'RECORD_ATTENDANCE',
-    'attendance_sessions',
-    newSession.id,
-    `Marked attendance for ${sessionData.subjectCode}: ${sessionData.presentCount}/${sessionData.totalCount} present. Topic: "${sessionData.topic}"`
-  );
-
-  return newSession;
+  const roster = loadFromStorage<StudentRosterEntry[]>(STORAGE_KEYS.STUDENT_ROSTER, []);
+  return roster;
 };
 
 // ----------------- AUDIT LOGS -----------------

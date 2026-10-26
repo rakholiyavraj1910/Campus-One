@@ -140,13 +140,13 @@ export const ProfileCard: React.FC = () => {
                 Faculty Mentor
               </p>
               <h4 className="font-bold text-sm text-slate-900 dark:text-white">
-                {user.mentorName || 'Dr. Radhika Sen'}
+                {user.mentorName || 'Department Faculty Advisor'}
               </h4>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Associate Professor & AI Lab Head
+                Government Polytechnic Ahmedabad
               </p>
               <p className="text-xs text-brand-cyan font-mono mt-0.5">
-                {user.mentorEmail || 'radhika.sen@campusone.edu'}
+                {user.mentorEmail || 'studentaffairs@gpahmedabad.ac.in'}
               </p>
             </div>
           </div>

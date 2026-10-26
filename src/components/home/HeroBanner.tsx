@@ -62,22 +62,22 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ onNavigate }) => {
             <p className="mt-2 text-sm sm:text-base text-slate-300 max-w-2xl leading-relaxed">
               {role === 'student' && (
                 <>
-                  You have <span className="text-white font-semibold">4 classes today</span> and 1 upcoming assignment due in 5 days. Your current aggregate attendance is healthy at <span className="text-brand-cyan font-bold">84.6%</span>.
+                  Welcome to your student portal. Access your lecture schedules, verify real-time attendance logs, track coursework assignments, and review published examination results.
                 </>
               )}
               {role === 'faculty' && (
                 <>
-                  Welcome to the faculty portal. You have 2 lecture hours scheduled today in Room LH-302 and 1 project mentoring session.
+                  Welcome to the faculty portal. Take attendance for assigned classes, evaluate internal assessment marks, and view enrolled student profiles.
                 </>
               )}
               {role === 'admin' && (
                 <>
-                  Administrator Control Active: All 4 campus clusters, servers, and library checkouts operating smoothly.
+                  Administrator Control Active: Review pending faculty access requests, manage student academic records, publish circulars, and monitor campus services.
                 </>
               )}
               {role === 'guest' && (
                 <>
-                  Discover academic programs, campus facilities, faculty research, student societies, and university events.
+                  Discover academic programs, campus facilities, faculty research, student societies, and institutional circulars.
                 </>
               )}
             </p>
@@ -98,10 +98,30 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ onNavigate }) => {
 
             {role === 'student' && (
               <button
-                onClick={() => onNavigate('student', 'timetable')}
+                onClick={() => onNavigate('student', 'attendance')}
                 className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-brand-cyan hover:bg-brand-cyan-hover text-navy-950 text-xs sm:text-sm font-bold shadow-md shadow-brand-cyan/20 transition-all hover:scale-102"
               >
-                <span>View Today's Classes</span>
+                <span>View Attendance</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            )}
+
+            {role === 'faculty' && (
+              <button
+                onClick={() => onNavigate('faculty', 'attendance')}
+                className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-brand-cyan hover:bg-brand-cyan-hover text-navy-950 text-xs sm:text-sm font-bold shadow-md shadow-brand-cyan/20 transition-all hover:scale-102"
+              >
+                <span>Take Attendance</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            )}
+
+            {role === 'admin' && (
+              <button
+                onClick={() => onNavigate('admin', 'faculty-requests')}
+                className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-brand-cyan hover:bg-brand-cyan-hover text-navy-950 text-xs sm:text-sm font-bold shadow-md shadow-brand-cyan/20 transition-all hover:scale-102"
+              >
+                <span>Faculty Requests</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             )}
@@ -115,39 +135,65 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* Right Column: Key Metric Snapshot Card */}
+        {/* Right Column: Dynamic Institutional Persona Snapshot */}
         <div className="lg:col-span-4 bg-navy-950/60 border border-navy-700/80 rounded-2xl p-4 sm:p-5 backdrop-blur-md">
           <div className="flex items-center justify-between border-b border-navy-800 pb-3 mb-3">
             <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center">
               <Award className="w-3.5 h-3.5 mr-1.5 text-brand-cyan" />
-              Academic Standing
+              {role === 'student' && 'Student Standing'}
+              {role === 'faculty' && 'Faculty Member'}
+              {role === 'admin' && 'System Authority'}
+              {role === 'guest' && 'Campus Portal'}
             </span>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30">
-              Good Standing
+            <span className={`text-xs px-2 py-0.5 rounded-full font-bold border ${
+              role === 'admin'
+                ? 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+                : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+            }`}>
+              {role === 'student' && 'Enrolled'}
+              {role === 'faculty' && 'Active Faculty'}
+              {role === 'admin' && 'Administrator'}
+              {role === 'guest' && 'Public Access'}
             </span>
           </div>
 
           <div className="grid grid-cols-2 gap-3 text-center">
             <div className="bg-navy-900/80 p-3 rounded-xl border border-navy-800">
-              <p className="text-[11px] text-slate-400 font-medium">Cumulative CGPA</p>
-              <p className="text-xl font-extrabold text-white mt-0.5">8.92</p>
-              <p className="text-[10px] text-brand-cyan font-semibold mt-0.5 flex items-center justify-center">
-                <TrendingUp className="w-3 h-3 mr-0.5" /> Top 5%
+              <p className="text-[11px] text-slate-400 font-medium">Department</p>
+              <p className="text-xs font-bold text-white mt-1 line-clamp-2">
+                {user.department || 'Government Polytechnic Ahmedabad'}
               </p>
             </div>
 
             <div className="bg-navy-900/80 p-3 rounded-xl border border-navy-800">
-              <p className="text-[11px] text-slate-400 font-medium">Overall Attendance</p>
-              <p className="text-xl font-extrabold text-emerald-400 mt-0.5">84.6%</p>
-              <p className="text-[10px] text-emerald-400/80 font-semibold mt-0.5">
-                Safe (&gt;75% min)
+              <p className="text-[11px] text-slate-400 font-medium">
+                {role === 'student' ? 'Roll / PRN' : role === 'faculty' ? 'Designation' : 'Portal Mode'}
+              </p>
+              <p className="text-xs font-mono font-bold text-brand-cyan mt-1 truncate">
+                {role === 'student'
+                  ? (user.rollNumber || user.prn || 'Registered')
+                  : role === 'faculty'
+                  ? (user.designation || 'Lecturer')
+                  : role === 'admin'
+                  ? 'Institutional Control'
+                  : 'GPA Ahmedabad'}
               </p>
             </div>
           </div>
 
           <div className="mt-3 pt-3 border-t border-navy-800/80 flex items-center justify-between text-xs text-slate-400">
-            <span>Branch: B.Tech CSE (Sem 6)</span>
-            <span className="font-mono text-slate-300">Roll: 21CS104</span>
+            <span>
+              {role === 'student' && `Sem ${user.semester || 1} • Div ${user.division || 'A'}`}
+              {role === 'faculty' && 'Government Polytechnic Ahmedabad'}
+              {role === 'admin' && 'Row Level Security Active'}
+              {role === 'guest' && 'Directorate of Technical Education'}
+            </span>
+            <span className="font-mono text-slate-300">
+              {role === 'student' && user.email}
+              {role === 'faculty' && user.email}
+              {role === 'admin' && 'Super Admin'}
+              {role === 'guest' && 'Visitor'}
+            </span>
           </div>
         </div>
       </div>

@@ -50,16 +50,6 @@ export const AdminAccessDenied: React.FC<AdminAccessDeniedProps> = ({ onNavigate
             <span>Sign In as Administrator</span>
           </button>
 
-          {!isLiveMode && (
-            <button
-              onClick={() => switchRole('admin')}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-navy-800 hover:bg-slate-200 dark:hover:bg-navy-700 text-slate-800 dark:text-white font-bold text-xs border border-slate-200 dark:border-navy-700 transition-colors flex items-center justify-center space-x-2"
-            >
-              <Sparkles className="w-4 h-4 text-brand-cyan" />
-              <span>Simulate Admin Persona (Dean)</span>
-            </button>
-          )}
-
           <button
             onClick={() => onNavigate('home')}
             className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-slate-500 hover:text-slate-800 dark:hover:text-white font-semibold text-xs transition-colors flex items-center justify-center space-x-1.5"

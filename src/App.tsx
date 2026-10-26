@@ -4,7 +4,6 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { NotificationProvider, useNotifications } from './context/NotificationContext';
 import { Navbar } from './components/common/Navbar';
 import { Sidebar } from './components/common/Sidebar';
-import { RoleSwitcherBanner } from './components/common/RoleSwitcherBanner';
 import { GlobalSearchModal } from './components/common/GlobalSearchModal';
 import { NotificationDrawer } from './components/common/NotificationDrawer';
 import { BookmarksModal } from './components/common/BookmarksModal';
@@ -303,10 +302,7 @@ const MainLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-navy-950 text-slate-800 dark:text-slate-100 flex flex-col transition-colors selection:bg-brand-cyan/25 selection:text-brand-cyan">
-      {/* 1. Institutional Session & Verification Status Banner */}
-      <RoleSwitcherBanner />
-
-      {/* 2. Sticky SaaS Navbar */}
+      {/* Sticky SaaS Navbar */}
       <Navbar
         onToggleSidebar={handleToggleSidebar}
         onNavigate={handleNavigate}

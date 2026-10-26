@@ -350,6 +350,74 @@ const emailTxt = fs.readFileSync(emailTxtPath, 'utf8');
 assert(emailTxt.includes('{{ .ConfirmationURL }}'), 'Email text template preserves {{ .ConfirmationURL }}');
 assert(emailTxt.includes('Government Polytechnic Ahmedabad'), 'Email text template references Government Polytechnic Ahmedabad');
 
+console.log('\n12. Checking Real College Workflows, Student Directory & Demo Cleanup:');
+const studentDirectoryPath = path.join(rootDir, 'src', 'components', 'faculty', 'StudentDirectory.tsx');
+assert(fs.existsSync(studentDirectoryPath), 'StudentDirectory.tsx exists');
+const studentDirectoryContent = fs.readFileSync(studentDirectoryPath, 'utf8');
+assert(studentDirectoryContent.includes('getStudents'), 'StudentDirectory uses getStudents for real Supabase profiles');
+
+const studentProfileViewPath = path.join(rootDir, 'src', 'components', 'faculty', 'StudentProfileView.tsx');
+assert(fs.existsSync(studentProfileViewPath), 'StudentProfileView.tsx exists');
+const studentProfileViewContent = fs.readFileSync(studentProfileViewPath, 'utf8');
+assert(studentProfileViewContent.includes('getStudentAttendanceSummary'), 'StudentProfileView fetches real attendance summary');
+assert(studentProfileViewContent.includes('getStudentMarks'), 'StudentProfileView fetches real student marks');
+
+const facultyPortalPath = path.join(rootDir, 'src', 'components', 'faculty', 'FacultyPortal.tsx');
+assert(fs.existsSync(facultyPortalPath), 'FacultyPortal.tsx exists');
+const facultyPortalContent = fs.readFileSync(facultyPortalPath, 'utf8');
+assert(facultyPortalContent.includes('StudentDirectory'), 'FacultyPortal integrates StudentDirectory');
+assert(facultyPortalContent.includes('saveAttendanceSession'), 'FacultyPortal uses saveAttendanceSession for real attendance');
+
+assert(storageContent.includes('export const saveAttendanceSession'), 'storageService exports saveAttendanceSession');
+assert(storageContent.includes('export const getAttendanceSessions'), 'storageService exports getAttendanceSessions');
+assert(storageContent.includes('export const getAttendanceRecordsForSession'), 'storageService exports getAttendanceRecordsForSession');
+assert(storageContent.includes('export const getStudentAttendanceSummary'), 'storageService exports getStudentAttendanceSummary');
+assert(storageContent.includes('export const getStudentMarks'), 'storageService exports getStudentMarks');
+assert(storageContent.includes('export const saveStudentMarks'), 'storageService exports saveStudentMarks');
+assert(storageContent.includes('export const getPendingFacultyRequests'), 'storageService exports getPendingFacultyRequests');
+assert(storageContent.includes('export const approveFacultyRequest'), 'storageService exports approveFacultyRequest');
+assert(storageContent.includes('export const rejectFacultyRequest'), 'storageService exports rejectFacultyRequest');
+
+const migration2Path = path.join(rootDir, 'supabase', 'migrations', '20261026020000_attendance_constraints_and_clean_schema.sql');
+assert(fs.existsSync(migration2Path), '20261026020000_attendance_constraints_and_clean_schema.sql exists');
+const migration2Content = fs.readFileSync(migration2Path, 'utf8');
+assert(migration2Content.includes('idx_attendance_records_session_student'), 'Migration ensures unique constraint on session and student');
+assert(migration2Content.includes('attendance_status_type'), 'Migration updates attendance status enum');
+
+assert(!appTsxContent.includes('<RoleSwitcherBanner'), 'App.tsx does NOT render RoleSwitcherBanner');
+const authModalPath = path.join(rootDir, 'src', 'components', 'common', 'AuthModal.tsx');
+const authModalContent = fs.readFileSync(authModalPath, 'utf8');
+assert(!authModalContent.includes('Instant Persona Preview'), 'AuthModal does NOT show demo persona switchers');
+
+const adminAccessDeniedPath = path.join(rootDir, 'src', 'components', 'common', 'AdminAccessDenied.tsx');
+const adminAccessDeniedContent = fs.readFileSync(adminAccessDeniedPath, 'utf8');
+assert(!adminAccessDeniedContent.includes('Simulate Admin Persona'), 'AdminAccessDenied does NOT show simulate role button');
+
+const updatedManageStudentsContent = fs.readFileSync(manageStudentsPath, 'utf8');
+assert(!updatedManageStudentsContent.includes('DEFAULT_STUDENTS'), 'ManageStudents removed DEFAULT_STUDENTS mock array');
+assert(updatedManageStudentsContent.includes('getStudents'), 'ManageStudents fetches real students from storageService');
+
+const manageFacultyReqPath = path.join(rootDir, 'src', 'components', 'admin', 'ManageFacultyRequests.tsx');
+const manageFacultyReqContent = fs.readFileSync(manageFacultyReqPath, 'utf8');
+assert(!manageFacultyReqContent.includes('SAMPLE_PENDING_REQUESTS'), 'ManageFacultyRequests removed SAMPLE_PENDING_REQUESTS mock array');
+assert(manageFacultyReqContent.includes('getPendingFacultyRequests'), 'ManageFacultyRequests fetches real pending faculty requests');
+
+const heroBannerPath = path.join(rootDir, 'src', 'components', 'home', 'HeroBanner.tsx');
+const heroBannerContent = fs.readFileSync(heroBannerPath, 'utf8');
+assert(!heroBannerContent.includes('84.6%'), 'HeroBanner removed hardcoded 84.6% fake attendance');
+
+const attendanceTrackerPath = path.join(rootDir, 'src', 'components', 'student', 'AttendanceTracker.tsx');
+const attendanceTrackerContent = fs.readFileSync(attendanceTrackerPath, 'utf8');
+assert(attendanceTrackerContent.includes('getStudentAttendanceSummary'), 'AttendanceTracker connects to real Supabase attendance summary');
+
+const marksAndResultsPath = path.join(rootDir, 'src', 'components', 'student', 'MarksAndResults.tsx');
+const marksAndResultsContent = fs.readFileSync(marksAndResultsPath, 'utf8');
+assert(marksAndResultsContent.includes('getStudentMarks'), 'MarksAndResults connects to real Supabase marks');
+
+const assignmentTrackerPath = path.join(rootDir, 'src', 'components', 'student', 'AssignmentTracker.tsx');
+const assignmentTrackerContent = fs.readFileSync(assignmentTrackerPath, 'utf8');
+assert(assignmentTrackerContent.includes('getAssignments'), 'AssignmentTracker fetches real assignments');
+
 console.log('\n====================================================');
 console.log(`Results: ${passedTests}/${totalTests} tests passed (${Math.round((passedTests / totalTests) * 100)}%)`);
 console.log('====================================================\n');

@@ -17,7 +17,6 @@ import {
   CheckCircle2,
   AlertCircle
 } from 'lucide-react';
-import { DEMO_USERS } from '../../lib/mockData';
 import { isSupabaseConfigured } from '../../lib/supabaseClient';
 import { CampusOneIcon } from './CampusOneLogo';
 
@@ -105,16 +104,6 @@ export const AuthModal: React.FC = () => {
     }
   };
 
-  const handleQuickDemoSwitch = (demoRole: UserRole) => {
-    switchRole(demoRole);
-    setIsAuthModalOpen(false);
-    addNotification(
-      'Demo Persona Switched',
-      `Active role: ${demoRole.toUpperCase()} (${DEMO_USERS[demoRole]?.name})`,
-      'alert'
-    );
-  };
-
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
       <div 
@@ -141,43 +130,6 @@ export const AuthModal: React.FC = () => {
           >
             <X className="w-5 h-5" />
           </button>
-        </div>
-
-        {/* Quick Demo Switcher Section */}
-        <div className="px-5 py-3.5 bg-slate-50 dark:bg-navy-950/60 border-b border-slate-100 dark:border-navy-800">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center space-x-1.5 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5 text-brand-cyan" />
-              <span>Instant Persona Preview</span>
-            </div>
-            <span className="text-[10px] text-slate-400">Offline Evaluator</span>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              type="button"
-              onClick={() => handleQuickDemoSwitch('student')}
-              className="p-2 rounded-xl text-left bg-white dark:bg-navy-800 border border-slate-200 dark:border-navy-700 hover:border-brand-cyan transition-colors"
-            >
-              <p className="text-[11px] font-bold text-brand-cyan">Student</p>
-              <p className="text-[10px] text-slate-400 truncate">Aarav Sharma</p>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickDemoSwitch('faculty')}
-              className="p-2 rounded-xl text-left bg-white dark:bg-navy-800 border border-slate-200 dark:border-navy-700 hover:border-blue-500 transition-colors"
-            >
-              <p className="text-[11px] font-bold text-blue-500">Faculty</p>
-              <p className="text-[10px] text-slate-400 truncate">Dr. Radhika Sen</p>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickDemoSwitch('admin')}
-              className="p-2 rounded-xl text-left bg-white dark:bg-navy-800 border border-slate-200 dark:border-navy-700 hover:border-amber-500 transition-colors"
-            >
-              <p className="text-[11px] font-bold text-amber-500">Admin</p>
-              <p className="text-[10px] text-slate-400 truncate">Dean K. Verma</p>
-            </button>
-          </div>
         </div>
 
         {/* Tab switch between Sign In, Register, Forgot */}
