@@ -42,6 +42,13 @@ export const getSiteUrl = (): string => {
  */
 export const getAuthRedirectUrl = (path: string = '/auth/confirm'): string => {
   const base = getSiteUrl();
+
+  // Strict Open-Redirect Protection:
+  // Reject protocol-relative URLs (//attacker.com), backslashes, or absolute URLs to untrusted hosts
+  if (!path || typeof path !== 'string' || path.startsWith('//') || path.includes('://') || path.includes('\\')) {
+    return `${base}/auth/confirm`;
+  }
+
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   return `${base}${normalizedPath}`;
 };

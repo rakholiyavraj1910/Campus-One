@@ -266,16 +266,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     }
   };
 
-  // Quick fill helper for evaluator or testing
-  const handleQuickFill = (portal: 'student' | 'faculty', demoEmail: string, demoPass: string) => {
-    setActivePortal(portal);
-    setEmail(demoEmail);
-    setPassword(demoPass);
-    setMode('signin');
-    setFormError(null);
-    setSuccessMessage(null);
-  };
-
   const isStudent = activePortal === 'student';
 
   return (
@@ -718,28 +708,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 Access Admin Control Center &rarr;
               </button>
             </p>
-          </div>
-
-          {/* 8. Demo Quick Fill Helper */}
-          <div className="mt-4 pt-3 border-t border-slate-900/60 flex items-center justify-between text-[11px] text-slate-500">
-            <span>Evaluator demo fill:</span>
-            <div className="flex space-x-2">
-              <button
-                type="button"
-                onClick={() => handleQuickFill('student', 'aarav.sharma@campusone.edu', 'demo1234')}
-                className="text-brand-cyan hover:underline"
-              >
-                Demo Student
-              </button>
-              <span>•</span>
-              <button
-                type="button"
-                onClick={() => handleQuickFill('faculty', 'radhika.sen@campusone.edu', 'demo1234')}
-                className="text-emerald-400 hover:underline"
-              >
-                Demo Faculty
-              </button>
-            </div>
           </div>
 
         </div>

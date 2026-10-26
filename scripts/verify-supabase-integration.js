@@ -445,6 +445,34 @@ const freshEmailTxt = fs.readFileSync(emailTxtPath, 'utf8');
 assert(freshEmailHtml.includes('/auth/confirm?token_hash={{ .TokenHash }}&type=signup'), 'Email HTML template links directly to production /auth/confirm with token_hash');
 assert(freshEmailTxt.includes('/auth/confirm?token_hash={{ .TokenHash }}&type=signup'), 'Email text template links directly to production /auth/confirm with token_hash');
 
+console.log('\n14. Checking Security Audit Remediation & Hardening:');
+const migration3Path = path.join(rootDir, 'supabase', 'migrations', '20261026030000_security_audit_remediation_and_hardening.sql');
+assert(fs.existsSync(migration3Path), '20261026030000_security_audit_remediation_and_hardening.sql exists');
+const migration3Content = fs.readFileSync(migration3Path, 'utf8');
+
+assert(migration3Content.includes('OLD.admin_level IS DISTINCT FROM NEW.admin_level'), 'Migration blocks unauthorized admin_level changes');
+assert(migration3Content.includes('OLD.cgpa IS DISTINCT FROM NEW.cgpa'), 'Migration blocks unauthorized student CGPA tampering');
+assert(migration3Content.includes('OLD.email IS DISTINCT FROM NEW.email'), 'Migration blocks unauthorized profile email modification');
+assert(migration3Content.includes("NOT IN ('pending_faculty', 'rejected')"), 'Migration ensures pending or rejected faculty cannot access faculty resources');
+assert(migration3Content.includes('class_sections_read_policy'), 'Migration declares read policy on class_sections');
+assert(migration3Content.includes('class_sections_write_policy'), 'Migration declares admin write policy on class_sections');
+assert(migration3Content.includes('student_sub_attend_manage'), 'Migration declares manage policy on student_subject_attendance');
+assert(migration3Content.includes('auth.uid() IS NOT NULL'), 'Migration denies unauthenticated audit log insertion');
+assert(migration3Content.includes('user_id = auth.uid()'), 'Migration enforces user_id matching on event registrations');
+assert(migration3Content.includes('(storage.foldername(name))[1]'), 'Migration prevents folder injection in assignment submissions storage');
+assert(migration3Content.includes('increment_notice_views'), 'Migration defines secure increment_notice_views RPC');
+
+assert(freshAuthRedirectContent.includes("path.startsWith('//')"), 'authRedirect sanitizes protocol-relative open redirect attacks');
+
+const freshVercelJsonContent = fs.readFileSync(vercelJsonPath, 'utf8');
+assert(freshVercelJsonContent.includes('Strict-Transport-Security'), 'vercel.json configures Strict-Transport-Security header');
+assert(freshVercelJsonContent.includes('Referrer-Policy'), 'vercel.json configures Referrer-Policy header');
+assert(freshVercelJsonContent.includes('Permissions-Policy'), 'vercel.json configures Permissions-Policy header');
+assert(freshVercelJsonContent.includes('X-XSS-Protection'), 'vercel.json configures X-XSS-Protection header');
+
+const freshLoginPageContent = fs.readFileSync(loginPagePath, 'utf8');
+assert(!freshLoginPageContent.includes('Evaluator demo fill'), 'LoginPage does not expose demo passwords or credentials');
+
 console.log('\n====================================================');
 console.log(`Results: ${passedTests}/${totalTests} tests passed (${Math.round((passedTests / totalTests) * 100)}%)`);
 console.log('====================================================\n');

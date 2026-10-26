@@ -524,8 +524,12 @@ export const registerForEvent = async (
   if (isSupabaseConfigured && supabase) {
     try {
       const passCode = 'PASS-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+      const { data: authData } = await supabase.auth.getUser();
+      const currentUserId = authData?.user?.id || null;
+
       const { error } = await supabase.from('event_registrations').insert([{
         event_id: eventId,
+        user_id: currentUserId,
         user_email: studentEmail,
         user_name: studentName,
         pass_code: passCode,
