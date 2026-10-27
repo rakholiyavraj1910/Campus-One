@@ -473,6 +473,51 @@ assert(freshVercelJsonContent.includes('X-XSS-Protection'), 'vercel.json configu
 const freshLoginPageContent = fs.readFileSync(loginPagePath, 'utf8');
 assert(!freshLoginPageContent.includes('Evaluator demo fill'), 'LoginPage does not expose demo passwords or credentials');
 
+console.log('\n15. Checking Dedicated Admin Login & Security Hardening:');
+const adminAuthLibPath = path.join(rootDir, 'src', 'lib', 'adminAuth.ts');
+assert(fs.existsSync(adminAuthLibPath), 'src/lib/adminAuth.ts exists');
+const adminAuthLibContent = fs.readFileSync(adminAuthLibPath, 'utf8');
+assert(adminAuthLibContent.includes('vibhusuvaliyacampusone'), 'adminAuth.ts defines DEFAULT_ADMIN_USERNAME = vibhusuvaliyacampusone');
+assert(adminAuthLibContent.includes('resolveAdminCandidateEmails'), 'adminAuth.ts exports resolveAdminCandidateEmails');
+assert(adminAuthLibContent.includes('validateAdminInput'), 'adminAuth.ts exports validateAdminInput');
+
+// Ensure password is NEVER hardcoded in client source files
+const srcFiles = [
+  path.join(rootDir, 'src', 'components', 'auth', 'AdminAuthPage.tsx'),
+  path.join(rootDir, 'src', 'components', 'auth', 'LoginPage.tsx'),
+  path.join(rootDir, 'src', 'context', 'AuthContext.tsx'),
+  path.join(rootDir, 'src', 'lib', 'adminAuth.ts'),
+  path.join(rootDir, 'src', 'lib', 'mockData.ts')
+];
+for (const sf of srcFiles) {
+  const content = fs.readFileSync(sf, 'utf8');
+  assert(!content.includes('vibhu1411'), `No hardcoded admin password in ${path.relative(rootDir, sf)}`);
+}
+
+const adminAuthPagePath = path.join(rootDir, 'src', 'components', 'auth', 'AdminAuthPage.tsx');
+const adminAuthPageContent = fs.readFileSync(adminAuthPagePath, 'utf8');
+assert(adminAuthPageContent.includes('DEFAULT_ADMIN_USERNAME'), 'AdminAuthPage references DEFAULT_ADMIN_USERNAME');
+assert(adminAuthPageContent.includes('showPassword'), 'AdminAuthPage implements password visibility toggle state');
+assert(adminAuthPageContent.includes('Eye') && adminAuthPageContent.includes('EyeOff'), 'AdminAuthPage renders Eye/EyeOff toggle buttons');
+assert(adminAuthPageContent.includes('isSubmitting'), 'AdminAuthPage implements loading indicator state');
+assert(adminAuthPageContent.includes('if (isSubmitting) return'), 'AdminAuthPage prevents repeated submissions');
+assert(adminAuthPageContent.includes('validateAdminInput'), 'AdminAuthPage validates inputs before submission');
+assert(adminAuthPageContent.includes("profile.role !== 'admin'"), 'AdminAuthPage verifies public.profiles.role === admin');
+assert(adminAuthPageContent.includes('await signOut()'), 'AdminAuthPage revokes session if non-admin attempts login');
+
+assert(adminDashboardContent.includes("role !== 'admin'"), 'AdminDashboard checks role !== admin');
+assert(adminDashboardContent.includes('AdminAccessDenied'), 'AdminDashboard renders AdminAccessDenied for non-admin users');
+
+const migrationAdminPath = path.join(rootDir, 'supabase', 'migrations', '20261028010000_provision_campusone_admin.sql');
+assert(fs.existsSync(migrationAdminPath), '20261028010000_provision_campusone_admin.sql exists');
+const migrationAdminContent = fs.readFileSync(migrationAdminPath, 'utf8');
+assert(migrationAdminContent.includes('vibhusuvaliyacampusone@gpahmedabad.ac.in'), 'Admin migration provisions vibhusuvaliyacampusone@gpahmedabad.ac.in');
+assert(migrationAdminContent.includes("'admin'::public.user_role_type"), 'Admin migration strictly assigns admin user_role_type');
+assert(migrationAdminContent.includes('auth.uid() IS NOT NULL'), 'Admin migration updates prevent_role_escalation for database operations');
+
+const freshMockDataContent = fs.readFileSync(mockDataPath, 'utf8');
+assert(freshMockDataContent.includes('vibhusuvaliyacampusone@gpahmedabad.ac.in'), 'DEMO_USERS.admin configured with vibhusuvaliyacampusone@gpahmedabad.ac.in');
+
 console.log('\n====================================================');
 console.log(`Results: ${passedTests}/${totalTests} tests passed (${Math.round((passedTests / totalTests) * 100)}%)`);
 console.log('====================================================\n');

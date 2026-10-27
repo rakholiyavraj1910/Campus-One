@@ -55,13 +55,13 @@ export const DEMO_USERS: Record<string, UserProfile> = {
   },
   admin: {
     id: 'user-admin-1',
-    name: 'Prof. K. Verma',
-    email: 'dean.academic@campusone.edu',
+    name: 'Vibhu Suvaliya',
+    email: 'vibhusuvaliyacampusone@gpahmedabad.ac.in',
     role: 'admin',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=250&q=80',
     phone: '+91 99000 11223',
     department: 'Central Administration',
-    designation: 'Dean of Academic Affairs',
+    designation: 'Chief Administrative Officer',
     cabin: 'Administrative Block, Suite 101',
     adminLevel: 'Super Administrator'
   },

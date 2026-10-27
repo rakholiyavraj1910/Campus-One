@@ -493,7 +493,8 @@ SET search_path = ''
 AS $$
 BEGIN
   -- Strict Privilege Separation: Non-admins cannot alter their role, approval status, CGPA, ID, or email
-  IF NOT public.is_admin() THEN
+  -- When auth.uid() IS NULL, the operation is an internal migration or postgres superuser command
+  IF auth.uid() IS NOT NULL AND NOT public.is_admin() THEN
     IF (OLD.role IS DISTINCT FROM NEW.role) THEN
       RAISE EXCEPTION 'Unauthorized: Only institutional administrators can change account roles.';
     END IF;

@@ -3,6 +3,7 @@ import { UserProfile, UserRole } from '../types';
 import { DEMO_USERS } from '../lib/mockData';
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import { getAuthRedirectUrl } from '../lib/authRedirect';
+import { resolveAdminCandidateEmails } from '../lib/adminAuth';
 
 export interface AuthContextType {
   user: UserProfile;
@@ -212,23 +213,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [isLiveMode, currentUser]);
 
-  // Live Supabase SignIn
-  const signInWithPassword = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+  // Live Supabase SignIn (Accepts email or administrative username)
+  const signInWithPassword = async (emailOrUsername: string, password: string): Promise<{ success: boolean; error?: string }> => {
     setAuthError(null);
+    const identifier = (emailOrUsername || '').trim();
+
+    if (!identifier) {
+      return { success: false, error: 'Username or email is required.' };
+    }
+
+    if (!password) {
+      return { success: false, error: 'Password is required.' };
+    }
+
+    const candidateEmails = resolveAdminCandidateEmails(identifier);
 
     if (!isSupabaseConfigured || !supabase) {
-      // In demo mode, sign in with demo user
-      const matched = Object.values(DEMO_USERS).find(u => u.email.toLowerCase() === email.toLowerCase());
+      // In offline/demo mode, authenticate against demo personas
+      const matched = Object.values(DEMO_USERS).find(u => {
+        const userEmail = u.email.toLowerCase();
+        const inputId = identifier.toLowerCase();
+        if (userEmail === inputId) return true;
+        if (candidateEmails.some(c => c === userEmail)) return true;
+        if (u.role === 'admin' && (inputId === 'vibhusuvaliyacampusone' || inputId.startsWith('vibhusuvaliya'))) {
+          return true;
+        }
+        return false;
+      });
+
       if (matched) {
         setCurrentUser(matched);
         setDemoRole(matched.role);
         return { success: true };
       }
+
       // Or default to student with custom email
       const customStudent: UserProfile = {
         ...DEMO_USERS.student,
-        email,
-        name: email.split('@')[0],
+        email: candidateEmails[0] || identifier,
+        name: identifier.split('@')[0],
       };
       setCurrentUser(customStudent);
       setDemoRole('student');
@@ -236,22 +259,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      });
+      let lastError: string | undefined;
 
-      if (error) {
-        setAuthError(error.message);
-        return { success: false, error: error.message };
+      // Attempt authentication for candidate emails (e.g. username mapped to institutional emails)
+      for (const targetEmail of candidateEmails) {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: targetEmail,
+          password,
+        });
+
+        if (!error && data.user) {
+          const profile = await fetchProfile(data.user.id, data.user.email);
+          if (profile) setCurrentUser(profile);
+          return { success: true };
+        }
+
+        if (error) {
+          lastError = error.message;
+          // If error is not invalid credentials (e.g. rate limit or unconfirmed email), do not retry next candidate
+          if (error.message !== 'Invalid login credentials') {
+            break;
+          }
+        }
       }
 
-      if (data.user) {
-        const profile = await fetchProfile(data.user.id, data.user.email);
-        if (profile) setCurrentUser(profile);
-      }
-
-      return { success: true };
+      const finalError = lastError || 'Invalid login credentials';
+      setAuthError(finalError);
+      return { success: false, error: finalError };
     } catch (err: any) {
       const msg = err.message || 'Authentication failed. Please verify credentials.';
       setAuthError(msg);
