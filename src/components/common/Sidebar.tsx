@@ -91,6 +91,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { id: 'assignments', label: 'Assignments' },
         { id: 'materials', label: 'Notes & PYQ Papers' },
         { id: 'exams', label: 'Exam Center & Hall Ticket' },
+        { id: 'fees', label: 'Fees & Payment' },
         { id: 'calendar', label: 'Academic Calendar' }
       ]
     },

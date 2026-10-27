@@ -343,3 +343,15 @@ export interface FeedbackItem {
   status: 'Pending' | 'In Review' | 'Resolved';
   createdAt: string;
 }
+
+export interface StudentFeeRecord {
+  id: string;
+  studentId: string;
+  feeType: string;
+  authority: 'GTU' | 'GPA';
+  amount: number;
+  dueDate: string;
+  status: 'Pending' | 'Paid' | 'Overdue';
+  receiptNumber?: string;
+  paymentDate?: string;
+}

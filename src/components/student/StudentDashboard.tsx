@@ -7,6 +7,7 @@ import { AssignmentTracker } from './AssignmentTracker';
 import { StudyMaterialsHub } from './StudyMaterialsHub';
 import { ExamCenter } from './ExamCenter';
 import { AcademicCalendarView } from './AcademicCalendarView';
+import { FeesManagement } from './FeesManagement';
 import { 
   User, 
   Clock, 
@@ -15,7 +16,8 @@ import {
   FileText, 
   Download, 
   Calendar,
-  Sparkles 
+  Sparkles,
+  Receipt 
 } from 'lucide-react';
 
 interface StudentDashboardProps {
@@ -35,6 +37,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
     { id: 'assignments', label: 'Assignments', icon: FileText },
     { id: 'materials', label: 'Notes & PYQ Papers', icon: Download },
     { id: 'exams', label: 'Exam Center & Hall Ticket', icon: Award },
+    { id: 'fees', label: 'Fees & Payment', icon: Receipt },
     { id: 'calendar', label: 'Academic Calendar', icon: Calendar },
   ];
 
@@ -71,6 +74,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
       {currentSubTab === 'assignments' && <AssignmentTracker />}
       {currentSubTab === 'materials' && <StudyMaterialsHub />}
       {currentSubTab === 'exams' && <ExamCenter />}
+      {currentSubTab === 'fees' && <FeesManagement />}
       {currentSubTab === 'calendar' && <AcademicCalendarView />}
     </div>
   );

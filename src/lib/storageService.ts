@@ -18,7 +18,8 @@ import {
   DepartmentInfo,
   CampusFacility,
   UserProfile,
-  UserRole
+  UserRole,
+  StudentFeeRecord
 } from '../types';
 import { 
   INITIAL_NOTICES, 
@@ -2686,5 +2687,53 @@ export const updateFacultyPersonalProfile = async (
   };
   localStorage.setItem('campusone_user_profile', JSON.stringify(updated));
   return updated;
+};
+
+// ==============================================================================
+// 16. STUDENT FEES & PAYMENT SERVICE
+// ==============================================================================
+
+/**
+ * Retrieves genuine fee ledger and payment records for a student.
+ * If no live fee records exist in Supabase, returns an empty array to prevent
+ * fabricating unverified financial claims.
+ */
+export const getStudentFeeRecords = async (studentId: string): Promise<StudentFeeRecord[]> => {
+  if (!studentId || studentId === 'guest') {
+    return [];
+  }
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('fees')
+        .select('*')
+        .eq('student_id', studentId)
+        .order('due_date', { ascending: false });
+
+      if (error) {
+        // Table may not yet be defined in database schema
+        return [];
+      }
+
+      if (data && data.length > 0) {
+        return data.map((row: any) => ({
+          id: row.id,
+          studentId: row.student_id,
+          feeType: row.fee_type || 'Tuition Fee',
+          authority: row.authority || 'GPA',
+          amount: Number(row.amount || 0),
+          dueDate: row.due_date || '',
+          status: row.status || 'Pending',
+          receiptNumber: row.receipt_number || undefined,
+          paymentDate: row.payment_date || undefined,
+        }));
+      }
+    } catch {
+      return [];
+    }
+  }
+
+  return [];
 };
 

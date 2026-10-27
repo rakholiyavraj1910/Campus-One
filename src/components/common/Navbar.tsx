@@ -20,7 +20,8 @@ import {
   Database,
   Lock,
   AlertTriangle,
-  CheckCircle2
+  CheckCircle2,
+  Receipt
 } from 'lucide-react';
 import { CampusOneLogo } from './CampusOneLogo';
 import { UserAvatar } from './UserAvatar';
@@ -298,13 +299,22 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onNavigate, cur
                     )}
 
                     {role === 'student' && (
-                      <button
-                        onClick={() => onNavigate('student', 'timetable')}
-                        className="w-full text-left px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-navy-800 flex items-center space-x-2"
-                      >
-                        <Calendar className="w-4 h-4 text-blue-500" />
-                        <span>Class Timetable</span>
-                      </button>
+                      <>
+                        <button
+                          onClick={() => onNavigate('student', 'timetable')}
+                          className="w-full text-left px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-navy-800 flex items-center space-x-2"
+                        >
+                          <Calendar className="w-4 h-4 text-blue-500" />
+                          <span>Class Timetable</span>
+                        </button>
+                        <button
+                          onClick={() => onNavigate('student', 'fees')}
+                          className="w-full text-left px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-navy-800 flex items-center space-x-2 font-medium"
+                        >
+                          <Receipt className="w-4 h-4 text-teal-500" />
+                          <span>Fees &amp; Payment Options</span>
+                        </button>
+                      </>
                     )}
                   </div>
 

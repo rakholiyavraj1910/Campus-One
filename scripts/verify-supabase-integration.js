@@ -629,6 +629,27 @@ const updatedSidebarContent = fs.readFileSync(sidebarPath, 'utf8');
 assert(updatedSidebarContent.includes('UserAvatar'), 'Sidebar renders UserAvatar component');
 assert(updatedSidebarContent.includes("{ id: 'profile', label: 'Faculty Profile' }"), 'Sidebar provides Faculty Profile navigation item');
 
+console.log('\n18. Checking Fees Management & GTU/GPA Payment Options:');
+const feesManagementPath = path.join(rootDir, 'src', 'components', 'student', 'FeesManagement.tsx');
+assert(fs.existsSync(feesManagementPath), 'FeesManagement.tsx exists');
+const feesManagementContent = fs.readFileSync(feesManagementPath, 'utf8');
+assert(feesManagementContent.includes('Gujarat Technological University (GTU) Fees'), 'FeesManagement displays Option A: GTU Fees');
+assert(feesManagementContent.includes('Government Polytechnic Ahmedabad (GPA) Fees'), 'FeesManagement displays Option B: GPA Fees');
+assert(feesManagementContent.includes('https://student.gtu.ac.in/Login.aspx'), 'FeesManagement links to official GTU portal URL');
+assert(feesManagementContent.includes('target="_blank"'), 'GTU link opens in a new tab');
+assert(feesManagementContent.includes('rel="noopener noreferrer"'), 'GTU link secures target with rel noopener noreferrer');
+assert(feesManagementContent.includes('GPA fee payment details will be available soon'), 'FeesManagement displays GPA fee notice');
+
+const studentDashboardPath = path.join(rootDir, 'src', 'components', 'student', 'StudentDashboard.tsx');
+const studentDashboardContent = fs.readFileSync(studentDashboardPath, 'utf8');
+assert(studentDashboardContent.includes('FeesManagement'), 'StudentDashboard imports FeesManagement');
+assert(studentDashboardContent.includes("id: 'fees'"), 'StudentDashboard includes fees sub-tab');
+
+assert(updatedSidebarContent.includes("{ id: 'fees', label: 'Fees & Payment' }"), 'Sidebar includes Fees & Payment sub-item');
+
+const freshStorageContent = fs.readFileSync(storagePath, 'utf8');
+assert(freshStorageContent.includes('getStudentFeeRecords'), 'storageService exports getStudentFeeRecords');
+
 console.log('\n====================================================');
 console.log(`Results: ${passedTests}/${totalTests} tests passed (${Math.round((passedTests / totalTests) * 100)}%)`);
 console.log('====================================================\n');
