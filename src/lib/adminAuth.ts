@@ -2,48 +2,49 @@
  * CampusOne Dedicated Administrator Authentication Helper
  * Government Polytechnic Ahmedabad
  * 
- * Provides secure username normalization, validation, and candidate
- * email resolution for the dedicated admin login flow without exposing
+ * Provides secure, deterministic username normalization, validation, and canonical
+ * email resolution for institutional administrator authentication without exposing
  * credentials in client-side code.
  */
 
 export const DEFAULT_ADMIN_USERNAME = 'vibhusuvaliyacampusone';
 export const DEFAULT_ADMIN_EMAIL = 'vibhusuvaliyacampusone@gpahmedabad.ac.in';
-export const FALLBACK_ADMIN_EMAIL = 'vibhusuvaliyacampusone@campusone.edu';
 
 /**
- * Normalizes an administrative username or email address into candidate
- * emails for Supabase GoTrue authentication.
+ * Normalizes an administrative username or email address into a canonical
+ * email for Supabase GoTrue authentication.
  * 
- * Accepts the dedicated admin username ("vibhusuvaliyacampusone") exactly
- * as specified without forcing the user to type an institutional domain.
+ * Guarantees a single, deterministic institutional email resolution:
+ * - The dedicated admin username ("vibhusuvaliyacampusone") deterministically maps
+ *   exclusively to "vibhusuvaliyacampusone@gpahmedabad.ac.in".
+ * - Fully qualified email addresses are normalized and preserved.
+ * - Arbitrary usernames without '@' are NOT synthesized into fake emails, preventing
+ *   silent generation of multiple identities.
  */
 export function resolveAdminCandidateEmails(identifier: string): string[] {
-  const trimmed = identifier.trim().toLowerCase();
+  const trimmed = (identifier || '').trim().toLowerCase();
   if (!trimmed) return [];
 
-  // If already a fully qualified email address
-  if (trimmed.includes('@')) {
+  // Deterministically map dedicated admin username strictly to canonical institutional email
+  if (trimmed === DEFAULT_ADMIN_USERNAME.toLowerCase()) {
+    return [DEFAULT_ADMIN_EMAIL];
+  }
+
+  // If already a qualified email address with valid email format
+  if (trimmed.includes('@') && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
     return [trimmed];
   }
 
-  // If matches dedicated admin username
-  if (trimmed === DEFAULT_ADMIN_USERNAME.toLowerCase()) {
-    return [DEFAULT_ADMIN_EMAIL, FALLBACK_ADMIN_EMAIL];
-  }
-
-  // Institutional domain fallback for standard administrator usernames
-  return [
-    `${trimmed}@gpahmedabad.ac.in`,
-    `${trimmed}@campusone.edu`
-  ];
+  // Reject arbitrary non-matching usernames to avoid silent generation of unauthorized identities
+  return [];
 }
 
 /**
  * Validates admin sign-in inputs before submission.
  */
 export function validateAdminInput(identifier: string, password: string): { valid: boolean; error?: string } {
-  const hasIdentifier = Boolean(identifier && identifier.trim());
+  const trimmedId = (identifier || '').trim();
+  const hasIdentifier = Boolean(trimmedId);
   const hasPassword = Boolean(password && password.length > 0);
 
   if (!hasIdentifier && !hasPassword) {
@@ -63,7 +64,18 @@ export function validateAdminInput(identifier: string, password: string): { vali
   if (!hasPassword) {
     return {
       valid: false,
-      error: 'Please enter your master administrator password.'
+      error: 'Please enter your administrator password.'
+    };
+  }
+
+  const normalized = trimmedId.toLowerCase();
+  const isDedicatedAdmin = normalized === DEFAULT_ADMIN_USERNAME.toLowerCase();
+  const isValidEmail = normalized.includes('@') && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized);
+
+  if (!isDedicatedAdmin && !isValidEmail) {
+    return {
+      valid: false,
+      error: 'Unrecognized administrator username. Please enter the configured username ("vibhusuvaliyacampusone") or your registered institutional administrator email.'
     };
   }
 

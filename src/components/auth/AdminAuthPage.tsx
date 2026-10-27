@@ -72,7 +72,7 @@ export const AdminAuthPage: React.FC<AdminAuthPageProps> = ({
           setFormError('Invalid administrator credentials. Please check your username and master password.');
         } else if (rawErr.toLowerCase().includes('email not confirmed')) {
           setFormError(
-            'Administrator account email confirmation is pending in Supabase. Please confirm the account or execute the provisioning migration.'
+            'Administrator account email confirmation is pending in Supabase Auth. In Supabase Dashboard (Authentication > Users), confirm the user email, or check your institutional inbox.'
           );
         } else {
           setFormError(rawErr || 'Administrator authentication failed. Please verify credentials.');
@@ -129,7 +129,12 @@ export const AdminAuthPage: React.FC<AdminAuthPageProps> = ({
 
     setIsSubmitting(true);
     const candidateEmails = resolveAdminCandidateEmails(identifier.trim());
-    const targetEmail = candidateEmails[0] || identifier.trim();
+    if (candidateEmails.length === 0) {
+      setIsSubmitting(false);
+      setFormError('Unrecognized administrator identifier. Please enter the configured administrator username ("vibhusuvaliyacampusone") or your registered institutional administrator email.');
+      return;
+    }
+    const targetEmail = candidateEmails[0];
 
     const result = await resetPassword(targetEmail);
     setIsSubmitting(false);

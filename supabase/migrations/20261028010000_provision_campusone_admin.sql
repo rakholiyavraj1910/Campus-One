@@ -2,9 +2,16 @@
 -- CampusOne Administrator Account Provisioning Migration
 -- Migration: 20261028010000_provision_campusone_admin.sql
 -- Description:
---   Provisions the dedicated institutional administrator account for
+--   Configures institutional administrator role governance for
 --   username: vibhusuvaliyacampusone (email: vibhusuvaliyacampusone@gpahmedabad.ac.in)
---   Ensures email confirmation in auth.users and sets role = 'admin' in public.profiles.
+--   
+--   SECURITY NOTICE:
+--   - Passwords and auth credentials MUST NEVER be stored in migrations or version control.
+--   - Direct manual INSERTs into auth.users and auth.identities are omitted to prevent
+--     GoTrue identity corruption and schema divergence across Supabase versions.
+--   - Administrator authentication accounts must be registered via the Supabase Dashboard
+--     (Authentication > Users > "Add user" with Auto Confirm enabled) or via the Supabase
+--     Auth Admin API using a trusted server environment.
 -- ==============================================================================
 
 -- 1. Ensure prevent_role_escalation permits database-level migrations (auth.uid() IS NULL)
@@ -33,6 +40,38 @@ BEGIN
     IF (OLD.email IS DISTINCT FROM NEW.email) THEN
       RAISE EXCEPTION 'Unauthorized: Account email cannot be altered directly.';
     END IF;
+
+    -- Student Protected Academic Fields
+    IF (OLD.role = 'student'::public.user_role_type) THEN
+      IF (OLD.roll_number IS DISTINCT FROM NEW.roll_number) THEN
+        RAISE EXCEPTION 'Unauthorized: Student Roll Number is institutionally assigned.';
+      END IF;
+      IF (OLD.prn IS DISTINCT FROM NEW.prn) THEN
+        RAISE EXCEPTION 'Unauthorized: Student PRN is institutionally assigned.';
+      END IF;
+      IF (OLD.department IS DISTINCT FROM NEW.department) THEN
+        RAISE EXCEPTION 'Unauthorized: Academic Department assignment requires administrative approval.';
+      END IF;
+      IF (OLD.semester IS DISTINCT FROM NEW.semester) THEN
+        RAISE EXCEPTION 'Unauthorized: Semester progression is controlled through official academic promotion.';
+      END IF;
+      IF (OLD.division IS DISTINCT FROM NEW.division) THEN
+        RAISE EXCEPTION 'Unauthorized: Division allocation is managed by the department coordinator.';
+      END IF;
+      IF (OLD.academic_year IS DISTINCT FROM NEW.academic_year) THEN
+        RAISE EXCEPTION 'Unauthorized: Academic year cannot be self-edited.';
+      END IF;
+    END IF;
+
+    -- Faculty Protected Administrative Fields
+    IF (OLD.role = 'faculty'::public.user_role_type) THEN
+      IF (OLD.department IS DISTINCT FROM NEW.department) THEN
+        RAISE EXCEPTION 'Unauthorized: Faculty department transfers must be processed by administration.';
+      END IF;
+      IF (OLD.designation IS DISTINCT FROM NEW.designation) THEN
+        RAISE EXCEPTION 'Unauthorized: Academic designation is governed by institutional appointment.';
+      END IF;
+    END IF;
   END IF;
 
   NEW.updated_at := pg_catalog.now();
@@ -40,115 +79,131 @@ BEGIN
 END;
 $$;
 
--- 2. Provision or Confirm the Admin Account in auth.users and public.profiles
-DO $$
+DROP TRIGGER IF EXISTS trg_prevent_role_escalation ON public.profiles;
+CREATE TRIGGER trg_prevent_role_escalation
+  BEFORE UPDATE ON public.profiles
+  FOR EACH ROW EXECUTE FUNCTION public.prevent_role_escalation();
+
+-- 2. Update handle_new_user() to automatically assign admin clearance to the official admin email
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
 DECLARE
-  v_user_id UUID;
-  v_encrypted_pw TEXT;
+  assigned_role public.user_role_type;
+  assigned_admin_level TEXT;
+  assigned_name TEXT;
+  assigned_department TEXT;
+  assigned_designation TEXT;
 BEGIN
-  -- Generate bcrypt password hash for 'vibhu1411' using standard pgcrypto
-  v_encrypted_pw := extensions.crypt('vibhu1411', extensions.gen_salt('bf', 10));
-
-  -- Check if user already exists in auth.users
-  SELECT id INTO v_user_id
-  FROM auth.users
-  WHERE email IN ('vibhusuvaliyacampusone@gpahmedabad.ac.in', 'vibhusuvaliyacampusone@campusone.edu')
-  LIMIT 1;
-
-  IF v_user_id IS NULL THEN
-    v_user_id := gen_random_uuid();
-
-    INSERT INTO auth.users (
-      instance_id,
-      id,
-      aud,
-      role,
-      email,
-      encrypted_password,
-      email_confirmed_at,
-      confirmed_at,
-      raw_app_meta_data,
-      raw_user_meta_data,
-      created_at,
-      updated_at
-    ) VALUES (
-      '00000000-0000-00-00-00-00-00000000-0000',
-      v_user_id,
-      'authenticated',
-      'authenticated',
-      'vibhusuvaliyacampusone@gpahmedabad.ac.in',
-      v_encrypted_pw,
-      pg_catalog.now(),
-      pg_catalog.now(),
-      '{"provider": "email", "providers": ["email"]}'::jsonb,
-      '{"name": "Vibhu Suvaliya", "role": "admin"}'::jsonb,
-      pg_catalog.now(),
-      pg_catalog.now()
-    );
-
-    INSERT INTO auth.identities (
-      id,
-      user_id,
-      identity_data,
-      provider,
-      last_sign_in_at,
-      created_at,
-      updated_at
-    ) VALUES (
-      v_user_id,
-      v_user_id,
-      format('{"sub":"%s","email":"%s"}', v_user_id, 'vibhusuvaliyacampusone@gpahmedabad.ac.in')::jsonb,
-      'email',
-      pg_catalog.now(),
-      pg_catalog.now(),
-      pg_catalog.now()
-    );
+  -- Designate canonical institutional admin if registered via Supabase Auth
+  IF lower(NEW.email) = 'vibhusuvaliyacampusone@gpahmedabad.ac.in' THEN
+    assigned_role := 'admin'::public.user_role_type;
+    assigned_admin_level := 'Super Administrator';
+    assigned_name := COALESCE(NEW.raw_user_meta_data->>'name', 'Vibhu Suvaliya');
+    assigned_department := 'Central Administration';
+    assigned_designation := 'Chief Administrative Officer';
   ELSE
-    -- Confirm existing user and update password hash
-    UPDATE auth.users
-    SET 
-      encrypted_password = v_encrypted_pw,
-      email_confirmed_at = COALESCE(email_confirmed_at, pg_catalog.now()),
-      confirmed_at = COALESCE(confirmed_at, pg_catalog.now()),
-      raw_user_meta_data = jsonb_set(
-        COALESCE(raw_user_meta_data, '{}'::jsonb),
-        '{name}',
-        '"Vibhu Suvaliya"'
-      ),
-      updated_at = pg_catalog.now()
-    WHERE id = v_user_id;
+    -- Default security policy: Every other public signup receives ONLY the student role
+    assigned_role := 'student'::public.user_role_type;
+    assigned_admin_level := CASE 
+      WHEN NEW.raw_user_meta_data->>'admin_level' = 'pending_faculty' 
+        OR NEW.raw_user_meta_data->>'requested_role' = 'faculty'
+      THEN 'pending_faculty'
+      ELSE NULL 
+    END;
+    assigned_name := COALESCE(NEW.raw_user_meta_data->>'name', pg_catalog.split_part(NEW.email, '@', 1));
+    assigned_department := COALESCE(NEW.raw_user_meta_data->>'department', 'Computer Science & Engineering');
+    assigned_designation := NEW.raw_user_meta_data->>'designation';
   END IF;
 
-  -- 3. Upsert into public.profiles with administrative role and clearance
   INSERT INTO public.profiles (
     id,
     email,
     name,
     role,
     department,
+    roll_number,
+    prn,
+    semester,
+    division,
     designation,
+    cabin,
     admin_level,
     created_at,
     updated_at
-  ) VALUES (
-    v_user_id,
-    'vibhusuvaliyacampusone@gpahmedabad.ac.in',
-    'Vibhu Suvaliya',
-    'admin'::public.user_role_type,
-    'Central Administration',
-    'Chief Administrative Officer',
-    'Super Administrator',
+  )
+  VALUES (
+    NEW.id,
+    NEW.email,
+    assigned_name,
+    assigned_role,
+    assigned_department,
+    CASE WHEN assigned_role = 'student'::public.user_role_type THEN COALESCE(NEW.raw_user_meta_data->>'roll_number', 'CS-' || pg_catalog.floor(pg_catalog.random() * 9000 + 1000)::TEXT) ELSE NULL END,
+    CASE WHEN assigned_role = 'student'::public.user_role_type THEN COALESCE(NEW.raw_user_meta_data->>'prn', '2025' || pg_catalog.lpad(pg_catalog.floor(pg_catalog.random() * 100000000)::TEXT, 8, '0')) ELSE NULL END,
+    CASE WHEN assigned_role = 'student'::public.user_role_type THEN COALESCE((NEW.raw_user_meta_data->>'semester')::INT, 1) ELSE NULL END,
+    CASE WHEN assigned_role = 'student'::public.user_role_type THEN COALESCE(NEW.raw_user_meta_data->>'division', 'A') ELSE NULL END,
+    assigned_designation,
+    NEW.raw_user_meta_data->>'cabin',
+    assigned_admin_level,
     pg_catalog.now(),
     pg_catalog.now()
   )
   ON CONFLICT (id) DO UPDATE SET
-    role = 'admin'::public.user_role_type,
-    admin_level = 'Super Administrator',
-    name = 'Vibhu Suvaliya',
-    designation = 'Chief Administrative Officer',
-    department = 'Central Administration',
-    updated_at = pg_catalog.now();
+    role = EXCLUDED.role,
+    admin_level = EXCLUDED.admin_level,
+    name = COALESCE(public.profiles.name, EXCLUDED.name),
+    department = COALESCE(public.profiles.department, EXCLUDED.department),
+    designation = COALESCE(public.profiles.designation, EXCLUDED.designation),
+    updated_at = pg_catalog.now()
+  WHERE lower(public.profiles.email) = 'vibhusuvaliyacampusone@gpahmedabad.ac.in';
 
+  RETURN NEW;
+END;
+$$;
+
+-- 3. Idempotently promote the admin account if already present in auth.users
+DO $$
+DECLARE
+  v_admin_id UUID;
+BEGIN
+  SELECT id INTO v_admin_id
+  FROM auth.users
+  WHERE lower(email) = 'vibhusuvaliyacampusone@gpahmedabad.ac.in'
+  LIMIT 1;
+
+  IF v_admin_id IS NOT NULL THEN
+    INSERT INTO public.profiles (
+      id,
+      email,
+      name,
+      role,
+      department,
+      designation,
+      admin_level,
+      created_at,
+      updated_at
+    ) VALUES (
+      v_admin_id,
+      'vibhusuvaliyacampusone@gpahmedabad.ac.in',
+      'Vibhu Suvaliya',
+      'admin'::public.user_role_type,
+      'Central Administration',
+      'Chief Administrative Officer',
+      'Super Administrator',
+      pg_catalog.now(),
+      pg_catalog.now()
+    )
+    ON CONFLICT (id) DO UPDATE SET
+      role = 'admin'::public.user_role_type,
+      admin_level = 'Super Administrator',
+      name = 'Vibhu Suvaliya',
+      designation = 'Chief Administrative Officer',
+      department = 'Central Administration',
+      updated_at = pg_catalog.now();
+  END IF;
 END $$;
 
 -- 4. Reload PostgREST schema cache

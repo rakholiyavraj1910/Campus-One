@@ -430,11 +430,32 @@ SECURITY DEFINER
 SET search_path = ''
 AS $$
 DECLARE
-  assigned_role public.user_role_type := 'student'::public.user_role_type;
+  assigned_role public.user_role_type;
+  assigned_admin_level TEXT;
+  assigned_name TEXT;
+  assigned_department TEXT;
+  assigned_designation TEXT;
 BEGIN
-  -- Strict security: Every public signup receives ONLY the student role.
-  -- Faculty requests remain student with admin_level = 'pending_faculty' until approved.
-  assigned_role := 'student'::public.user_role_type;
+  -- Designate canonical institutional admin if registered via Supabase Auth
+  IF lower(NEW.email) = 'vibhusuvaliyacampusone@gpahmedabad.ac.in' THEN
+    assigned_role := 'admin'::public.user_role_type;
+    assigned_admin_level := 'Super Administrator';
+    assigned_name := COALESCE(NEW.raw_user_meta_data->>'name', 'Vibhu Suvaliya');
+    assigned_department := 'Central Administration';
+    assigned_designation := 'Chief Administrative Officer';
+  ELSE
+    -- Default security policy: Every other public signup receives ONLY the student role
+    assigned_role := 'student'::public.user_role_type;
+    assigned_admin_level := CASE 
+      WHEN NEW.raw_user_meta_data->>'admin_level' = 'pending_faculty' 
+        OR NEW.raw_user_meta_data->>'requested_role' = 'faculty'
+      THEN 'pending_faculty'
+      ELSE NULL 
+    END;
+    assigned_name := COALESCE(NEW.raw_user_meta_data->>'name', pg_catalog.split_part(NEW.email, '@', 1));
+    assigned_department := COALESCE(NEW.raw_user_meta_data->>'department', 'Computer Science & Engineering');
+    assigned_designation := NEW.raw_user_meta_data->>'designation';
+  END IF;
 
   INSERT INTO public.profiles (
     id,
@@ -455,25 +476,27 @@ BEGIN
   VALUES (
     NEW.id,
     NEW.email,
-    COALESCE(NEW.raw_user_meta_data->>'name', pg_catalog.split_part(NEW.email, '@', 1)),
+    assigned_name,
     assigned_role,
-    COALESCE(NEW.raw_user_meta_data->>'department', 'Architecture'),
-    COALESCE(NEW.raw_user_meta_data->>'roll_number', 'CS-' || pg_catalog.floor(pg_catalog.random() * 9000 + 1000)::TEXT),
-    COALESCE(NEW.raw_user_meta_data->>'prn', '2025' || pg_catalog.lpad(pg_catalog.floor(pg_catalog.random() * 100000000)::TEXT, 8, '0')),
-    COALESCE((NEW.raw_user_meta_data->>'semester')::INT, 1),
-    COALESCE(NEW.raw_user_meta_data->>'division', 'A'),
-    NEW.raw_user_meta_data->>'designation',
+    assigned_department,
+    CASE WHEN assigned_role = 'student'::public.user_role_type THEN COALESCE(NEW.raw_user_meta_data->>'roll_number', 'CS-' || pg_catalog.floor(pg_catalog.random() * 9000 + 1000)::TEXT) ELSE NULL END,
+    CASE WHEN assigned_role = 'student'::public.user_role_type THEN COALESCE(NEW.raw_user_meta_data->>'prn', '2025' || pg_catalog.lpad(pg_catalog.floor(pg_catalog.random() * 100000000)::TEXT, 8, '0')) ELSE NULL END,
+    CASE WHEN assigned_role = 'student'::public.user_role_type THEN COALESCE((NEW.raw_user_meta_data->>'semester')::INT, 1) ELSE NULL END,
+    CASE WHEN assigned_role = 'student'::public.user_role_type THEN COALESCE(NEW.raw_user_meta_data->>'division', 'A') ELSE NULL END,
+    assigned_designation,
     NEW.raw_user_meta_data->>'cabin',
-    CASE 
-      WHEN NEW.raw_user_meta_data->>'admin_level' = 'pending_faculty' 
-        OR NEW.raw_user_meta_data->>'requested_role' = 'faculty'
-      THEN 'pending_faculty'
-      ELSE NULL 
-    END,
+    assigned_admin_level,
     pg_catalog.now(),
     pg_catalog.now()
   )
-  ON CONFLICT (id) DO NOTHING;
+  ON CONFLICT (id) DO UPDATE SET
+    role = EXCLUDED.role,
+    admin_level = EXCLUDED.admin_level,
+    name = COALESCE(public.profiles.name, EXCLUDED.name),
+    department = COALESCE(public.profiles.department, EXCLUDED.department),
+    designation = COALESCE(public.profiles.designation, EXCLUDED.designation),
+    updated_at = pg_catalog.now()
+  WHERE lower(public.profiles.email) = 'vibhusuvaliyacampusone@gpahmedabad.ac.in';
 
   RETURN NEW;
 END;

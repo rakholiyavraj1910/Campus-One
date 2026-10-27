@@ -56,6 +56,7 @@ CREATE POLICY "avatars_user_delete" ON storage.objects FOR DELETE
 -- 3. Hardened Role & Profile Field Protection Trigger
 -- Enforces that students and faculty can update permitted personal information,
 -- but CANNOT modify institution-controlled or privilege-defining fields.
+-- Permits database-level migrations and administrative commands when auth.uid() IS NULL.
 CREATE OR REPLACE FUNCTION public.prevent_role_escalation()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -64,7 +65,7 @@ SET search_path = ''
 AS $$
 BEGIN
   -- Strict Privilege Separation: Non-admins cannot alter role or system flags
-  IF NOT public.is_admin() THEN
+  IF auth.uid() IS NOT NULL AND NOT public.is_admin() THEN
     -- Immutable core identity fields
     IF (OLD.id IS DISTINCT FROM NEW.id) THEN
       RAISE EXCEPTION 'Unauthorized: Account ID cannot be altered.';

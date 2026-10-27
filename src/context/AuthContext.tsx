@@ -260,9 +260,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
+      if (candidateEmails.length === 0) {
+        const msg = 'Please enter a valid email address or registered administrator username.';
+        setAuthError(msg);
+        return { success: false, error: msg };
+      }
+
       let lastError: string | undefined;
 
-      // Attempt authentication for candidate emails (e.g. username mapped to institutional emails)
+      // Attempt authentication for canonical candidate email
       for (const targetEmail of candidateEmails) {
         const { data, error } = await supabase.auth.signInWithPassword({
           email: targetEmail,

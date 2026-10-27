@@ -478,21 +478,29 @@ const adminAuthLibPath = path.join(rootDir, 'src', 'lib', 'adminAuth.ts');
 assert(fs.existsSync(adminAuthLibPath), 'src/lib/adminAuth.ts exists');
 const adminAuthLibContent = fs.readFileSync(adminAuthLibPath, 'utf8');
 assert(adminAuthLibContent.includes('vibhusuvaliyacampusone'), 'adminAuth.ts defines DEFAULT_ADMIN_USERNAME = vibhusuvaliyacampusone');
+assert(adminAuthLibContent.includes('vibhusuvaliyacampusone@gpahmedabad.ac.in'), 'adminAuth.ts defines DEFAULT_ADMIN_EMAIL canonical address');
+assert(!adminAuthLibContent.includes('FALLBACK_ADMIN_EMAIL'), 'adminAuth.ts does not define fallback non-canonical admin emails');
+assert(!adminAuthLibContent.includes('@campusone.edu'), 'adminAuth.ts enforces single canonical institutional domain');
 assert(adminAuthLibContent.includes('resolveAdminCandidateEmails'), 'adminAuth.ts exports resolveAdminCandidateEmails');
 assert(adminAuthLibContent.includes('validateAdminInput'), 'adminAuth.ts exports validateAdminInput');
 
-// Ensure password is NEVER hardcoded in client source files
-const srcFiles = [
-  path.join(rootDir, 'src', 'components', 'auth', 'AdminAuthPage.tsx'),
-  path.join(rootDir, 'src', 'components', 'auth', 'LoginPage.tsx'),
-  path.join(rootDir, 'src', 'context', 'AuthContext.tsx'),
-  path.join(rootDir, 'src', 'lib', 'adminAuth.ts'),
-  path.join(rootDir, 'src', 'lib', 'mockData.ts')
-];
-for (const sf of srcFiles) {
-  const content = fs.readFileSync(sf, 'utf8');
-  assert(!content.includes('vibhu1411'), `No hardcoded admin password in ${path.relative(rootDir, sf)}`);
+// Ensure password is NEVER hardcoded anywhere in src or supabase directories
+function scanDirForSecret(dir, secret) {
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      if (entry.name !== 'node_modules' && entry.name !== '.git' && entry.name !== 'dist') {
+        scanDirForSecret(fullPath, secret);
+      }
+    } else if (entry.isFile() && (entry.name.endsWith('.ts') || entry.name.endsWith('.tsx') || entry.name.endsWith('.sql') || entry.name.endsWith('.js'))) {
+      const content = fs.readFileSync(fullPath, 'utf8');
+      assert(!content.includes(secret), `No hardcoded secret in ${path.relative(rootDir, fullPath)}`);
+    }
+  }
 }
+scanDirForSecret(path.join(rootDir, 'src'), 'vibhu1411');
+scanDirForSecret(path.join(rootDir, 'supabase'), 'vibhu1411');
 
 const adminAuthPagePath = path.join(rootDir, 'src', 'components', 'auth', 'AdminAuthPage.tsx');
 const adminAuthPageContent = fs.readFileSync(adminAuthPagePath, 'utf8');
@@ -513,7 +521,11 @@ assert(fs.existsSync(migrationAdminPath), '20261028010000_provision_campusone_ad
 const migrationAdminContent = fs.readFileSync(migrationAdminPath, 'utf8');
 assert(migrationAdminContent.includes('vibhusuvaliyacampusone@gpahmedabad.ac.in'), 'Admin migration provisions vibhusuvaliyacampusone@gpahmedabad.ac.in');
 assert(migrationAdminContent.includes("'admin'::public.user_role_type"), 'Admin migration strictly assigns admin user_role_type');
-assert(migrationAdminContent.includes('auth.uid() IS NOT NULL'), 'Admin migration updates prevent_role_escalation for database operations');
+assert(migrationAdminContent.includes('auth.uid() IS NOT NULL AND NOT public.is_admin()'), 'Admin migration updates prevent_role_escalation for database operations');
+assert(!migrationAdminContent.includes('INSERT INTO auth.users'), 'Admin migration omits direct manual auth.users INSERTs');
+assert(!migrationAdminContent.includes('INSERT INTO auth.identities'), 'Admin migration omits direct manual auth.identities INSERTs');
+assert(!migrationAdminContent.includes('extensions.crypt'), 'Admin migration does not store encrypted passwords in SQL');
+assert(migrationAdminContent.includes('handle_new_user()'), 'Admin migration updates handle_new_user for automatic admin role assignment');
 
 const freshMockDataContent = fs.readFileSync(mockDataPath, 'utf8');
 assert(freshMockDataContent.includes('vibhusuvaliyacampusone@gpahmedabad.ac.in'), 'DEMO_USERS.admin configured with vibhusuvaliyacampusone@gpahmedabad.ac.in');
@@ -584,6 +596,7 @@ assert(profileMigrationContent.includes('avatars_user_update'), 'Migration defin
 assert(profileMigrationContent.includes('avatars_user_delete'), 'Migration defines avatars_user_delete policy');
 assert(profileMigrationContent.includes('OLD.role = \'student\'::public.user_role_type'), 'Migration protects student institutional academic fields');
 assert(profileMigrationContent.includes('OLD.role = \'faculty\'::public.user_role_type'), 'Migration protects faculty appointment fields');
+assert(profileMigrationContent.includes('auth.uid() IS NOT NULL AND NOT public.is_admin()'), 'Migration preserves database operations in prevent_role_escalation');
 
 const userAvatarPath = path.join(rootDir, 'src', 'components', 'common', 'UserAvatar.tsx');
 assert(fs.existsSync(userAvatarPath), 'UserAvatar.tsx exists');
