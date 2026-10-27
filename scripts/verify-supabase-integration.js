@@ -518,6 +518,61 @@ assert(migrationAdminContent.includes('auth.uid() IS NOT NULL'), 'Admin migratio
 const freshMockDataContent = fs.readFileSync(mockDataPath, 'utf8');
 assert(freshMockDataContent.includes('vibhusuvaliyacampusone@gpahmedabad.ac.in'), 'DEMO_USERS.admin configured with vibhusuvaliyacampusone@gpahmedabad.ac.in');
 
+console.log('\n16. Checking Super Admin Dashboard & Governance Architecture:');
+const confirmationModalPath = path.join(rootDir, 'src', 'components', 'admin', 'ConfirmationModal.tsx');
+assert(fs.existsSync(confirmationModalPath), 'ConfirmationModal.tsx exists');
+const confirmationModalContent = fs.readFileSync(confirmationModalPath, 'utf8');
+assert(confirmationModalContent.includes('onConfirm') && confirmationModalContent.includes('onCancel'), 'ConfirmationModal supports onConfirm and onCancel');
+
+const manageDepartmentsPath = path.join(rootDir, 'src', 'components', 'admin', 'ManageDepartments.tsx');
+assert(fs.existsSync(manageDepartmentsPath), 'ManageDepartments.tsx exists');
+const manageDepartmentsContent = fs.readFileSync(manageDepartmentsPath, 'utf8');
+assert(manageDepartmentsContent.includes('COLLEGE_DEPARTMENTS'), 'ManageDepartments references official COLLEGE_DEPARTMENTS');
+assert(manageDepartmentsContent.includes('onFilterStudents'), 'ManageDepartments provides student filtering link');
+assert(manageDepartmentsContent.includes('onFilterFaculty'), 'ManageDepartments provides faculty filtering link');
+
+const manageFacilitiesPath = path.join(rootDir, 'src', 'components', 'admin', 'ManageFacilities.tsx');
+assert(fs.existsSync(manageFacilitiesPath), 'ManageFacilities.tsx exists');
+const manageFacilitiesContent = fs.readFileSync(manageFacilitiesPath, 'utf8');
+assert(manageFacilitiesContent.includes('getFacilities'), 'ManageFacilities fetches facilities');
+assert(manageFacilitiesContent.includes('addFacility'), 'ManageFacilities supports adding facility');
+assert(manageFacilitiesContent.includes('deleteFacility'), 'ManageFacilities supports deleting facility');
+
+const databaseOverviewPath = path.join(rootDir, 'src', 'components', 'admin', 'DatabaseOverview.tsx');
+assert(fs.existsSync(databaseOverviewPath), 'DatabaseOverview.tsx exists');
+const databaseOverviewContent = fs.readFileSync(databaseOverviewPath, 'utf8');
+assert(databaseOverviewContent.includes('getDatabaseOverviewStats'), 'DatabaseOverview reads safe telemetry stats');
+assert(!databaseOverviewContent.includes('service_role'), 'DatabaseOverview NEVER references service_role');
+assert(!databaseOverviewContent.includes('DROP TABLE'), 'DatabaseOverview does not contain arbitrary SQL consoles');
+
+assert(fs.existsSync(manageStudentsPath), 'ManageStudents.tsx exists');
+const superAdminManageStudentsContent = fs.readFileSync(manageStudentsPath, 'utf8');
+assert(superAdminManageStudentsContent.includes('updateStudentProfile'), 'ManageStudents supports updating student profiles');
+assert(superAdminManageStudentsContent.includes('updateUserStatus'), 'ManageStudents supports account suspension toggle');
+assert(superAdminManageStudentsContent.includes('pageSize = 10'), 'ManageStudents implements 10-per-page pagination');
+
+const manageFacultyPath = path.join(rootDir, 'src', 'components', 'admin', 'ManageFaculty.tsx');
+assert(fs.existsSync(manageFacultyPath), 'ManageFaculty.tsx exists');
+const manageFacultyContent = fs.readFileSync(manageFacultyPath, 'utf8');
+assert(manageFacultyContent.includes('addFacultyMember'), 'ManageFaculty supports adding faculty');
+assert(manageFacultyContent.includes('updateFacultyMember'), 'ManageFaculty supports updating faculty');
+assert(manageFacultyContent.includes('deleteFacultyMember'), 'ManageFaculty supports deactivating faculty');
+
+const updatedAdminDashboardContent = fs.readFileSync(adminDashboardPath, 'utf8');
+assert(updatedAdminDashboardContent.includes('ManageDepartments'), 'AdminDashboard imports ManageDepartments');
+assert(updatedAdminDashboardContent.includes('ManageFacilities'), 'AdminDashboard imports ManageFacilities');
+assert(updatedAdminDashboardContent.includes('DatabaseOverview'), 'AdminDashboard imports DatabaseOverview');
+assert(updatedAdminDashboardContent.includes('studentDeptFilter'), 'AdminDashboard coordinates student department filter');
+assert(updatedAdminDashboardContent.includes('facultyDeptFilter'), 'AdminDashboard coordinates faculty department filter');
+
+const updatedStorageContent = fs.readFileSync(storagePath, 'utf8');
+assert(updatedStorageContent.includes('getSuperAdminDashboardMetrics'), 'storageService exports getSuperAdminDashboardMetrics');
+assert(updatedStorageContent.includes('getDatabaseOverviewStats'), 'storageService exports getDatabaseOverviewStats');
+assert(updatedStorageContent.includes('getFacilities'), 'storageService exports getFacilities');
+assert(updatedStorageContent.includes('addFacility'), 'storageService exports addFacility');
+assert(updatedStorageContent.includes('updateFacility'), 'storageService exports updateFacility');
+assert(updatedStorageContent.includes('deleteFacility'), 'storageService exports deleteFacility');
+
 console.log('\n====================================================');
 console.log(`Results: ${passedTests}/${totalTests} tests passed (${Math.round((passedTests / totalTests) * 100)}%)`);
 console.log('====================================================\n');

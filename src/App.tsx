@@ -404,6 +404,7 @@ const MainLayout: React.FC = () => {
               onRefreshNotices={loadData}
               onRefreshEvents={loadData}
               onNavigate={handleNavigate}
+              initialSubTab={currentSubTab}
             />
           )}
 
@@ -416,6 +417,7 @@ const MainLayout: React.FC = () => {
                 onRefreshNotices={loadData}
                 onRefreshEvents={loadData}
                 onNavigate={handleNavigate}
+                initialSubTab={currentSubTab}
               />
             ) : role === 'faculty' ? (
               <FacultyPortal />

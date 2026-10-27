@@ -16,6 +16,7 @@ import {
   AuditLog,
   FeedbackItem,
   DepartmentInfo,
+  CampusFacility,
   UserProfile,
   UserRole
 } from '../types';
@@ -33,7 +34,8 @@ import {
   INITIAL_ATTENDANCE_SESSIONS,
   INITIAL_AUDIT_LOGS,
   INITIAL_FEEDBACK,
-  INITIAL_DEPARTMENTS
+  INITIAL_DEPARTMENTS,
+  INITIAL_FACILITIES
 } from './mockData';
 import { supabase, isSupabaseConfigured } from './supabaseClient';
 
@@ -54,6 +56,7 @@ const STORAGE_KEYS = {
   AUDIT_LOGS: 'campusone_audit_logs_v1',
   FEEDBACK: 'campusone_feedback_v1',
   DEPARTMENTS: 'campusone_departments_v1',
+  FACILITIES: 'campusone_facilities_v1',
 };
 
 // Safe LocalStorage helpers for Demo Mode
@@ -198,6 +201,19 @@ const mapDepartmentFromDb = (row: any): DepartmentInfo => ({
   programsOffered: row.programs_offered || [],
   labs: row.labs || [],
   bannerImage: row.banner_image || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80',
+});
+
+const mapFacilityFromDb = (row: any): CampusFacility => ({
+  id: row.id,
+  name: row.name,
+  category: row.category || 'Academic',
+  location: row.location || '',
+  block: row.block || '',
+  timings: row.timings || '8:00 AM - 6:00 PM',
+  description: row.description || '',
+  features: row.features || [],
+  image: row.image || 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=1200&q=80',
+  inCharge: row.in_charge || 'Campus Administration',
 });
 
 export const mapProfileFromDb = (row: any): UserProfile => ({
@@ -1722,4 +1738,594 @@ export const resetToInitialDemoData = (): void => {
   saveToStorage(STORAGE_KEYS.ATTENDANCE_SESSIONS, INITIAL_ATTENDANCE_SESSIONS);
   saveToStorage(STORAGE_KEYS.AUDIT_LOGS, INITIAL_AUDIT_LOGS);
   saveToStorage(STORAGE_KEYS.FEEDBACK, INITIAL_FEEDBACK);
+  saveToStorage(STORAGE_KEYS.FACILITIES, INITIAL_FACILITIES);
 };
+
+// ==============================================================================
+// 10. CAMPUS FACILITIES CRUD (Super Admin & Public Directory)
+// ==============================================================================
+
+export const getFacilities = async (): Promise<CampusFacility[]> => {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('facilities')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (!error && data && data.length > 0) {
+        return data.map(mapFacilityFromDb);
+      }
+
+      if (error) {
+        console.warn(`[CampusOne Supabase Facilities Fetch] Status ${error.code}: ${error.message}`);
+      }
+    } catch (e) {
+      console.warn('[CampusOne Supabase Facilities Fetch Failure]:', e);
+    }
+  }
+
+  return loadFromStorage<CampusFacility[]>(STORAGE_KEYS.FACILITIES, INITIAL_FACILITIES);
+};
+
+export const addFacility = async (
+  facility: Omit<CampusFacility, 'id'>, 
+  actorName: string = 'Super Administrator'
+): Promise<CampusFacility> => {
+  assertCanMutateContent();
+
+  const newId = 'fac-' + Date.now();
+  const created: CampusFacility = { ...facility, id: newId };
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('facilities')
+        .insert([{
+          name: facility.name,
+          category: facility.category,
+          location: facility.location,
+          block: facility.block,
+          timings: facility.timings,
+          description: facility.description,
+          features: facility.features,
+          image: facility.image,
+          in_charge: facility.inCharge,
+        }])
+        .select()
+        .single();
+
+      if (!error && data) {
+        const item = mapFacilityFromDb(data);
+        await addAuditLog(
+          actorName,
+          'admin',
+          'CREATE_FACILITY',
+          'facilities',
+          item.id,
+          `Added campus facility "${item.name}" in Block ${item.block}.`
+        );
+        return item;
+      }
+    } catch (e) {
+      console.warn('Supabase addFacility exception:', e);
+    }
+  }
+
+  // Demo Fallback
+  const list = loadFromStorage<CampusFacility[]>(STORAGE_KEYS.FACILITIES, INITIAL_FACILITIES);
+  saveToStorage(STORAGE_KEYS.FACILITIES, [created, ...list]);
+  await addAuditLog(actorName, 'admin', 'CREATE_FACILITY', 'facilities', newId, `Added facility "${facility.name}".`);
+  return created;
+};
+
+export const updateFacility = async (
+  facility: CampusFacility,
+  actorName: string = 'Super Administrator'
+): Promise<CampusFacility> => {
+  assertCanMutateContent();
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('facilities')
+        .update({
+          name: facility.name,
+          category: facility.category,
+          location: facility.location,
+          block: facility.block,
+          timings: facility.timings,
+          description: facility.description,
+          features: facility.features,
+          image: facility.image,
+          in_charge: facility.inCharge,
+        })
+        .eq('id', facility.id)
+        .select()
+        .single();
+
+      if (!error && data) {
+        const item = mapFacilityFromDb(data);
+        await addAuditLog(
+          actorName,
+          'admin',
+          'UPDATE_FACILITY',
+          'facilities',
+          facility.id,
+          `Updated campus facility specifications for "${facility.name}".`
+        );
+        return item;
+      }
+    } catch (e) {
+      console.warn('Supabase updateFacility exception:', e);
+    }
+  }
+
+  // Demo Fallback
+  const list = loadFromStorage<CampusFacility[]>(STORAGE_KEYS.FACILITIES, INITIAL_FACILITIES);
+  const updated = list.map(f => f.id === facility.id ? facility : f);
+  saveToStorage(STORAGE_KEYS.FACILITIES, updated);
+  await addAuditLog(actorName, 'admin', 'UPDATE_FACILITY', 'facilities', facility.id, `Updated facility "${facility.name}".`);
+  return facility;
+};
+
+export const deleteFacility = async (
+  id: string,
+  facilityName: string = 'Facility',
+  actorName: string = 'Super Administrator'
+): Promise<boolean> => {
+  assertCanMutateContent();
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { error } = await supabase
+        .from('facilities')
+        .delete()
+        .eq('id', id);
+
+      if (!error) {
+        await addAuditLog(
+          actorName,
+          'admin',
+          'DELETE_FACILITY',
+          'facilities',
+          id,
+          `Decommissioned campus facility "${facilityName}".`
+        );
+        return true;
+      }
+    } catch (e) {
+      console.warn('Supabase deleteFacility exception:', e);
+    }
+  }
+
+  // Demo Fallback
+  const list = loadFromStorage<CampusFacility[]>(STORAGE_KEYS.FACILITIES, INITIAL_FACILITIES);
+  saveToStorage(STORAGE_KEYS.FACILITIES, list.filter(f => f.id !== id));
+  await addAuditLog(actorName, 'admin', 'DELETE_FACILITY', 'facilities', id, `Decommissioned facility "${facilityName}".`);
+  return true;
+};
+
+// ==============================================================================
+// 11. DEPARTMENT UPDATES & MUTATIONS
+// ==============================================================================
+
+export const updateDepartment = async (
+  dept: DepartmentInfo,
+  actorName: string = 'Super Administrator'
+): Promise<DepartmentInfo> => {
+  assertCanMutateContent();
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('departments')
+        .update({
+          name: dept.name,
+          code: dept.code,
+          hod_name: dept.hodName,
+          hod_email: dept.hodEmail,
+          established_year: dept.establishedYear,
+          description: dept.description,
+          vision: dept.vision,
+          programs_offered: dept.programsOffered,
+          labs: dept.labs,
+          banner_image: dept.bannerImage,
+        })
+        .eq('id', dept.id)
+        .select()
+        .single();
+
+      if (!error && data) {
+        const item = mapDepartmentFromDb(data);
+        await addAuditLog(
+          actorName,
+          'admin',
+          'UPDATE_DEPARTMENT',
+          'departments',
+          dept.id,
+          `Updated academic department records for "${dept.name}" (${dept.code}).`
+        );
+        return item;
+      }
+    } catch (e) {
+      console.warn('Supabase updateDepartment exception:', e);
+    }
+  }
+
+  // Demo Fallback
+  const list = loadFromStorage<DepartmentInfo[]>(STORAGE_KEYS.DEPARTMENTS, INITIAL_DEPARTMENTS);
+  const updated = list.map(d => d.id === dept.id || d.code === dept.code ? dept : d);
+  saveToStorage(STORAGE_KEYS.DEPARTMENTS, updated);
+  await addAuditLog(actorName, 'admin', 'UPDATE_DEPARTMENT', 'departments', dept.id, `Updated department "${dept.name}".`);
+  return dept;
+};
+
+// ==============================================================================
+// 12. STUDENT PROFILE & ACCESS MODIFICATIONS
+// ==============================================================================
+
+export const updateStudentProfile = async (
+  updates: Partial<UserProfile> & { id: string },
+  actorName: string = 'Super Administrator'
+): Promise<UserProfile | null> => {
+  assertCanMutateContent();
+
+  if (isSupabaseConfigured && supabase) {
+    const payload: Record<string, any> = {
+      updated_at: new Date().toISOString()
+    };
+    if (updates.name !== undefined) payload.name = updates.name.trim();
+    if (updates.department !== undefined) payload.department = updates.department;
+    if (updates.rollNumber !== undefined) payload.roll_number = updates.rollNumber;
+    if (updates.prn !== undefined) payload.prn = updates.prn;
+    if (updates.semester !== undefined) payload.semester = Number(updates.semester);
+    if (updates.division !== undefined) payload.division = updates.division;
+    if (updates.cgpa !== undefined) payload.cgpa = Number(updates.cgpa);
+    if (updates.phone !== undefined) payload.phone = updates.phone;
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update(payload)
+        .eq('id', updates.id)
+        .select()
+        .single();
+
+      if (!error && data) {
+        const profile = mapProfileFromDb(data);
+        await addAuditLog(
+          actorName,
+          'admin',
+          'UPDATE_STUDENT_PROFILE',
+          'profiles',
+          updates.id,
+          `Modified student profile record for "${profile.name}" (${profile.rollNumber || profile.email}).`
+        );
+        return profile;
+      }
+      if (error) {
+        throw new Error(error.message);
+      }
+    } catch (err: any) {
+      console.error('updateStudentProfile error:', err);
+      throw err;
+    }
+  }
+
+  return null;
+};
+
+export const updateUserStatus = async (
+  userId: string,
+  status: 'active' | 'suspended',
+  actorName: string = 'Super Administrator'
+): Promise<void> => {
+  assertCanMutateContent();
+
+  if (isSupabaseConfigured && supabase) {
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        admin_level: status === 'suspended' ? 'suspended' : null,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', userId);
+
+    if (error) throw new Error(`Failed to update account status: ${error.message}`);
+
+    await addAuditLog(
+      actorName,
+      'admin',
+      status === 'suspended' ? 'SUSPEND_USER_ACCESS' : 'RESTORE_USER_ACCESS',
+      'profiles',
+      userId,
+      `${status === 'suspended' ? 'Suspended' : 'Restored'} portal authorization for account.`
+    );
+  }
+};
+
+// ==============================================================================
+// 13. LIVE SUPER ADMIN DASHBOARD METRICS AGGREGATION
+// ==============================================================================
+
+export interface SuperAdminMetrics {
+  totalStudents: number;
+  totalFaculty: number;
+  totalDepartments: number;
+  pendingFacultyRequests: number;
+  totalNotices: number;
+  upcomingEvents: number;
+  studyMaterials: number;
+  campusFacilities: number;
+  recentStudents: UserProfile[];
+  recentFaculty: FacultyMember[];
+  recentAuditLogs: AuditLog[];
+  systemWarnings: string[];
+}
+
+export const getSuperAdminDashboardMetrics = async (): Promise<SuperAdminMetrics> => {
+  const warnings: string[] = [];
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      // Parallel exact count queries
+      const [
+        studentsRes,
+        facultyDirRes,
+        deptRes,
+        pendingRes,
+        noticesRes,
+        eventsRes,
+        materialsRes,
+        facilitiesRes,
+        recentStudentsRes,
+        recentFacultyRes,
+        recentLogsRes,
+      ] = await Promise.all([
+        supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'student'),
+        supabase.from('faculty_directory').select('*', { count: 'exact', head: true }),
+        supabase.from('departments').select('*', { count: 'exact', head: true }),
+        supabase.from('profiles').select('*', { count: 'exact', head: true }).or('admin_level.eq.pending_faculty,role.eq.pending'),
+        supabase.from('notices').select('*', { count: 'exact', head: true }),
+        supabase.from('events').select('*', { count: 'exact', head: true }),
+        supabase.from('study_materials').select('*', { count: 'exact', head: true }),
+        supabase.from('facilities').select('*', { count: 'exact', head: true }),
+        supabase.from('profiles').select('*').eq('role', 'student').order('created_at', { ascending: false }).limit(5),
+        supabase.from('faculty_directory').select('*').order('created_at', { ascending: false }).limit(5),
+        supabase.from('audit_logs').select('*').order('timestamp', { ascending: false }).limit(6),
+      ]);
+
+      if (studentsRes.error) warnings.push(`Students table: ${studentsRes.error.message}`);
+      if (noticesRes.error) warnings.push(`Notices table: ${noticesRes.error.message}`);
+
+      const recentStudents = (recentStudentsRes.data || []).map(mapProfileFromDb);
+      const recentFaculty = (recentFacultyRes.data || []).map(mapFacultyFromDb);
+      const recentLogs = (recentLogsRes.data || []).map(mapAuditLogFromDb);
+
+      return {
+        totalStudents: studentsRes.count || 0,
+        totalFaculty: facultyDirRes.count || 0,
+        totalDepartments: deptRes.count && deptRes.count > 0 ? deptRes.count : 14,
+        pendingFacultyRequests: pendingRes.count || 0,
+        totalNotices: noticesRes.count || 0,
+        upcomingEvents: eventsRes.count || 0,
+        studyMaterials: materialsRes.count || 0,
+        campusFacilities: facilitiesRes.count || 0,
+        recentStudents,
+        recentFaculty,
+        recentAuditLogs: recentLogs,
+        systemWarnings: warnings,
+      };
+    } catch (e: any) {
+      warnings.push(`Metrics aggregation exception: ${e.message}`);
+    }
+  }
+
+  // Offline / Demo Mode Metric Counts
+  const notices = loadFromStorage<Notice[]>(STORAGE_KEYS.NOTICES, INITIAL_NOTICES);
+  const events = loadFromStorage<EventItem[]>(STORAGE_KEYS.EVENTS, INITIAL_EVENTS);
+  const faculty = loadFromStorage<FacultyMember[]>(STORAGE_KEYS.FACULTY, INITIAL_FACULTY);
+  const materials = loadFromStorage<StudyMaterial[]>(STORAGE_KEYS.MATERIALS, INITIAL_STUDY_MATERIALS);
+  const facilities = loadFromStorage<CampusFacility[]>(STORAGE_KEYS.FACILITIES, INITIAL_FACILITIES);
+  const departments = loadFromStorage<DepartmentInfo[]>(STORAGE_KEYS.DEPARTMENTS, INITIAL_DEPARTMENTS);
+  const auditLogs = loadFromStorage<AuditLog[]>(STORAGE_KEYS.AUDIT_LOGS, INITIAL_AUDIT_LOGS);
+
+  return {
+    totalStudents: 0,
+    totalFaculty: faculty.length,
+    totalDepartments: departments.length || 14,
+    pendingFacultyRequests: 0,
+    totalNotices: notices.length,
+    upcomingEvents: events.length,
+    studyMaterials: materials.length,
+    campusFacilities: facilities.length,
+    recentStudents: [],
+    recentFaculty: faculty.slice(0, 5),
+    recentAuditLogs: auditLogs.slice(0, 6),
+    systemWarnings: warnings,
+  };
+};
+
+// ==============================================================================
+// 14. SAFE READ-ONLY DATABASE OVERVIEW & MONITORING
+// ==============================================================================
+
+export interface TableOverviewInfo {
+  name: string;
+  count: number;
+  description: string;
+  category: 'Core' | 'Academic' | 'Content' | 'Security';
+  rlsEnabled: boolean;
+}
+
+export interface DatabaseOverviewStats {
+  tables: TableOverviewInfo[];
+  profilesByRole: Record<string, number>;
+  departmentDistribution: { department: string; students: number; faculty: number }[];
+  fieldCompleteness: {
+    label: string;
+    completed: number;
+    total: number;
+    percentage: number;
+  }[];
+  systemStatus: {
+    isLive: boolean;
+    projectRef: string;
+    mode: string;
+  };
+}
+
+export const getDatabaseOverviewStats = async (): Promise<DatabaseOverviewStats> => {
+  const tableDefinitions: { name: string; description: string; category: TableOverviewInfo['category'] }[] = [
+    { name: 'profiles', description: 'Central user accounts with role authorization and academic details', category: 'Core' },
+    { name: 'departments', description: 'Government Polytechnic Ahmedabad official academic departments', category: 'Core' },
+    { name: 'faculty_directory', description: 'Instructional staff roster with cabins, qualifications & papers', category: 'Academic' },
+    { name: 'notices', description: 'Institutional circulars, exam notices & administrative broadcasts', category: 'Content' },
+    { name: 'events', description: 'Academic symposiums, campus fests, hackathons & sports meets', category: 'Content' },
+    { name: 'event_registrations', description: 'Student & faculty ticket passes for college events', category: 'Content' },
+    { name: 'study_materials', description: 'Course syllabi, lecture notes, lab manuals & PYQ papers', category: 'Content' },
+    { name: 'facilities', description: 'Central library, high-performance GPU clusters, labs & grounds', category: 'Content' },
+    { name: 'attendance_sessions', description: 'Class attendance sessions created by instructional faculty', category: 'Academic' },
+    { name: 'attendance_records', description: 'Individual student present/absent roll marks per session', category: 'Academic' },
+    { name: 'marks', description: 'Continuous internal evaluation, mid-sem exams & SGPA records', category: 'Academic' },
+    { name: 'assignments', description: 'Coursework assignments issued by faculty with submission deadlines', category: 'Academic' },
+    { name: 'assignment_submissions', description: 'Student solution PDF submissions with timestamps', category: 'Academic' },
+    { name: 'audit_logs', description: 'Immutable administrative action audit trail for security', category: 'Security' },
+    { name: 'feedback', description: 'Student grievances and administrative feedback submissions', category: 'Security' },
+  ];
+
+  const tables: TableOverviewInfo[] = [];
+  const profilesByRole: Record<string, number> = {
+    student: 0,
+    faculty: 0,
+    admin: 1,
+    pending: 0,
+    rejected: 0,
+  };
+  const deptDistMap: Record<string, { students: number; faculty: number }> = {};
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      // 1. Fetch exact table record counts
+      for (const t of tableDefinitions) {
+        const { count, error } = await supabase.from(t.name).select('*', { count: 'exact', head: true });
+        tables.push({
+          name: t.name,
+          count: error ? 0 : (count || 0),
+          description: t.description,
+          category: t.category,
+          rlsEnabled: true,
+        });
+      }
+
+      // 2. Query verified profiles breakdown
+      const { data: allProfiles } = await supabase.from('profiles').select('role, admin_level, department, prn, roll_number, semester');
+      if (allProfiles) {
+        allProfiles.forEach(p => {
+          if (p.admin_level === 'pending_faculty') {
+            profilesByRole.pending = (profilesByRole.pending || 0) + 1;
+          } else if (p.admin_level === 'rejected') {
+            profilesByRole.rejected = (profilesByRole.rejected || 0) + 1;
+          } else {
+            const r = p.role || 'student';
+            profilesByRole[r] = (profilesByRole[r] || 0) + 1;
+          }
+
+          if (p.department) {
+            if (!deptDistMap[p.department]) deptDistMap[p.department] = { students: 0, faculty: 0 };
+            if (p.role === 'faculty') deptDistMap[p.department].faculty++;
+            else if (p.role === 'student') deptDistMap[p.department].students++;
+          }
+        });
+      }
+
+      // 3. Faculty directory headcount
+      const { data: allFac } = await supabase.from('faculty_directory').select('department');
+      if (allFac) {
+        allFac.forEach(f => {
+          if (f.department) {
+            if (!deptDistMap[f.department]) deptDistMap[f.department] = { students: 0, faculty: 0 };
+            deptDistMap[f.department].faculty++;
+          }
+        });
+      }
+
+      // 4. Data Completeness Indicators
+      const totalStudents = (allProfiles || []).filter(p => p.role === 'student');
+      const studentTotal = totalStudents.length;
+      const withPrn = totalStudents.filter(p => Boolean(p.prn)).length;
+      const withRoll = totalStudents.filter(p => Boolean(p.roll_number)).length;
+      const withSem = totalStudents.filter(p => Boolean(p.semester)).length;
+
+      const fieldCompleteness = [
+        {
+          label: 'Student PRN Identifiers',
+          completed: withPrn,
+          total: studentTotal,
+          percentage: studentTotal > 0 ? Math.round((withPrn / studentTotal) * 100) : 100
+        },
+        {
+          label: 'Student Roll Numbers',
+          completed: withRoll,
+          total: studentTotal,
+          percentage: studentTotal > 0 ? Math.round((withRoll / studentTotal) * 100) : 100
+        },
+        {
+          label: 'Academic Semester Allocation',
+          completed: withSem,
+          total: studentTotal,
+          percentage: studentTotal > 0 ? Math.round((withSem / studentTotal) * 100) : 100
+        },
+      ];
+
+      const departmentDistribution = Object.entries(deptDistMap).map(([department, stats]) => ({
+        department,
+        students: stats.students,
+        faculty: stats.faculty,
+      }));
+
+      return {
+        tables,
+        profilesByRole,
+        departmentDistribution,
+        fieldCompleteness,
+        systemStatus: {
+          isLive: true,
+          projectRef: 'bbtjbazbeyedxjfgnfcm',
+          mode: 'PostgreSQL Cloud Backend (RLS Active)'
+        }
+      };
+    } catch (e) {
+      console.warn('Database overview exception:', e);
+    }
+  }
+
+  // Fallback representation for local evaluation
+  return {
+    tables: tableDefinitions.map(t => ({
+      name: t.name,
+      count: t.name === 'notices' ? 9 : t.name === 'events' ? 6 : t.name === 'facilities' ? 9 : 0,
+      description: t.description,
+      category: t.category,
+      rlsEnabled: true,
+    })),
+    profilesByRole: { student: 0, faculty: 4, admin: 1, pending: 0, rejected: 0 },
+    departmentDistribution: [
+      { department: 'Computer Engineering', students: 0, faculty: 2 },
+      { department: 'Civil Engineering', students: 0, faculty: 1 },
+      { department: 'Mechanical Engineering', students: 0, faculty: 1 },
+    ],
+    fieldCompleteness: [
+      { label: 'Student PRN Identifiers', completed: 0, total: 0, percentage: 100 },
+      { label: 'Student Roll Numbers', completed: 0, total: 0, percentage: 100 },
+      { label: 'Academic Semester Allocation', completed: 0, total: 0, percentage: 100 },
+    ],
+    systemStatus: {
+      isLive: false,
+      projectRef: 'local-demo',
+      mode: 'Browser Local Persistence'
+    }
+  };
+};
+

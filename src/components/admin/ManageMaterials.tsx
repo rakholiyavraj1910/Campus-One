@@ -5,18 +5,18 @@ import { getStudyMaterials, addStudyMaterial, deleteStudyMaterial } from '../../
 import { FileText, Plus, Trash2, X, Download, Upload } from 'lucide-react';
 import { useNotifications } from '../../context/NotificationContext';
 import { useAuth } from '../../context/AuthContext';
+import { ConfirmationModal } from './ConfirmationModal';
 
 export const ManageMaterials: React.FC = () => {
   const { user } = useAuth();
   const { addNotification } = useNotifications();
-  const [materials, setMaterials] = useState<StudyMaterial[]>(() => {
-    try {
-      const saved = localStorage.getItem('campusone_materials_v1');
-      return saved ? JSON.parse(saved) : INITIAL_STUDY_MATERIALS;
-    } catch (e) {
-      return INITIAL_STUDY_MATERIALS;
-    }
-  });
+  const [materials, setMaterials] = useState<StudyMaterial[]>([]);
+  const [deletingMaterial, setDeletingMaterial] = useState<StudyMaterial | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  React.useEffect(() => {
+    getStudyMaterials().then(setMaterials).catch(() => {});
+  }, []);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [title, setTitle] = useState('');
@@ -55,15 +55,18 @@ export const ManageMaterials: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: string, matTitle: string) => {
-    if (confirm(`Delete document "${matTitle}"?`)) {
-      try {
-        await deleteStudyMaterial(id);
-        setMaterials(await getStudyMaterials());
-        addNotification('Document Deleted', `Removed ${matTitle}`, 'alert');
-      } catch (err: any) {
-        addNotification('Error Deleting Material', err.message || 'Failed to delete material.', 'alert');
-      }
+  const handleDeleteConfirmed = async () => {
+    if (!deletingMaterial) return;
+    setIsDeleting(true);
+    try {
+      await deleteStudyMaterial(deletingMaterial.id);
+      setMaterials(await getStudyMaterials());
+      addNotification('Document Deleted', `Removed ${deletingMaterial.title}`, 'notice');
+      setDeletingMaterial(null);
+    } catch (err: any) {
+      addNotification('Error Deleting Material', err.message || 'Failed to delete material.', 'alert');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -122,8 +125,9 @@ export const ManageMaterials: React.FC = () => {
                   </td>
                   <td className="py-3.5 px-3 text-right">
                     <button
-                      onClick={() => handleDelete(m.id, m.title)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:hover:bg-navy-800"
+                      type="button"
+                      onClick={() => setDeletingMaterial(m)}
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:hover:bg-navy-800 cursor-pointer"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -244,6 +248,17 @@ export const ManageMaterials: React.FC = () => {
           </div>
         </div>
       )}
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={Boolean(deletingMaterial)}
+        title="Delete Document"
+        message={`Are you sure you want to remove "${deletingMaterial?.title}" from the academic repository?`}
+        confirmLabel="Delete Document"
+        variant="danger"
+        isLoading={isDeleting}
+        onConfirm={handleDeleteConfirmed}
+        onCancel={() => setDeletingMaterial(null)}
+      />
     </div>
   );
 };

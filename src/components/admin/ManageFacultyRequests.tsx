@@ -22,6 +22,7 @@ import {
   approveFacultyRequest, 
   rejectFacultyRequest 
 } from '../../lib/storageService';
+import { ConfirmationModal } from './ConfirmationModal';
 
 export const ManageFacultyRequests: React.FC = () => {
   const { user } = useAuth();
@@ -31,6 +32,10 @@ export const ManageFacultyRequests: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedDept, setSelectedDept] = useState<string>('All');
   const [actionInProgress, setActionInProgress] = useState<string | null>(null);
+  const [confirmingAction, setConfirmingAction] = useState<{
+    type: 'approve' | 'reject';
+    request: UserProfile;
+  } | null>(null);
 
   const loadRequests = async () => {
     setIsLoading(true);
@@ -242,26 +247,52 @@ export const ManageFacultyRequests: React.FC = () => {
               {/* Action Buttons */}
               <div className="flex items-center space-x-2 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-navy-800">
                 <button
-                  onClick={() => handleReject(req)}
+                  type="button"
+                  onClick={() => setConfirmingAction({ type: 'reject', request: req })}
                   disabled={actionInProgress === req.id}
-                  className="px-3.5 py-2 rounded-xl border border-rose-200 dark:border-rose-900/50 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-xs font-bold btn-tactile transition-colors disabled:opacity-50 flex items-center space-x-1.5"
+                  className="px-3.5 py-2 rounded-xl border border-rose-200 dark:border-rose-900/50 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-xs font-bold btn-tactile transition-colors disabled:opacity-50 flex items-center space-x-1.5 cursor-pointer"
                 >
                   <XCircle className="w-4 h-4" />
                   <span>Decline</span>
                 </button>
                 <button
-                  onClick={() => handleApprove(req)}
+                  type="button"
+                  onClick={() => setConfirmingAction({ type: 'approve', request: req })}
                   disabled={actionInProgress === req.id}
-                  className="px-4 py-2 rounded-xl bg-brand-cyan hover:bg-brand-cyan-hover text-navy-950 text-xs font-bold shadow-xs btn-tactile transition-all disabled:opacity-50 flex items-center space-x-1.5"
+                  className="px-4 py-2 rounded-xl bg-brand-cyan hover:bg-brand-cyan-hover text-navy-950 text-xs font-bold shadow-xs btn-tactile transition-all disabled:opacity-50 flex items-center space-x-1.5 cursor-pointer"
                 >
                   <CheckCircle2 className="w-4 h-4" />
-                  <span>{actionInProgress === req.id ? 'Approving...' : 'Approve Faculty'}</span>
+                  <span>Approve Faculty</span>
                 </button>
               </div>
             </div>
           ))
         )}
       </div>
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={Boolean(confirmingAction)}
+        title={confirmingAction?.type === 'approve' ? 'Approve Instructional Privileges' : 'Decline Faculty Access Request'}
+        message={
+          confirmingAction?.type === 'approve'
+            ? `Are you sure you want to approve instructional faculty clearance for ${confirmingAction?.request.name} in the ${confirmingAction?.request.department} department? This will update their PostgreSQL role to faculty.`
+            : `Are you sure you want to decline the faculty access application from ${confirmingAction?.request.name}?`
+        }
+        confirmLabel={confirmingAction?.type === 'approve' ? 'Grant Clearance' : 'Decline Request'}
+        variant={confirmingAction?.type === 'approve' ? 'info' : 'danger'}
+        isLoading={Boolean(actionInProgress)}
+        onConfirm={async () => {
+          if (!confirmingAction) return;
+          if (confirmingAction.type === 'approve') {
+            await handleApprove(confirmingAction.request);
+          } else {
+            await handleReject(confirmingAction.request);
+          }
+          setConfirmingAction(null);
+        }}
+        onCancel={() => setConfirmingAction(null)}
+      />
     </div>
   );
 };

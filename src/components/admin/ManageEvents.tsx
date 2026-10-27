@@ -3,6 +3,7 @@ import { EventItem } from '../../types';
 import { Calendar, Plus, Trash2, Edit3, Users, MapPin, X, Sparkles } from 'lucide-react';
 import { addEvent, updateEvent, deleteEvent } from '../../lib/storageService';
 import { useNotifications } from '../../context/NotificationContext';
+import { ConfirmationModal } from './ConfirmationModal';
 
 interface ManageEventsProps {
   events: EventItem[];
@@ -13,6 +14,8 @@ export const ManageEvents: React.FC<ManageEventsProps> = ({ events, onRefreshEve
   const { addNotification } = useNotifications();
   const [modalMode, setModalMode] = useState<'create' | 'edit' | null>(null);
   const [editingEvent, setEditingEvent] = useState<EventItem | null>(null);
+  const [deletingEvent, setDeletingEvent] = useState<EventItem | null>(null);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   // Form states
   const [title, setTitle] = useState('');
@@ -103,15 +106,18 @@ export const ManageEvents: React.FC<ManageEventsProps> = ({ events, onRefreshEve
     }
   };
 
-  const handleDelete = async (id: string, eventTitle: string) => {
-    if (confirm(`Delete event "${eventTitle}"?`)) {
-      try {
-        await deleteEvent(id);
-        addNotification('Event Removed', `Deleted event: ${eventTitle}`, 'alert');
-        onRefreshEvents();
-      } catch (err: any) {
-        addNotification('Error Deleting Event', err.message || 'Failed to delete event.', 'alert');
-      }
+  const handleDeleteConfirmed = async () => {
+    if (!deletingEvent) return;
+    setIsDeleting(true);
+    try {
+      await deleteEvent(deletingEvent.id);
+      addNotification('Event Removed', `Deleted event: ${deletingEvent.title}`, 'notice');
+      onRefreshEvents();
+      setDeletingEvent(null);
+    } catch (err: any) {
+      addNotification('Error Deleting Event', err.message || 'Failed to delete event.', 'alert');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -176,8 +182,9 @@ export const ManageEvents: React.FC<ManageEventsProps> = ({ events, onRefreshEve
                         <Edit3 className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleDelete(evt.id, evt.title)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:hover:bg-navy-800"
+                        type="button"
+                        onClick={() => setDeletingEvent(evt)}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:hover:bg-navy-800 cursor-pointer"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -313,6 +320,17 @@ export const ManageEvents: React.FC<ManageEventsProps> = ({ events, onRefreshEve
           </div>
         </div>
       )}
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={Boolean(deletingEvent)}
+        title="Decommission Event"
+        message={`Are you sure you want to cancel and delete the event "${deletingEvent?.title}"? This cannot be undone.`}
+        confirmLabel="Delete Event"
+        variant="danger"
+        isLoading={isDeleting}
+        onConfirm={handleDeleteConfirmed}
+        onCancel={() => setDeletingEvent(null)}
+      />
     </div>
   );
 };

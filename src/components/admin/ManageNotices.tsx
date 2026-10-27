@@ -14,6 +14,7 @@ import {
 import { addNotice, updateNotice, deleteNotice } from '../../lib/storageService';
 import { useNotifications } from '../../context/NotificationContext';
 import { useAuth } from '../../context/AuthContext';
+import { ConfirmationModal } from './ConfirmationModal';
 
 interface ManageNoticesProps {
   notices: Notice[];
@@ -27,6 +28,8 @@ export const ManageNotices: React.FC<ManageNoticesProps> = ({ notices, onRefresh
   const [search, setSearch] = useState('');
   const [modalMode, setModalMode] = useState<'create' | 'edit' | null>(null);
   const [editingNotice, setEditingNotice] = useState<Notice | null>(null);
+  const [deletingNotice, setDeletingNotice] = useState<Notice | null>(null);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   // Form states
   const [title, setTitle] = useState('');
@@ -107,15 +110,18 @@ export const ManageNotices: React.FC<ManageNoticesProps> = ({ notices, onRefresh
     }
   };
 
-  const handleDelete = async (id: string, noticeTitle: string) => {
-    if (confirm(`Are you sure you want to delete notice "${noticeTitle}"?`)) {
-      try {
-        await deleteNotice(id);
-        addNotification('Notice Removed', `Notice "${noticeTitle}" was removed.`, 'alert');
-        onRefreshNotices();
-      } catch (err: any) {
-        addNotification('Error Deleting Notice', err.message || 'Failed to delete notice.', 'alert');
-      }
+  const handleDeleteConfirmed = async () => {
+    if (!deletingNotice) return;
+    setIsDeleting(true);
+    try {
+      await deleteNotice(deletingNotice.id);
+      addNotification('Notice Removed', `Notice "${deletingNotice.title}" was removed.`, 'notice');
+      onRefreshNotices();
+      setDeletingNotice(null);
+    } catch (err: any) {
+      addNotification('Error Deleting Notice', err.message || 'Failed to delete notice.', 'alert');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -205,8 +211,9 @@ export const ManageNotices: React.FC<ManageNoticesProps> = ({ notices, onRefresh
                         <Edit3 className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleDelete(n.id, n.title)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:hover:bg-navy-800"
+                        type="button"
+                        onClick={() => setDeletingNotice(n)}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:hover:bg-navy-800 cursor-pointer"
                         title="Delete Notice"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -365,6 +372,17 @@ export const ManageNotices: React.FC<ManageNoticesProps> = ({ notices, onRefresh
           </div>
         </div>
       )}
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={Boolean(deletingNotice)}
+        title="Delete Circular Notice"
+        message={`Are you sure you want to permanently delete notice "${deletingNotice?.title}"? This cannot be undone.`}
+        confirmLabel="Delete Notice"
+        variant="danger"
+        isLoading={isDeleting}
+        onConfirm={handleDeleteConfirmed}
+        onCancel={() => setDeletingNotice(null)}
+      />
     </div>
   );
 };
