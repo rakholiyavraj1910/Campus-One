@@ -27,6 +27,7 @@ import {
 } from '../../lib/storageService';
 import { StudentDirectory } from './StudentDirectory';
 import { StudentProfileView } from './StudentProfileView';
+import { FacultyProfilePage } from '../profile/FacultyProfilePage';
 import { 
   User, 
   Users, 
@@ -57,12 +58,31 @@ import {
 import confetti from 'canvas-confetti';
 import { attendanceSessionSchema } from '../../lib/validationSchemas';
 
-export const FacultyPortal: React.FC = () => {
+interface FacultyPortalProps {
+  initialTab?: string;
+  onNavigateTab?: (tab: string) => void;
+}
+
+export const FacultyPortal: React.FC<FacultyPortalProps> = ({
+  initialTab,
+  onNavigateTab
+}) => {
   const { user, role, isFaculty, isAdmin } = useAuth();
   const { addNotification } = useNotifications();
 
   // Primary Tab Navigation
-  const [activeTab, setActiveTab] = useState<'directory' | 'attendance' | 'marks' | 'assignments' | 'materials' | 'announcements'>('directory');
+  const [activeTab, setActiveTab] = useState<'profile' | 'directory' | 'attendance' | 'marks' | 'assignments' | 'materials' | 'announcements'>(
+    initialTab === 'profile' ? 'profile' : 'directory'
+  );
+
+  useEffect(() => {
+    if (initialTab) {
+      const validTabs = ['profile', 'directory', 'attendance', 'marks', 'assignments', 'materials', 'announcements'];
+      if (validTabs.includes(initialTab)) {
+        setActiveTab(initialTab as any);
+      }
+    }
+  }, [initialTab]);
 
   // Selected Student for Profile View
   const [selectedStudent, setSelectedStudent] = useState<UserProfile | null>(null);
@@ -417,6 +437,7 @@ export const FacultyPortal: React.FC = () => {
       {/* 2. Primary Navigation Tabs */}
       <div className="bg-white dark:bg-navy-900 rounded-2xl p-2 border border-slate-200/80 dark:border-navy-800 shadow-xs flex items-center space-x-1 overflow-x-auto scrollbar-none">
         {[
+          { id: 'profile', label: 'Faculty Profile', icon: User },
           { id: 'directory', label: 'Student Directory', icon: Users },
           { id: 'attendance', label: 'Record Attendance', icon: CheckCircle2 },
           { id: 'marks', label: 'Marks Evaluation', icon: Award },
@@ -432,6 +453,7 @@ export const FacultyPortal: React.FC = () => {
               key={t.id}
               onClick={() => {
                 setActiveTab(t.id as any);
+                if (onNavigateTab) onNavigateTab(t.id);
                 if (t.id === 'directory') setSelectedStudent(null);
               }}
               className={`flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
@@ -447,7 +469,12 @@ export const FacultyPortal: React.FC = () => {
         })}
       </div>
 
-      {/* 3. TAB: STUDENT DIRECTORY (Requirement 2 & 3) */}
+      {/* 3. TAB: FACULTY PROFILE */}
+      {activeTab === 'profile' && (
+        <FacultyProfilePage />
+      )}
+
+      {/* 4. TAB: STUDENT DIRECTORY (Requirement 2 & 3) */}
       {activeTab === 'directory' && (
         <div>
           {selectedStudent ? (

@@ -366,7 +366,10 @@ const MainLayout: React.FC = () => {
           )}
 
           {currentPage === 'faculty-portal' && (
-            <FacultyPortal />
+            <FacultyPortal
+              initialTab={currentSubTab}
+              onNavigateTab={(tab) => setCurrentSubTab(tab)}
+            />
           )}
 
           {currentPage === 'student' && (
@@ -420,7 +423,10 @@ const MainLayout: React.FC = () => {
                 initialSubTab={currentSubTab}
               />
             ) : role === 'faculty' ? (
-              <FacultyPortal />
+              <FacultyPortal
+                initialTab={currentSubTab}
+                onNavigateTab={(tab) => setCurrentSubTab(tab)}
+              />
             ) : (
               <StudentDashboard
                 currentSubTab={currentSubTab || 'profile'}

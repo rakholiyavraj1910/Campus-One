@@ -2329,3 +2329,362 @@ export const getDatabaseOverviewStats = async (): Promise<DatabaseOverviewStats>
   };
 };
 
+// ==============================================================================
+// 15. PROFILE PHOTO & AVATAR STORAGE (STUDENT & FACULTY)
+// ==============================================================================
+
+/**
+ * Uploads a user's cropped profile image to the Supabase Storage 'avatars' bucket.
+ * Organizes files into an isolated directory per user: `${userId}/avatar-${timestamp}.${ext}`
+ * Cleans up previous avatar files belonging to this user.
+ */
+export const uploadProfileAvatar = async (
+  userId: string,
+  imageBlob: Blob,
+  fileExtension: string = 'webp'
+): Promise<{ publicUrl: string; path: string }> => {
+  if (!userId || userId === 'guest') {
+    throw new Error('Authentication required: Sign in to update your profile photo.');
+  }
+
+  // Security check: validate MIME type
+  const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
+  if (!allowedMimeTypes.includes(imageBlob.type)) {
+    throw new Error('Invalid image format: Please upload a JPG, PNG, or WebP image.');
+  }
+
+  // Size limit check (5MB)
+  if (imageBlob.size > 5 * 1024 * 1024) {
+    throw new Error('Image too large: Profile photo must be less than 5 MB.');
+  }
+
+  if (isSupabaseConfigured && supabase) {
+    const timestamp = Date.now();
+    const fileName = `avatar-${timestamp}.${fileExtension}`;
+    const filePath = `${userId}/${fileName}`;
+
+    try {
+      // 1. List and prune older avatar files for this user in their folder
+      try {
+        const { data: existingFiles } = await supabase.storage
+          .from('avatars')
+          .list(userId);
+
+        if (existingFiles && existingFiles.length > 0) {
+          const filesToRemove = existingFiles.map(f => `${userId}/${f.name}`);
+          await supabase.storage.from('avatars').remove(filesToRemove);
+        }
+      } catch (listErr) {
+        console.warn('Non-blocking: could not clean prior avatars', listErr);
+      }
+
+      // 2. Upload the new image blob
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, imageBlob, {
+          contentType: imageBlob.type || 'image/webp',
+          cacheControl: '3600',
+          upsert: true,
+        });
+
+      if (uploadError) {
+        throw new Error(`Upload failed: ${uploadError.message}`);
+      }
+
+      // 3. Get Public URL
+      const { data: urlData } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      const publicUrl = urlData.publicUrl;
+
+      // 4. Update the avatar_url in public.profiles
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          avatar_url: publicUrl,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', userId);
+
+      if (profileError) {
+        throw new Error(`Failed to update profile record: ${profileError.message}`);
+      }
+
+      // 5. If faculty member, also update avatar in public.faculty_directory if row exists
+      try {
+        await supabase
+          .from('faculty_directory')
+          .update({
+            avatar: publicUrl,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('profile_id', userId);
+      } catch {
+        // non-blocking
+      }
+
+      // 6. Security audit log
+      await addAuditLog(
+        userId,
+        'user',
+        'UPLOAD_PROFILE_AVATAR',
+        'profiles',
+        userId,
+        `User uploaded a new profile photo.`
+      );
+
+      return { publicUrl, path: filePath };
+    } catch (err: any) {
+      console.error('uploadProfileAvatar error:', err);
+      throw err;
+    }
+  }
+
+  // Offline / Demo fallback: Create data URL and persist locally
+  const reader = new FileReader();
+  const dataUrlPromise = new Promise<string>((resolve, reject) => {
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(imageBlob);
+  });
+  const dataUrl = await dataUrlPromise;
+
+  try {
+    const saved = JSON.parse(localStorage.getItem('campusone_user_profile') || '{}');
+    saved.avatar = dataUrl;
+    localStorage.setItem('campusone_user_profile', JSON.stringify(saved));
+  } catch {
+    // ignore
+  }
+
+  return { publicUrl: dataUrl, path: `local/${userId}/avatar.webp` };
+};
+
+/**
+ * Removes the user's profile photo, restoring the institutional default avatar.
+ */
+export const removeProfileAvatar = async (userId: string): Promise<void> => {
+  if (!userId || userId === 'guest') {
+    throw new Error('Authentication required.');
+  }
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      // 1. Remove files in user's folder
+      const { data: existingFiles } = await supabase.storage
+        .from('avatars')
+        .list(userId);
+
+      if (existingFiles && existingFiles.length > 0) {
+        const filesToRemove = existingFiles.map(f => `${userId}/${f.name}`);
+        await supabase.storage.from('avatars').remove(filesToRemove);
+      }
+
+      // 2. Set avatar_url = null in public.profiles
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          avatar_url: null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', userId);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      // 3. Remove avatar from faculty_directory if applicable
+      try {
+        await supabase
+          .from('faculty_directory')
+          .update({
+            avatar: null,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('profile_id', userId);
+      } catch {
+        // non-blocking
+      }
+
+      await addAuditLog(
+        userId,
+        'user',
+        'REMOVE_PROFILE_AVATAR',
+        'profiles',
+        userId,
+        `User removed profile photo.`
+      );
+    } catch (err: any) {
+      console.error('removeProfileAvatar error:', err);
+      throw err;
+    }
+  } else {
+    try {
+      const saved = JSON.parse(localStorage.getItem('campusone_user_profile') || '{}');
+      delete saved.avatar;
+      localStorage.setItem('campusone_user_profile', JSON.stringify(saved));
+    } catch {
+      // ignore
+    }
+  }
+};
+
+/**
+ * Updates a student's self-editable profile fields (Name, Phone).
+ * Institution-controlled academic fields (roll number, department, PRN, CGPA, semester)
+ * cannot be edited here.
+ */
+export const updateStudentPersonalProfile = async (
+  userId: string,
+  updates: {
+    name: string;
+    phone?: string;
+  }
+): Promise<UserProfile> => {
+  if (!userId || userId === 'guest') {
+    throw new Error('Authentication required: Sign in to update your profile.');
+  }
+
+  if (!updates.name || updates.name.trim().length < 2) {
+    throw new Error('Please enter a valid full name (at least 2 characters).');
+  }
+
+  if (isSupabaseConfigured && supabase) {
+    const payload: Record<string, any> = {
+      name: updates.name.trim(),
+      updated_at: new Date().toISOString(),
+    };
+    if (updates.phone !== undefined) {
+      payload.phone = updates.phone ? updates.phone.trim() : null;
+    }
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .update(payload)
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    await addAuditLog(
+      userId,
+      'student',
+      'UPDATE_PERSONAL_PROFILE',
+      'profiles',
+      userId,
+      `Student updated personal details (name: "${updates.name}").`
+    );
+
+    return mapProfileFromDb(data);
+  }
+
+  // Offline / Demo
+  const current = JSON.parse(localStorage.getItem('campusone_user_profile') || '{}');
+  const updated: UserProfile = {
+    ...current,
+    id: userId,
+    name: updates.name.trim(),
+    phone: updates.phone,
+  };
+  localStorage.setItem('campusone_user_profile', JSON.stringify(updated));
+  return updated;
+};
+
+/**
+ * Updates a faculty member's self-editable profile fields:
+ * Name, Phone, Cabin, Consultation Hours, Specialization.
+ * Department, Designation, and Approval Status are institutionally protected.
+ */
+export const updateFacultyPersonalProfile = async (
+  userId: string,
+  updates: {
+    name: string;
+    phone?: string;
+    cabin?: string;
+    consultationHours?: string;
+    specialization?: string[];
+  }
+): Promise<UserProfile> => {
+  if (!userId || userId === 'guest') {
+    throw new Error('Authentication required: Sign in to update your profile.');
+  }
+
+  if (!updates.name || updates.name.trim().length < 2) {
+    throw new Error('Please enter a valid full name (at least 2 characters).');
+  }
+
+  if (isSupabaseConfigured && supabase) {
+    const payload: Record<string, any> = {
+      name: updates.name.trim(),
+      updated_at: new Date().toISOString(),
+    };
+    if (updates.phone !== undefined) payload.phone = updates.phone ? updates.phone.trim() : null;
+    if (updates.cabin !== undefined) payload.cabin = updates.cabin ? updates.cabin.trim() : null;
+    if (updates.consultationHours !== undefined) {
+      payload.consultation_hours = updates.consultationHours ? updates.consultationHours.trim() : null;
+    }
+    if (updates.specialization !== undefined) {
+      payload.specialization = updates.specialization;
+    }
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .update(payload)
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    // Sync to faculty_directory if row exists
+    try {
+      const dirPayload: Record<string, any> = {
+        name: updates.name.trim(),
+        updated_at: new Date().toISOString(),
+      };
+      if (updates.phone !== undefined) dirPayload.phone = updates.phone;
+      if (updates.cabin !== undefined) dirPayload.cabin = updates.cabin;
+      if (updates.consultationHours !== undefined) dirPayload.consultation_hours = updates.consultationHours;
+      if (updates.specialization !== undefined) dirPayload.specialization = updates.specialization;
+
+      await supabase
+        .from('faculty_directory')
+        .update(dirPayload)
+        .eq('profile_id', userId);
+    } catch {
+      // non-blocking
+    }
+
+    await addAuditLog(
+      userId,
+      'faculty',
+      'UPDATE_FACULTY_PROFILE',
+      'profiles',
+      userId,
+      `Faculty member updated personal & professional details (name: "${updates.name}").`
+    );
+
+    return mapProfileFromDb(data);
+  }
+
+  // Offline / Demo
+  const current = JSON.parse(localStorage.getItem('campusone_user_profile') || '{}');
+  const updated: UserProfile = {
+    ...current,
+    id: userId,
+    name: updates.name.trim(),
+    phone: updates.phone,
+    cabin: updates.cabin,
+    consultationHours: updates.consultationHours,
+    specialization: updates.specialization,
+  };
+  localStorage.setItem('campusone_user_profile', JSON.stringify(updated));
+  return updated;
+};
+

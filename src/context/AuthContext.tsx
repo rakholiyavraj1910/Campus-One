@@ -44,6 +44,7 @@ export interface AuthContextType {
   login: (email: string, role: UserRole, name?: string) => void;
   logout: () => void;
   refreshProfile: () => Promise<void>;
+  updateLocalUserProfile: (updates: Partial<UserProfile>) => void;
 }
 
 const GUEST_USER: UserProfile = {
@@ -574,6 +575,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const updateLocalUserProfile = (updates: Partial<UserProfile>) => {
+    setCurrentUser(prev => {
+      const next = { ...prev, ...updates };
+      try {
+        localStorage.setItem('campusone_user_profile', JSON.stringify(next));
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  };
+
   const role = currentUser.role;
   const isPending = role === 'pending';
   const isAdmin = role === 'admin';
@@ -608,6 +621,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login,
         logout,
         refreshProfile,
+        updateLocalUserProfile,
       }}
     >
       {children}

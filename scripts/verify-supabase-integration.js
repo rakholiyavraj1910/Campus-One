@@ -573,6 +573,62 @@ assert(updatedStorageContent.includes('addFacility'), 'storageService exports ad
 assert(updatedStorageContent.includes('updateFacility'), 'storageService exports updateFacility');
 assert(updatedStorageContent.includes('deleteFacility'), 'storageService exports deleteFacility');
 
+console.log('\n17. Checking Student & Faculty Profile Management & Avatar Security:');
+const profileMigrationPath = path.join(rootDir, 'supabase', 'migrations', '20261028020000_profile_management_security_and_storage.sql');
+assert(fs.existsSync(profileMigrationPath), '20261028020000_profile_management_security_and_storage.sql exists');
+const profileMigrationContent = fs.readFileSync(profileMigrationPath, 'utf8');
+assert(profileMigrationContent.includes("bucket_id = 'avatars'"), 'Migration configures avatars bucket policies');
+assert(profileMigrationContent.includes('(storage.foldername(name))[1]'), 'Migration enforces user folder isolation for avatars');
+assert(profileMigrationContent.includes('avatars_user_upload'), 'Migration defines avatars_user_upload policy');
+assert(profileMigrationContent.includes('avatars_user_update'), 'Migration defines avatars_user_update policy');
+assert(profileMigrationContent.includes('avatars_user_delete'), 'Migration defines avatars_user_delete policy');
+assert(profileMigrationContent.includes('OLD.role = \'student\'::public.user_role_type'), 'Migration protects student institutional academic fields');
+assert(profileMigrationContent.includes('OLD.role = \'faculty\'::public.user_role_type'), 'Migration protects faculty appointment fields');
+
+const userAvatarPath = path.join(rootDir, 'src', 'components', 'common', 'UserAvatar.tsx');
+assert(fs.existsSync(userAvatarPath), 'UserAvatar.tsx exists');
+const userAvatarContent = fs.readFileSync(userAvatarPath, 'utf8');
+assert(userAvatarContent.includes('getInitials'), 'UserAvatar computes fallback initials');
+
+const imageCropModalPath = path.join(rootDir, 'src', 'components', 'common', 'ImageCropModal.tsx');
+assert(fs.existsSync(imageCropModalPath), 'ImageCropModal.tsx exists');
+const imageCropModalContent = fs.readFileSync(imageCropModalPath, 'utf8');
+assert(imageCropModalContent.includes('image/webp'), 'ImageCropModal supports WebP format');
+assert(imageCropModalContent.includes('5 * 1024 * 1024'), 'ImageCropModal enforces 5MB file limit');
+
+assert(fs.existsSync(profileCardPath), 'ProfileCard.tsx exists');
+const updatedProfileCardContent = fs.readFileSync(profileCardPath, 'utf8');
+assert(updatedProfileCardContent.includes('calculateCompletion'), 'ProfileCard calculates profile completion percentage');
+assert(updatedProfileCardContent.includes('updateStudentPersonalProfile'), 'ProfileCard updates personal profile in database');
+assert(updatedProfileCardContent.includes('ImageCropModal'), 'ProfileCard integrates ImageCropModal');
+assert(updatedProfileCardContent.includes('beforeunload'), 'ProfileCard guards against unsaved form modifications');
+
+const facultyProfilePagePath = path.join(rootDir, 'src', 'components', 'profile', 'FacultyProfilePage.tsx');
+assert(fs.existsSync(facultyProfilePagePath), 'FacultyProfilePage.tsx exists');
+const facultyProfilePageContent = fs.readFileSync(facultyProfilePagePath, 'utf8');
+assert(facultyProfilePageContent.includes('updateFacultyPersonalProfile'), 'FacultyProfilePage updates faculty details in database');
+assert(facultyProfilePageContent.includes('consultationHours'), 'FacultyProfilePage manages consultation hours');
+assert(facultyProfilePageContent.includes('specialization'), 'FacultyProfilePage manages academic specializations');
+
+const updatedFacultyPortalContent = fs.readFileSync(facultyPortalPath, 'utf8');
+assert(updatedFacultyPortalContent.includes('FacultyProfilePage'), 'FacultyPortal integrates FacultyProfilePage');
+assert(updatedFacultyPortalContent.includes("id: 'profile', label: 'Faculty Profile'"), 'FacultyPortal includes Faculty Profile tab');
+
+assert(updatedStorageContent.includes('uploadProfileAvatar'), 'storageService exports uploadProfileAvatar');
+assert(updatedStorageContent.includes('removeProfileAvatar'), 'storageService exports removeProfileAvatar');
+assert(updatedStorageContent.includes('updateStudentPersonalProfile'), 'storageService exports updateStudentPersonalProfile');
+assert(updatedStorageContent.includes('updateFacultyPersonalProfile'), 'storageService exports updateFacultyPersonalProfile');
+
+const navbarPath = path.join(rootDir, 'src', 'components', 'common', 'Navbar.tsx');
+const navbarContent = fs.readFileSync(navbarPath, 'utf8');
+assert(navbarContent.includes('UserAvatar'), 'Navbar renders UserAvatar component');
+assert(navbarContent.includes("onNavigate('student', 'profile')"), 'Navbar navigates to student profile');
+assert(navbarContent.includes("onNavigate('faculty-portal', 'profile')"), 'Navbar navigates to faculty profile');
+
+const updatedSidebarContent = fs.readFileSync(sidebarPath, 'utf8');
+assert(updatedSidebarContent.includes('UserAvatar'), 'Sidebar renders UserAvatar component');
+assert(updatedSidebarContent.includes("{ id: 'profile', label: 'Faculty Profile' }"), 'Sidebar provides Faculty Profile navigation item');
+
 console.log('\n====================================================');
 console.log(`Results: ${passedTests}/${totalTests} tests passed (${Math.round((passedTests / totalTests) * 100)}%)`);
 console.log('====================================================\n');

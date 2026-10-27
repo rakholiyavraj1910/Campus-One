@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { CampusOneLogo } from './CampusOneLogo';
+import { UserAvatar } from './UserAvatar';
 import { 
   Home, 
   GraduationCap, 
@@ -31,7 +32,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   currentSubTab,
   onNavigate
 }) => {
-  const { role } = useAuth();
+  const { role, user } = useAuth();
 
   // Close drawer on Escape key press
   useEffect(() => {
@@ -98,6 +99,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: 'Faculty Portal',
       icon: Users,
       badge: role === 'faculty' ? 'Authorized' : null,
+      subItems: [
+        { id: 'profile', label: 'Faculty Profile' },
+        { id: 'directory', label: 'Student Directory' },
+        { id: 'attendance', label: 'Record Attendance' },
+        { id: 'marks', label: 'Marks Evaluation' },
+        { id: 'assignments', label: 'Assignments' },
+        { id: 'materials', label: 'Study Materials' },
+        { id: 'announcements', label: 'Course Circulars' }
+      ]
     },
     {
       id: 'campus',
@@ -244,6 +254,39 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </button>
         </nav>
       </div>
+
+      {/* Authenticated User Profile Quick Pill */}
+      {role !== 'guest' && user.id !== 'guest' && (
+        <div className="pt-2 border-t border-slate-100 dark:border-navy-800">
+          <button
+            type="button"
+            onClick={() => {
+              if (role === 'student') handleNav('student', 'profile');
+              else if (role === 'faculty') handleNav('faculty-portal', 'profile');
+              else handleNav('admin', 'overview');
+            }}
+            className="w-full p-2.5 rounded-2xl bg-slate-50 dark:bg-navy-950/60 hover:bg-slate-100 dark:hover:bg-navy-800/80 border border-slate-200/80 dark:border-navy-800 flex items-center space-x-3 text-left transition-all group"
+            title="Open My Profile"
+          >
+            <UserAvatar
+              src={user.avatar}
+              name={user.name}
+              role={role}
+              size="sm"
+              ring
+            />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-slate-800 dark:text-white truncate group-hover:text-teal-600 dark:group-hover:text-teal-400">
+                {user.name}
+              </p>
+              <p className="text-[10px] text-slate-400 capitalize truncate">
+                {role} &bull; My Profile
+              </p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+          </button>
+        </div>
+      )}
     </div>
   );
 

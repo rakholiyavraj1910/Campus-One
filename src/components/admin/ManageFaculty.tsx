@@ -8,6 +8,7 @@ import {
 } from '../../lib/storageService';
 import { useNotifications } from '../../context/NotificationContext';
 import { ConfirmationModal } from './ConfirmationModal';
+import { UserAvatar } from '../common/UserAvatar';
 import { 
   Users, 
   Plus, 
@@ -305,10 +306,12 @@ export const ManageFaculty: React.FC<ManageFacultyProps> = ({
               <div>
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center space-x-3">
-                    <img
+                    <UserAvatar
                       src={fac.avatar}
-                      alt={fac.name}
-                      className="w-12 h-12 rounded-2xl object-cover border border-slate-200 dark:border-navy-700 shrink-0"
+                      name={fac.name}
+                      role="faculty"
+                      size="md"
+                      ring={false}
                     />
                     <div>
                       <h4 className="text-sm font-extrabold text-slate-900 dark:text-white group-hover:text-emerald-500 transition-colors line-clamp-1">
@@ -412,10 +415,12 @@ export const ManageFaculty: React.FC<ManageFacultyProps> = ({
             </button>
 
             <div className="flex items-center space-x-3 mb-4">
-              <img
+              <UserAvatar
                 src={viewingFaculty.avatar}
-                alt={viewingFaculty.name}
-                className="w-14 h-14 rounded-2xl object-cover border border-slate-200 dark:border-navy-700"
+                name={viewingFaculty.name}
+                role="faculty"
+                size="lg"
+                ring
               />
               <div>
                 <h3 className="text-base font-extrabold text-slate-900 dark:text-white">

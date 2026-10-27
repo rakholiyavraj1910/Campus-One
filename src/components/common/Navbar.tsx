@@ -23,6 +23,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { CampusOneLogo } from './CampusOneLogo';
+import { UserAvatar } from './UserAvatar';
 import { getBackendStatus, BackendStatus, subscribeToBackendHealth } from '../../lib/supabaseClient';
 
 interface NavbarProps {
@@ -204,10 +205,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onNavigate, cur
                   aria-label="User profile menu"
                   className="relative z-50 flex items-center space-x-2 p-1.5 pl-2 rounded-xl hover:bg-slate-100 dark:hover:bg-navy-800 border border-transparent hover:border-slate-200 dark:hover:border-navy-700 btn-tactile transition-all focus:outline-none"
                 >
-                <img
-                  src={user.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80'}
-                  alt={user.name}
-                  className="w-8 h-8 rounded-full object-cover ring-2 ring-brand-cyan/40"
+                <UserAvatar
+                  src={user.avatar}
+                  name={user.name}
+                  role={role}
+                  size="sm"
+                  ring
+                  showBadge
                 />
                 <div className="hidden lg:block text-left">
                   <div className="text-xs font-bold text-slate-800 dark:text-white leading-tight">
@@ -237,39 +241,69 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onNavigate, cur
                   </div>
 
                   <div className="py-1">
-                    <button
-                      onClick={() => onNavigate('student', 'profile')}
-                      className="w-full text-left px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-navy-800 flex items-center space-x-2"
-                    >
-                      <User className="w-4 h-4 text-brand-cyan" />
-                      <span>Student Academic Profile</span>
-                    </button>
-
-                    {(role === 'faculty' || role === 'admin') && (
+                    {/* Role-Adaptive Profile Link */}
+                    {role === 'student' && (
                       <button
-                        onClick={() => onNavigate('faculty-portal')}
-                        className="w-full text-left px-4 py-2 text-xs text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-navy-800 flex items-center space-x-2 font-semibold"
+                        onClick={() => onNavigate('student', 'profile')}
+                        className="w-full text-left px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-navy-800 flex items-center space-x-2 font-semibold"
                       >
-                        <GraduationCap className="w-4 h-4" />
-                        <span>Faculty Teaching Portal</span>
+                        <User className="w-4 h-4 text-brand-cyan" />
+                        <span>My Student Profile</span>
                       </button>
                     )}
 
-                    <button
-                      onClick={() => onNavigate('student', 'timetable')}
-                      className="w-full text-left px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-navy-800 flex items-center space-x-2"
-                    >
-                      <Calendar className="w-4 h-4 text-blue-500" />
-                      <span>Class Timetable</span>
-                    </button>
+                    {role === 'faculty' && (
+                      <>
+                        <button
+                          onClick={() => onNavigate('faculty-portal', 'profile')}
+                          className="w-full text-left px-4 py-2 text-xs text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-navy-800 flex items-center space-x-2 font-semibold"
+                        >
+                          <User className="w-4 h-4 text-teal-500" />
+                          <span>My Faculty Profile</span>
+                        </button>
+                        <button
+                          onClick={() => onNavigate('faculty-portal', 'directory')}
+                          className="w-full text-left px-4 py-2 text-xs text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-navy-800 flex items-center space-x-2 font-semibold"
+                        >
+                          <GraduationCap className="w-4 h-4" />
+                          <span>Faculty Teaching Portal</span>
+                        </button>
+                      </>
+                    )}
 
-                    {(role === 'admin' || role === 'faculty') && (
+                    {role === 'admin' && (
+                      <>
+                        <button
+                          onClick={() => onNavigate('admin', 'overview')}
+                          className="w-full text-left px-4 py-2 text-xs text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-navy-800 flex items-center space-x-2 font-semibold"
+                        >
+                          <ShieldCheck className="w-4 h-4 text-amber-500" />
+                          <span>Super Admin Control Center</span>
+                        </button>
+                        <button
+                          onClick={() => onNavigate('admin', 'students')}
+                          className="w-full text-left px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-navy-800 flex items-center space-x-2"
+                        >
+                          <User className="w-4 h-4 text-brand-cyan" />
+                          <span>Manage Student Profiles</span>
+                        </button>
+                        <button
+                          onClick={() => onNavigate('admin', 'faculty')}
+                          className="w-full text-left px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-navy-800 flex items-center space-x-2"
+                        >
+                          <GraduationCap className="w-4 h-4 text-blue-500" />
+                          <span>Manage Faculty Profiles</span>
+                        </button>
+                      </>
+                    )}
+
+                    {role === 'student' && (
                       <button
-                        onClick={() => onNavigate('admin')}
-                        className="w-full text-left px-4 py-2 text-xs text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-navy-800 flex items-center space-x-2 font-semibold"
+                        onClick={() => onNavigate('student', 'timetable')}
+                        className="w-full text-left px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-navy-800 flex items-center space-x-2"
                       >
-                        <ShieldCheck className="w-4 h-4" />
-                        <span>Staff Admin Panel</span>
+                        <Calendar className="w-4 h-4 text-blue-500" />
+                        <span>Class Timetable</span>
                       </button>
                     )}
                   </div>

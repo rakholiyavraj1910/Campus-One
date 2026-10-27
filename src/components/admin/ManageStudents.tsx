@@ -28,6 +28,7 @@ import {
   updateUserStatus 
 } from '../../lib/storageService';
 import { ConfirmationModal } from './ConfirmationModal';
+import { UserAvatar } from '../common/UserAvatar';
 
 interface ManageStudentsProps {
   initialDepartmentFilter?: string;
@@ -287,9 +288,13 @@ export const ManageStudents: React.FC<ManageStudentsProps> = ({
                     <tr key={student.id} className="hover:bg-slate-50 dark:hover:bg-navy-950/40 transition-colors">
                       <td className="py-3 px-4">
                         <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 rounded-full bg-brand-cyan/20 text-brand-cyan flex items-center justify-center font-bold text-xs shrink-0">
-                            {student.name.slice(0, 2).toUpperCase()}
-                          </div>
+                          <UserAvatar
+                            src={student.avatar}
+                            name={student.name}
+                            role="student"
+                            size="sm"
+                            ring={false}
+                          />
                           <div>
                             <p className="font-bold text-slate-900 dark:text-white leading-tight">
                               {student.name}
@@ -430,9 +435,13 @@ export const ManageStudents: React.FC<ManageStudentsProps> = ({
             </button>
 
             <div className="flex items-center space-x-3 mb-4">
-              <div className="w-12 h-12 rounded-2xl bg-brand-cyan/20 text-brand-cyan flex items-center justify-center font-extrabold text-sm">
-                {viewingStudent.name.slice(0, 2).toUpperCase()}
-              </div>
+              <UserAvatar
+                src={viewingStudent.avatar}
+                name={viewingStudent.name}
+                role="student"
+                size="lg"
+                ring
+              />
               <div>
                 <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
                   {viewingStudent.name}

@@ -501,14 +501,46 @@ BEGIN
     IF (OLD.admin_level IS DISTINCT FROM NEW.admin_level) THEN
       RAISE EXCEPTION 'Unauthorized: Only institutional administrators can modify admin levels or approval status.';
     END IF;
-    IF (OLD.cgpa IS DISTINCT FROM NEW.cgpa) THEN
-      RAISE EXCEPTION 'Unauthorized: Only institutional academic officers can modify student CGPA.';
-    END IF;
     IF (OLD.id IS DISTINCT FROM NEW.id) THEN
       RAISE EXCEPTION 'Unauthorized: Account ID cannot be altered.';
     END IF;
     IF (OLD.email IS DISTINCT FROM NEW.email) THEN
       RAISE EXCEPTION 'Unauthorized: Account email cannot be altered directly.';
+    END IF;
+
+    -- Student Protected Academic Fields
+    IF (OLD.role = 'student'::public.user_role_type) THEN
+      IF (OLD.cgpa IS DISTINCT FROM NEW.cgpa) THEN
+        RAISE EXCEPTION 'Unauthorized: Student CGPA is institutionally verified and cannot be self-edited.';
+      END IF;
+      IF (OLD.roll_number IS DISTINCT FROM NEW.roll_number) THEN
+        RAISE EXCEPTION 'Unauthorized: Student Roll Number is institutionally assigned and cannot be self-edited.';
+      END IF;
+      IF (OLD.prn IS DISTINCT FROM NEW.prn) THEN
+        RAISE EXCEPTION 'Unauthorized: Student PRN is institutionally assigned and cannot be self-edited.';
+      END IF;
+      IF (OLD.department IS DISTINCT FROM NEW.department) THEN
+        RAISE EXCEPTION 'Unauthorized: Academic Department assignment requires administrative registrar approval.';
+      END IF;
+      IF (OLD.semester IS DISTINCT FROM NEW.semester) THEN
+        RAISE EXCEPTION 'Unauthorized: Semester progression is controlled through official academic promotion.';
+      END IF;
+      IF (OLD.division IS DISTINCT FROM NEW.division) THEN
+        RAISE EXCEPTION 'Unauthorized: Division allocation is managed by the department academic coordinator.';
+      END IF;
+      IF (OLD.academic_year IS DISTINCT FROM NEW.academic_year) THEN
+        RAISE EXCEPTION 'Unauthorized: Academic year cannot be self-edited.';
+      END IF;
+    END IF;
+
+    -- Faculty Protected Administrative Fields
+    IF (OLD.role = 'faculty'::public.user_role_type) THEN
+      IF (OLD.department IS DISTINCT FROM NEW.department) THEN
+        RAISE EXCEPTION 'Unauthorized: Faculty department transfers must be processed by the administration.';
+      END IF;
+      IF (OLD.designation IS DISTINCT FROM NEW.designation) THEN
+        RAISE EXCEPTION 'Unauthorized: Academic designation is governed by institutional appointment.';
+      END IF;
     END IF;
   END IF;
 
@@ -712,7 +744,39 @@ CREATE POLICY "avatars_public_read" ON storage.objects FOR SELECT
 
 DROP POLICY IF EXISTS "avatars_user_upload" ON storage.objects;
 CREATE POLICY "avatars_user_upload" ON storage.objects FOR INSERT
-  WITH CHECK (bucket_id = 'avatars' AND auth.uid() IS NOT NULL);
+  WITH CHECK (
+    bucket_id = 'avatars' 
+    AND auth.uid() IS NOT NULL 
+    AND (
+      auth.uid()::text = (storage.foldername(name))[1]
+      OR auth.uid()::text = split_part(name, '/', 1)
+      OR public.is_admin()
+    )
+  );
+
+DROP POLICY IF EXISTS "avatars_user_update" ON storage.objects;
+CREATE POLICY "avatars_user_update" ON storage.objects FOR UPDATE
+  USING (
+    bucket_id = 'avatars' 
+    AND auth.uid() IS NOT NULL 
+    AND (
+      auth.uid()::text = (storage.foldername(name))[1]
+      OR auth.uid()::text = split_part(name, '/', 1)
+      OR public.is_admin()
+    )
+  );
+
+DROP POLICY IF EXISTS "avatars_user_delete" ON storage.objects;
+CREATE POLICY "avatars_user_delete" ON storage.objects FOR DELETE
+  USING (
+    bucket_id = 'avatars' 
+    AND auth.uid() IS NOT NULL 
+    AND (
+      auth.uid()::text = (storage.foldername(name))[1]
+      OR auth.uid()::text = split_part(name, '/', 1)
+      OR public.is_admin()
+    )
+  );
 
 DROP POLICY IF EXISTS "study_materials_public_read" ON storage.objects;
 CREATE POLICY "study_materials_public_read" ON storage.objects FOR SELECT
