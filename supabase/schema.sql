@@ -377,6 +377,7 @@ CREATE INDEX IF NOT EXISTS idx_assignment_submissions_student ON public.assignme
 CREATE OR REPLACE FUNCTION public.is_admin() 
 RETURNS BOOLEAN
 LANGUAGE plpgsql
+STABLE
 SECURITY DEFINER
 SET search_path = ''
 AS $$
@@ -508,9 +509,18 @@ BEGIN
   -- A. An active authenticated administrator session in PostgREST (auth.uid() matches an admin profile)
   IF public.is_admin() THEN
     v_is_authorized_admin := true;
-  -- B. A direct database administrator session executed by the database owner ('postgres')
-  --    without an external web user identity (auth.uid() IS NULL).
-  ELSIF pg_catalog.current_user = 'postgres' AND auth.uid() IS NULL THEN
+  -- B. Restricted database operator maintenance exception:
+  --    Must satisfy ALL of the following conditions simultaneously:
+  --    1. Explicit transaction-local configuration parameter set to 'true'
+  --    2. Current PostgreSQL session role is 'postgres' (PostgREST connections run as 'authenticated' or 'anon')
+  --    3. No external web JWT present (auth.uid() IS NULL)
+  --    4. Target email matches the authorized institutional administrator email
+  --    5. Target role is 'admin'::public.user_role_type
+  ELSIF pg_catalog.current_setting('campusone.admin_provisioning_in_progress', true) = 'true'
+        AND pg_catalog.current_user = 'postgres'
+        AND auth.uid() IS NULL
+        AND NEW.email = 'campusonegpa@gmail.com'
+        AND NEW.role = 'admin'::public.user_role_type THEN
     v_is_authorized_admin := true;
   END IF;
 
