@@ -430,32 +430,26 @@ SECURITY DEFINER
 SET search_path = ''
 AS $$
 DECLARE
-  assigned_role public.user_role_type;
+  assigned_role public.user_role_type := 'student'::public.user_role_type;
   assigned_admin_level TEXT;
   assigned_name TEXT;
   assigned_department TEXT;
   assigned_designation TEXT;
 BEGIN
-  -- Designate canonical institutional admin if registered via Supabase Auth
-  IF lower(NEW.email) = 'vibhusuvaliyacampusone@gpahmedabad.ac.in' THEN
-    assigned_role := 'admin'::public.user_role_type;
-    assigned_admin_level := 'Super Administrator';
-    assigned_name := COALESCE(NEW.raw_user_meta_data->>'name', 'Vibhu Suvaliya');
-    assigned_department := 'Central Administration';
-    assigned_designation := 'Chief Administrative Officer';
-  ELSE
-    -- Default security policy: Every other public signup receives ONLY the student role
-    assigned_role := 'student'::public.user_role_type;
-    assigned_admin_level := CASE 
-      WHEN NEW.raw_user_meta_data->>'admin_level' = 'pending_faculty' 
-        OR NEW.raw_user_meta_data->>'requested_role' = 'faculty'
-      THEN 'pending_faculty'
-      ELSE NULL 
-    END;
-    assigned_name := COALESCE(NEW.raw_user_meta_data->>'name', pg_catalog.split_part(NEW.email, '@', 1));
-    assigned_department := COALESCE(NEW.raw_user_meta_data->>'department', 'Computer Science & Engineering');
-    assigned_designation := NEW.raw_user_meta_data->>'designation';
-  END IF;
+  -- Strict security guarantee:
+  -- Every public registration via GoTrue receives exclusively student role.
+  -- Admin role assignment is NEVER granted automatically on signup by checking email address.
+  -- Administrative clearance must require an independently authorized provisioning action.
+  assigned_role := 'student'::public.user_role_type;
+  assigned_admin_level := CASE 
+    WHEN NEW.raw_user_meta_data->>'admin_level' = 'pending_faculty' 
+      OR NEW.raw_user_meta_data->>'requested_role' = 'faculty'
+    THEN 'pending_faculty'
+    ELSE NULL 
+  END;
+  assigned_name := COALESCE(NEW.raw_user_meta_data->>'name', pg_catalog.split_part(NEW.email, '@', 1));
+  assigned_department := COALESCE(NEW.raw_user_meta_data->>'department', 'Computer Science & Engineering');
+  assigned_designation := NEW.raw_user_meta_data->>'designation';
 
   INSERT INTO public.profiles (
     id,
@@ -489,14 +483,7 @@ BEGIN
     pg_catalog.now(),
     pg_catalog.now()
   )
-  ON CONFLICT (id) DO UPDATE SET
-    role = EXCLUDED.role,
-    admin_level = EXCLUDED.admin_level,
-    name = COALESCE(public.profiles.name, EXCLUDED.name),
-    department = COALESCE(public.profiles.department, EXCLUDED.department),
-    designation = COALESCE(public.profiles.designation, EXCLUDED.designation),
-    updated_at = pg_catalog.now()
-  WHERE lower(public.profiles.email) = 'vibhusuvaliyacampusone@gpahmedabad.ac.in';
+  ON CONFLICT (id) DO NOTHING;
 
   RETURN NEW;
 END;

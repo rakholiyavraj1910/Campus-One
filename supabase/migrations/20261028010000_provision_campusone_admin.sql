@@ -3,15 +3,17 @@
 -- Migration: 20261028010000_provision_campusone_admin.sql
 -- Description:
 --   Configures institutional administrator role governance for
---   username: vibhusuvaliyacampusone (email: vibhusuvaliyacampusone@gpahmedabad.ac.in)
+--   username: vibhusuvaliyacampusone (email: vibhusuvaliya@gmail.com)
 --   
---   SECURITY NOTICE:
+--   SECURITY & PRIVILEGE SEPARATION NOTICE:
 --   - Passwords and auth credentials MUST NEVER be stored in migrations or version control.
 --   - Direct manual INSERTs into auth.users and auth.identities are omitted to prevent
 --     GoTrue identity corruption and schema divergence across Supabase versions.
---   - Administrator authentication accounts must be registered via the Supabase Dashboard
---     (Authentication > Users > "Add user" with Auto Confirm enabled) or via the Supabase
---     Auth Admin API using a trusted server environment.
+--   - Email confirmation must remain enabled; do not fabricate synthetic email domains.
+--   - Public signups are strictly restricted to the 'student' role. Under NO circumstances
+--     does handle_new_user() automatically grant 'admin' role simply based on email address.
+--   - Administrator role promotion requires an independently authorized provisioning action
+--     executed in the Supabase SQL Editor by a trusted database operator.
 -- ==============================================================================
 
 -- 1. Ensure prevent_role_escalation permits database-level migrations (auth.uid() IS NULL)
@@ -84,7 +86,8 @@ CREATE TRIGGER trg_prevent_role_escalation
   BEFORE UPDATE ON public.profiles
   FOR EACH ROW EXECUTE FUNCTION public.prevent_role_escalation();
 
--- 2. Update handle_new_user() to automatically assign admin clearance to the official admin email
+-- 2. Strict handle_new_user() Trigger: Public signups receive ONLY the student role
+-- No automatic admin elevation is performed on signup by email matching.
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -92,32 +95,25 @@ SECURITY DEFINER
 SET search_path = ''
 AS $$
 DECLARE
-  assigned_role public.user_role_type;
+  assigned_role public.user_role_type := 'student'::public.user_role_type;
   assigned_admin_level TEXT;
   assigned_name TEXT;
   assigned_department TEXT;
   assigned_designation TEXT;
 BEGIN
-  -- Designate canonical institutional admin if registered via Supabase Auth
-  IF lower(NEW.email) = 'vibhusuvaliyacampusone@gpahmedabad.ac.in' THEN
-    assigned_role := 'admin'::public.user_role_type;
-    assigned_admin_level := 'Super Administrator';
-    assigned_name := COALESCE(NEW.raw_user_meta_data->>'name', 'Vibhu Suvaliya');
-    assigned_department := 'Central Administration';
-    assigned_designation := 'Chief Administrative Officer';
-  ELSE
-    -- Default security policy: Every other public signup receives ONLY the student role
-    assigned_role := 'student'::public.user_role_type;
-    assigned_admin_level := CASE 
-      WHEN NEW.raw_user_meta_data->>'admin_level' = 'pending_faculty' 
-        OR NEW.raw_user_meta_data->>'requested_role' = 'faculty'
-      THEN 'pending_faculty'
-      ELSE NULL 
-    END;
-    assigned_name := COALESCE(NEW.raw_user_meta_data->>'name', pg_catalog.split_part(NEW.email, '@', 1));
-    assigned_department := COALESCE(NEW.raw_user_meta_data->>'department', 'Computer Science & Engineering');
-    assigned_designation := NEW.raw_user_meta_data->>'designation';
-  END IF;
+  -- Strict security guarantee:
+  -- Every public registration via GoTrue receives exclusively student role.
+  -- Faculty requests are flagged with pending_faculty for admin review.
+  assigned_role := 'student'::public.user_role_type;
+  assigned_admin_level := CASE 
+    WHEN NEW.raw_user_meta_data->>'admin_level' = 'pending_faculty' 
+      OR NEW.raw_user_meta_data->>'requested_role' = 'faculty'
+    THEN 'pending_faculty'
+    ELSE NULL 
+  END;
+  assigned_name := COALESCE(NEW.raw_user_meta_data->>'name', pg_catalog.split_part(NEW.email, '@', 1));
+  assigned_department := COALESCE(NEW.raw_user_meta_data->>'department', 'Computer Science & Engineering');
+  assigned_designation := NEW.raw_user_meta_data->>'designation';
 
   INSERT INTO public.profiles (
     id,
@@ -151,27 +147,24 @@ BEGIN
     pg_catalog.now(),
     pg_catalog.now()
   )
-  ON CONFLICT (id) DO UPDATE SET
-    role = EXCLUDED.role,
-    admin_level = EXCLUDED.admin_level,
-    name = COALESCE(public.profiles.name, EXCLUDED.name),
-    department = COALESCE(public.profiles.department, EXCLUDED.department),
-    designation = COALESCE(public.profiles.designation, EXCLUDED.designation),
-    updated_at = pg_catalog.now()
-  WHERE lower(public.profiles.email) = 'vibhusuvaliyacampusone@gpahmedabad.ac.in';
+  ON CONFLICT (id) DO NOTHING;
 
   RETURN NEW;
 END;
 $$;
 
--- 3. Idempotently promote the admin account if already present in auth.users
+-- 3. Independent Administrator Account Role Promotion
+-- This block is executed independently by the database administrator in the Supabase SQL editor.
+-- It links the confirmed administrator auth user to full administrative clearance in public.profiles.
 DO $$
 DECLARE
   v_admin_id UUID;
+  v_admin_email TEXT := 'vibhusuvaliya@gmail.com';
 BEGIN
+  -- Locate the authorized admin account in auth.users
   SELECT id INTO v_admin_id
   FROM auth.users
-  WHERE lower(email) = 'vibhusuvaliyacampusone@gpahmedabad.ac.in'
+  WHERE lower(email) = lower(v_admin_email)
   LIMIT 1;
 
   IF v_admin_id IS NOT NULL THEN
@@ -187,7 +180,7 @@ BEGIN
       updated_at
     ) VALUES (
       v_admin_id,
-      'vibhusuvaliyacampusone@gpahmedabad.ac.in',
+      v_admin_email,
       'Vibhu Suvaliya',
       'admin'::public.user_role_type,
       'Central Administration',

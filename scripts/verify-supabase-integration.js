@@ -478,7 +478,7 @@ const adminAuthLibPath = path.join(rootDir, 'src', 'lib', 'adminAuth.ts');
 assert(fs.existsSync(adminAuthLibPath), 'src/lib/adminAuth.ts exists');
 const adminAuthLibContent = fs.readFileSync(adminAuthLibPath, 'utf8');
 assert(adminAuthLibContent.includes('vibhusuvaliyacampusone'), 'adminAuth.ts defines DEFAULT_ADMIN_USERNAME = vibhusuvaliyacampusone');
-assert(adminAuthLibContent.includes('vibhusuvaliyacampusone@gpahmedabad.ac.in'), 'adminAuth.ts defines DEFAULT_ADMIN_EMAIL canonical address');
+assert(adminAuthLibContent.includes('vibhusuvaliya@gmail.com'), 'adminAuth.ts defines DEFAULT_ADMIN_EMAIL canonical address');
 assert(!adminAuthLibContent.includes('FALLBACK_ADMIN_EMAIL'), 'adminAuth.ts does not define fallback non-canonical admin emails');
 assert(!adminAuthLibContent.includes('@campusone.edu'), 'adminAuth.ts enforces single canonical institutional domain');
 assert(adminAuthLibContent.includes('resolveAdminCandidateEmails'), 'adminAuth.ts exports resolveAdminCandidateEmails');
@@ -519,16 +519,17 @@ assert(adminDashboardContent.includes('AdminAccessDenied'), 'AdminDashboard rend
 const migrationAdminPath = path.join(rootDir, 'supabase', 'migrations', '20261028010000_provision_campusone_admin.sql');
 assert(fs.existsSync(migrationAdminPath), '20261028010000_provision_campusone_admin.sql exists');
 const migrationAdminContent = fs.readFileSync(migrationAdminPath, 'utf8');
-assert(migrationAdminContent.includes('vibhusuvaliyacampusone@gpahmedabad.ac.in'), 'Admin migration provisions vibhusuvaliyacampusone@gpahmedabad.ac.in');
+assert(migrationAdminContent.includes('vibhusuvaliya@gmail.com'), 'Admin migration provisions vibhusuvaliya@gmail.com');
 assert(migrationAdminContent.includes("'admin'::public.user_role_type"), 'Admin migration strictly assigns admin user_role_type');
 assert(migrationAdminContent.includes('auth.uid() IS NOT NULL AND NOT public.is_admin()'), 'Admin migration updates prevent_role_escalation for database operations');
 assert(!migrationAdminContent.includes('INSERT INTO auth.users'), 'Admin migration omits direct manual auth.users INSERTs');
 assert(!migrationAdminContent.includes('INSERT INTO auth.identities'), 'Admin migration omits direct manual auth.identities INSERTs');
 assert(!migrationAdminContent.includes('extensions.crypt'), 'Admin migration does not store encrypted passwords in SQL');
-assert(migrationAdminContent.includes('handle_new_user()'), 'Admin migration updates handle_new_user for automatic admin role assignment');
+assert(migrationAdminContent.includes('handle_new_user()'), 'Admin migration updates handle_new_user for unprivileged default assignments');
+assert(!migrationAdminContent.includes("IF lower(NEW.email) ="), 'handle_new_user does not grant admin role based on signup email matching');
 
 const freshMockDataContent = fs.readFileSync(mockDataPath, 'utf8');
-assert(freshMockDataContent.includes('vibhusuvaliyacampusone@gpahmedabad.ac.in'), 'DEMO_USERS.admin configured with vibhusuvaliyacampusone@gpahmedabad.ac.in');
+assert(freshMockDataContent.includes('vibhusuvaliya@gmail.com'), 'DEMO_USERS.admin configured with vibhusuvaliya@gmail.com');
 
 console.log('\n16. Checking Super Admin Dashboard & Governance Architecture:');
 const confirmationModalPath = path.join(rootDir, 'src', 'components', 'admin', 'ConfirmationModal.tsx');

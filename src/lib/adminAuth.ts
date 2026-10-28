@@ -8,7 +8,10 @@
  */
 
 export const DEFAULT_ADMIN_USERNAME = 'vibhusuvaliyacampusone';
-export const DEFAULT_ADMIN_EMAIL = 'vibhusuvaliyacampusone@gpahmedabad.ac.in';
+export const DEFAULT_ADMIN_EMAIL = 
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_ADMIN_EMAIL)
+    ? String(import.meta.env.VITE_ADMIN_EMAIL).trim().toLowerCase()
+    : 'vibhusuvaliya@gmail.com';
 
 /**
  * Normalizes an administrative username or email address into a canonical
@@ -16,7 +19,7 @@ export const DEFAULT_ADMIN_EMAIL = 'vibhusuvaliyacampusone@gpahmedabad.ac.in';
  * 
  * Guarantees a single, deterministic institutional email resolution:
  * - The dedicated admin username ("vibhusuvaliyacampusone") deterministically maps
- *   exclusively to "vibhusuvaliyacampusone@gpahmedabad.ac.in".
+ *   exclusively to the verified administrator email (e.g. "vibhusuvaliya@gmail.com").
  * - Fully qualified email addresses are normalized and preserved.
  * - Arbitrary usernames without '@' are NOT synthesized into fake emails, preventing
  *   silent generation of multiple identities.
@@ -25,7 +28,7 @@ export function resolveAdminCandidateEmails(identifier: string): string[] {
   const trimmed = (identifier || '').trim().toLowerCase();
   if (!trimmed) return [];
 
-  // Deterministically map dedicated admin username strictly to canonical institutional email
+  // Deterministically map dedicated admin username strictly to canonical email
   if (trimmed === DEFAULT_ADMIN_USERNAME.toLowerCase()) {
     return [DEFAULT_ADMIN_EMAIL];
   }

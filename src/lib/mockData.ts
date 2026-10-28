@@ -56,7 +56,7 @@ export const DEMO_USERS: Record<string, UserProfile> = {
   admin: {
     id: 'user-admin-1',
     name: 'Vibhu Suvaliya',
-    email: 'vibhusuvaliyacampusone@gpahmedabad.ac.in',
+    email: 'vibhusuvaliya@gmail.com',
     role: 'admin',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=250&q=80',
     phone: '+91 99000 11223',
