@@ -477,8 +477,8 @@ console.log('\n15. Checking Dedicated Admin Login & Security Hardening:');
 const adminAuthLibPath = path.join(rootDir, 'src', 'lib', 'adminAuth.ts');
 assert(fs.existsSync(adminAuthLibPath), 'src/lib/adminAuth.ts exists');
 const adminAuthLibContent = fs.readFileSync(adminAuthLibPath, 'utf8');
-assert(adminAuthLibContent.includes('vibhusuvaliyacampusone'), 'adminAuth.ts defines DEFAULT_ADMIN_USERNAME = vibhusuvaliyacampusone');
-assert(adminAuthLibContent.includes('vibhusuvaliya@gmail.com'), 'adminAuth.ts defines DEFAULT_ADMIN_EMAIL canonical address');
+assert(adminAuthLibContent.includes('campusonegpa@gmail.com'), 'adminAuth.ts defines DEFAULT_ADMIN_EMAIL canonical address');
+assert(adminAuthLibContent.includes('DEFAULT_ADMIN_EMAIL'), 'adminAuth.ts defines DEFAULT_ADMIN_EMAIL');
 assert(!adminAuthLibContent.includes('FALLBACK_ADMIN_EMAIL'), 'adminAuth.ts does not define fallback non-canonical admin emails');
 assert(!adminAuthLibContent.includes('@campusone.edu'), 'adminAuth.ts enforces single canonical institutional domain');
 assert(adminAuthLibContent.includes('resolveAdminCandidateEmails'), 'adminAuth.ts exports resolveAdminCandidateEmails');
@@ -504,7 +504,8 @@ scanDirForSecret(path.join(rootDir, 'supabase'), 'vibhu1411');
 
 const adminAuthPagePath = path.join(rootDir, 'src', 'components', 'auth', 'AdminAuthPage.tsx');
 const adminAuthPageContent = fs.readFileSync(adminAuthPagePath, 'utf8');
-assert(adminAuthPageContent.includes('DEFAULT_ADMIN_USERNAME'), 'AdminAuthPage references DEFAULT_ADMIN_USERNAME');
+assert(adminAuthPageContent.includes('DEFAULT_ADMIN_EMAIL'), 'AdminAuthPage references DEFAULT_ADMIN_EMAIL');
+assert(adminAuthPageContent.includes('Administrator Email Address'), 'AdminAuthPage uses Administrator Email Address label');
 assert(adminAuthPageContent.includes('showPassword'), 'AdminAuthPage implements password visibility toggle state');
 assert(adminAuthPageContent.includes('Eye') && adminAuthPageContent.includes('EyeOff'), 'AdminAuthPage renders Eye/EyeOff toggle buttons');
 assert(adminAuthPageContent.includes('isSubmitting'), 'AdminAuthPage implements loading indicator state');
@@ -516,10 +517,10 @@ assert(adminAuthPageContent.includes('await signOut()'), 'AdminAuthPage revokes 
 assert(adminDashboardContent.includes("role !== 'admin'"), 'AdminDashboard checks role !== admin');
 assert(adminDashboardContent.includes('AdminAccessDenied'), 'AdminDashboard renders AdminAccessDenied for non-admin users');
 
-const migrationAdminPath = path.join(rootDir, 'supabase', 'migrations', '20261028010000_provision_campusone_admin.sql');
-assert(fs.existsSync(migrationAdminPath), '20261028010000_provision_campusone_admin.sql exists');
+const migrationAdminPath = path.join(rootDir, 'supabase', 'migrations', '20261028040000_configure_campusone_admin_email.sql');
+assert(fs.existsSync(migrationAdminPath), '20261028040000_configure_campusone_admin_email.sql exists');
 const migrationAdminContent = fs.readFileSync(migrationAdminPath, 'utf8');
-assert(migrationAdminContent.includes('vibhusuvaliya@gmail.com'), 'Admin migration provisions vibhusuvaliya@gmail.com');
+assert(migrationAdminContent.includes('campusonegpa@gmail.com'), 'Admin migration provisions campusonegpa@gmail.com');
 assert(migrationAdminContent.includes("'admin'::public.user_role_type"), 'Admin migration strictly assigns admin user_role_type');
 assert(migrationAdminContent.includes('auth.uid() IS NOT NULL AND NOT public.is_admin()'), 'Admin migration updates prevent_role_escalation for database operations');
 assert(!migrationAdminContent.includes('INSERT INTO auth.users'), 'Admin migration omits direct manual auth.users INSERTs');
@@ -529,7 +530,7 @@ assert(migrationAdminContent.includes('handle_new_user()'), 'Admin migration upd
 assert(!migrationAdminContent.includes("IF lower(NEW.email) ="), 'handle_new_user does not grant admin role based on signup email matching');
 
 const freshMockDataContent = fs.readFileSync(mockDataPath, 'utf8');
-assert(freshMockDataContent.includes('vibhusuvaliya@gmail.com'), 'DEMO_USERS.admin configured with vibhusuvaliya@gmail.com');
+assert(freshMockDataContent.includes('campusonegpa@gmail.com'), 'DEMO_USERS.admin configured with campusonegpa@gmail.com');
 
 console.log('\n16. Checking Super Admin Dashboard & Governance Architecture:');
 const confirmationModalPath = path.join(rootDir, 'src', 'components', 'admin', 'ConfirmationModal.tsx');

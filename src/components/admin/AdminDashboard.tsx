@@ -217,7 +217,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             Central Institutional Governance Suite
           </h2>
           <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-            Logged in as <strong className="text-white font-semibold">{user.name}</strong> (<code className="text-teal-300 text-xs font-mono">{user.email || 'vibhusuvaliyacampusone'}</code>). Real-time telemetry, 14 academic departments, instructional staff, student directory, and infrastructure control.
+            Logged in as <strong className="text-white font-semibold">{user.name}</strong> (<code className="text-teal-300 text-xs font-mono">{user.email || 'campusonegpa@gmail.com'}</code>). Real-time telemetry, 14 academic departments, instructional staff, student directory, and infrastructure control.
           </p>
         </div>
 

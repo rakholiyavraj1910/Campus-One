@@ -236,7 +236,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const inputId = identifier.toLowerCase();
         if (userEmail === inputId) return true;
         if (candidateEmails.some(c => c === userEmail)) return true;
-        if (u.role === 'admin' && (inputId === 'vibhusuvaliyacampusone' || inputId.startsWith('vibhusuvaliya'))) {
+        if (u.role === 'admin' && (inputId === 'campusonegpa@gmail.com' || inputId === 'campusonegpa' || inputId === 'vibhusuvaliyacampusone' || inputId.startsWith('vibhusuvaliya'))) {
           return true;
         }
         return false;

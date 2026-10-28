@@ -13,11 +13,11 @@ import {
   Eye,
   EyeOff,
   Loader2,
-  UserCheck,
   Mail
 } from 'lucide-react';
 import { CampusOneLogo } from '../common/CampusOneLogo';
 import { 
+  DEFAULT_ADMIN_EMAIL,
   DEFAULT_ADMIN_USERNAME, 
   validateAdminInput, 
   resolveAdminCandidateEmails 
@@ -69,7 +69,7 @@ export const AdminAuthPage: React.FC<AdminAuthPageProps> = ({
         const rawErr = result.error || '';
         
         if (rawErr.toLowerCase().includes('invalid login credentials')) {
-          setFormError('Invalid administrator credentials. Please check your username and master password.');
+          setFormError('Invalid administrator credentials. Please check your email and master password.');
         } else if (rawErr.toLowerCase().includes('email not confirmed')) {
           setFormError(
             'Administrator account email confirmation is pending in Supabase Auth. In Supabase Dashboard (Authentication > Users), confirm the user email, or check your institutional inbox.'
@@ -96,10 +96,25 @@ export const AdminAuthPage: React.FC<AdminAuthPageProps> = ({
             await signOut();
             setIsSubmitting(false);
             setFormError(
-              `Access Denied: The authenticated account does not possess institutional administrator clearance in the PostgreSQL database.`
+              'Access Denied: This account does not possess institutional administrator clearance. Student and faculty accounts cannot access the Admin Control Center.'
             );
             return;
           }
+        }
+      } else {
+        // Offline / demo fallback check: strictly permit only authorized admin accounts
+        const normalizedInput = identifier.trim().toLowerCase();
+        const isAdminInput = normalizedInput === DEFAULT_ADMIN_EMAIL.toLowerCase() ||
+                             normalizedInput === 'campusonegpa' ||
+                             normalizedInput === 'vibhusuvaliyacampusone' ||
+                             normalizedInput.startsWith('admin');
+        if (!isAdminInput) {
+          await signOut();
+          setIsSubmitting(false);
+          setFormError(
+            'Access Denied: This account does not possess institutional administrator clearance. Student and faculty accounts cannot access the Admin Control Center.'
+          );
+          return;
         }
       }
 
@@ -123,7 +138,7 @@ export const AdminAuthPage: React.FC<AdminAuthPageProps> = ({
     setSuccessMessage(null);
 
     if (!identifier.trim()) {
-      setFormError('Please enter your administrator username or institutional email address.');
+      setFormError('Please enter your administrator email address.');
       return;
     }
 
@@ -131,7 +146,7 @@ export const AdminAuthPage: React.FC<AdminAuthPageProps> = ({
     const candidateEmails = resolveAdminCandidateEmails(identifier.trim());
     if (candidateEmails.length === 0) {
       setIsSubmitting(false);
-      setFormError('Unrecognized administrator identifier. Please enter the configured administrator username ("vibhusuvaliyacampusone") or your registered institutional administrator email.');
+      setFormError('Please enter a valid administrator email address (e.g. campusonegpa@gmail.com).');
       return;
     }
     const targetEmail = candidateEmails[0];
@@ -140,7 +155,7 @@ export const AdminAuthPage: React.FC<AdminAuthPageProps> = ({
     setIsSubmitting(false);
 
     if (result.success) {
-      setSuccessMessage(`Password recovery instructions dispatched to ${targetEmail}.`);
+      setSuccessMessage(`Password recovery instructions dispatched to ${targetEmail}. Please check your inbox.`);
     } else {
       setFormError(result.error || 'Unable to send password recovery instructions.');
     }
@@ -197,8 +212,8 @@ export const AdminAuthPage: React.FC<AdminAuthPageProps> = ({
             </h1>
             <p className="text-xs text-slate-400">
               {mode === 'signin'
-                ? 'Sign in with your verified institutional administrator credentials.'
-                : 'Enter your administrative username or email to receive password recovery.'}
+                ? 'Sign in with your verified institutional administrator email.'
+                : 'Enter your administrative email to receive password recovery instructions.'}
             </p>
           </div>
 
@@ -232,21 +247,21 @@ export const AdminAuthPage: React.FC<AdminAuthPageProps> = ({
           {mode === 'signin' ? (
             <form onSubmit={handleAdminSignIn} className="space-y-4" noValidate>
               <div>
-                <label htmlFor="admin-username" className="block text-xs font-bold text-slate-300 mb-1">
-                  Administrator Username or Email
+                <label htmlFor="admin-email" className="block text-xs font-bold text-slate-300 mb-1">
+                  Administrator Email Address
                 </label>
                 <div className="relative">
-                  <UserCheck className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                  <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                   <input
-                    id="admin-username"
-                    name="username"
-                    type="text"
+                    id="admin-email"
+                    name="email"
+                    type="email"
                     required
                     disabled={isSubmitting}
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
-                    placeholder={DEFAULT_ADMIN_USERNAME}
-                    autoComplete="username"
+                    placeholder={DEFAULT_ADMIN_EMAIL}
+                    autoComplete="email"
                     className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-navy-950 border border-navy-700 text-white placeholder:text-slate-500 focus:outline-none focus:border-amber-400 disabled:opacity-50 transition-colors"
                   />
                 </div>
@@ -313,20 +328,21 @@ export const AdminAuthPage: React.FC<AdminAuthPageProps> = ({
           ) : (
             <form onSubmit={handleForgot} className="space-y-4" noValidate>
               <div>
-                <label htmlFor="admin-recovery-identifier" className="block text-xs font-bold text-slate-300 mb-1">
-                  Administrator Username or Email
+                <label htmlFor="admin-recovery-email" className="block text-xs font-bold text-slate-300 mb-1">
+                  Administrator Email Address
                 </label>
                 <div className="relative">
                   <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                   <input
-                    id="admin-recovery-identifier"
-                    name="recovery-identifier"
-                    type="text"
+                    id="admin-recovery-email"
+                    name="recovery-email"
+                    type="email"
                     required
                     disabled={isSubmitting}
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
-                    placeholder={DEFAULT_ADMIN_USERNAME}
+                    placeholder={DEFAULT_ADMIN_EMAIL}
+                    autoComplete="email"
                     className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-navy-950 border border-navy-700 text-white placeholder:text-slate-500 focus:outline-none focus:border-amber-400 disabled:opacity-50"
                   />
                 </div>
