@@ -77,7 +77,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     },
     {
       id: 'users',
-      label: 'User Management',
+      label: 'User & Role Management',
       icon: Users,
       description: 'Directory, profiles & search'
     },

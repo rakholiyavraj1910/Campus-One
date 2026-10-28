@@ -11,7 +11,8 @@ import {
   ExternalLink,
   ChevronDown,
   Sparkles,
-  Database
+  Database,
+  Users
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { UserProfile } from '../../types';
@@ -233,6 +234,17 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
               >
                 <ShieldCheck className="w-4 h-4 text-teal-400" />
                 <span>My Admin Profile</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  onSelectSection('users');
+                  setIsAccountOpen(false);
+                }}
+                className="w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800/80 transition-colors text-left"
+              >
+                <Users className="w-4 h-4 text-slate-400" />
+                <span>User & Role Management</span>
               </button>
 
               <button

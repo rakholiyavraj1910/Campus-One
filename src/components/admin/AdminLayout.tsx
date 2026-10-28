@@ -48,6 +48,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     if (sec === 'faculty-requests') return 'approvals';
     if (sec === 'system' || sec === 'database') return 'settings';
     if (sec === 'profile' || sec === 'my-profile' || sec === 'identity' || sec === 'account') return 'profile';
+    if (sec === 'users' || sec === 'user-management' || sec === 'user-roles' || sec === 'manage-users') return 'users';
+    if (sec === 'roles' || sec === 'role-management' || sec === 'permissions') return 'roles';
     return valid.includes(sec as AdminSectionId) ? (sec as AdminSectionId) : 'overview';
   };
 

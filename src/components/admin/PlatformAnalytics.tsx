@@ -160,7 +160,16 @@ export const PlatformAnalytics: React.FC<PlatformAnalyticsProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center space-x-2 shrink-0">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => onNavigateTab('users')}
+            className="px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold flex items-center space-x-1.5 transition-colors cursor-pointer btn-tactile shadow-xs"
+            title="Open User & Role Management"
+          >
+            <Users className="w-3.5 h-3.5" />
+            <span>User & Role Management</span>
+          </button>
           <button
             type="button"
             onClick={handleManualRefresh}
