@@ -28,6 +28,8 @@ import { CampusHub } from './components/campus/CampusHub';
 import { NoticesList } from './components/notices/NoticesList';
 import { EventsList } from './components/events/EventsList';
 import { AdminDashboard } from './components/admin/AdminDashboard';
+import { AdminLayout } from './components/admin/AdminLayout';
+import { AdminAccessDenied } from './components/admin/AdminAccessDenied';
 import { AboutPage } from './components/public/AboutPage';
 import { ContactPage } from './components/public/ContactPage';
 
@@ -108,7 +110,7 @@ function getPageFromLocation(): ParsedLocation {
 }
 
 const MainLayout: React.FC = () => {
-  const { user, role, isAuthenticated, isPending, loading } = useAuth();
+  const { user, role, isAuthenticated, isPending, loading, signOut } = useAuth();
   
   const initialLoc = getPageFromLocation();
   const [currentPage, setCurrentPage] = useState<string>(initialLoc.page);
@@ -330,13 +332,69 @@ const MainLayout: React.FC = () => {
     }
   }
 
-  // Active admin authentication page guard for authenticated non-admin roles
-  if (currentPage === 'admin-auth' && role !== 'admin') {
+  // =========================================================================
+  // DEDICATED SUPER ADMIN CONTROL CENTER (COMPLETELY STANDALONE ARCHITECTURE)
+  // Strictly isolated from Student Portal & Faculty Portal layouts & widgets
+  // =========================================================================
+
+  // A. Dedicated Admin Authentication Route (/admin/login)
+  if (currentPage === 'admin-auth') {
+    if (isAuthenticated && role === 'admin') {
+      return (
+        <AdminLayout
+          initialSection={currentSubTab || 'overview'}
+          onNavigateSection={(sec) => handleNavigate('admin', sec)}
+          onSignOut={async () => {
+            await signOut();
+            handleNavigate('admin-auth');
+          }}
+          onNavigatePublic={() => handleNavigate('portal-select')}
+        />
+      );
+    }
+
     return (
       <AdminAuthPage
         onLoginSuccess={() => handleNavigate('admin')}
         onNavigateHub={() => handleNavigate('portal-select')}
         onSwitchPortal={(p) => handleNavigate(p === 'student' ? 'student-auth' : 'faculty-auth')}
+      />
+    );
+  }
+
+  // B. Dedicated Admin Control Center Route (/admin and sub-sections)
+  if (currentPage === 'admin') {
+    // 1. Not Authenticated -> Show dedicated admin login
+    if (!isAuthenticated) {
+      return (
+        <AdminAuthPage
+          onLoginSuccess={() => handleNavigate('admin')}
+          onNavigateHub={() => handleNavigate('portal-select')}
+          onSwitchPortal={(p) => handleNavigate(p === 'student' ? 'student-auth' : 'faculty-auth')}
+        />
+      );
+    }
+
+    // 2. Authenticated but non-admin role -> Strictly Deny Access with dedicated screen
+    if (role !== 'admin') {
+      return (
+        <AdminAccessDenied
+          onNavigateLogin={() => handleNavigate('admin-auth')}
+          onNavigatePortal={() => handleNavigate(role === 'faculty' ? 'faculty-portal' : 'student')}
+        />
+      );
+    }
+
+    // 3. Authorized Super Administrator -> Render Standalone AdminLayout
+    return (
+      <AdminLayout
+        initialSection={currentSubTab || 'overview'}
+        onNavigateSection={(sec) => handleNavigate('admin', sec)}
+        onSignOut={async () => {
+          await signOut();
+          handleNavigate('admin-auth');
+        }}
+        onNavigatePublic={() => handleNavigate('portal-select')}
       />
     );
   }

@@ -745,6 +745,77 @@ assert(freshStorageContent.includes('export const changeUserRole'), 'storageServ
 assert(freshStorageContent.includes('export const sendUserPasswordReset'), 'storageService exports sendUserPasswordReset');
 assert(freshStorageContent.includes('export const findMohiniMishraAccounts'), 'storageService exports findMohiniMishraAccounts');
 
+console.log('\n20. Checking Completely Separate Super Admin Panel Architecture:');
+const adminLayoutPath = path.join(rootDir, 'src', 'components', 'admin', 'AdminLayout.tsx');
+assert(fs.existsSync(adminLayoutPath), 'AdminLayout.tsx exists');
+const adminLayoutContent = fs.readFileSync(adminLayoutPath, 'utf8');
+assert(adminLayoutContent.includes('AdminSidebar'), 'AdminLayout imports AdminSidebar');
+assert(adminLayoutContent.includes('AdminHeader'), 'AdminLayout imports AdminHeader');
+assert(adminLayoutContent.includes('PlatformAnalytics'), 'AdminLayout renders PlatformAnalytics for overview');
+assert(adminLayoutContent.includes('ManageUsers'), 'AdminLayout renders ManageUsers');
+assert(adminLayoutContent.includes('ManageStudents'), 'AdminLayout renders ManageStudents');
+assert(adminLayoutContent.includes('ManageFaculty'), 'AdminLayout renders ManageFaculty');
+assert(adminLayoutContent.includes('ManageRolesAndPermissions'), 'AdminLayout renders ManageRolesAndPermissions');
+assert(adminLayoutContent.includes('ManageFacultyRequests'), 'AdminLayout renders ManageFacultyRequests');
+assert(adminLayoutContent.includes('ManageDepartments'), 'AdminLayout renders ManageDepartments');
+assert(adminLayoutContent.includes('ManageNoticesAndEvents'), 'AdminLayout renders ManageNoticesAndEvents');
+assert(adminLayoutContent.includes('ManageAcademicRecords'), 'AdminLayout renders ManageAcademicRecords');
+assert(adminLayoutContent.includes('AuditLogsViewer'), 'AdminLayout renders AuditLogsViewer');
+assert(adminLayoutContent.includes('SystemSettings'), 'AdminLayout renders SystemSettings');
+
+const adminSidebarPath = path.join(rootDir, 'src', 'components', 'admin', 'AdminSidebar.tsx');
+assert(fs.existsSync(adminSidebarPath), 'AdminSidebar.tsx exists');
+const adminSidebarContent = fs.readFileSync(adminSidebarPath, 'utf8');
+assert(adminSidebarContent.includes("'overview'"), 'AdminSidebar includes overview navigation');
+assert(adminSidebarContent.includes("'users'"), 'AdminSidebar includes users navigation');
+assert(adminSidebarContent.includes("'students'"), 'AdminSidebar includes students navigation');
+assert(adminSidebarContent.includes("'faculty'"), 'AdminSidebar includes faculty navigation');
+assert(adminSidebarContent.includes("'roles'"), 'AdminSidebar includes roles navigation');
+assert(adminSidebarContent.includes("'approvals'"), 'AdminSidebar includes approvals navigation');
+assert(adminSidebarContent.includes("'departments'"), 'AdminSidebar includes departments navigation');
+assert(adminSidebarContent.includes("'notices-events'"), 'AdminSidebar includes notices-events navigation');
+assert(adminSidebarContent.includes("'academic'"), 'AdminSidebar includes academic navigation');
+assert(adminSidebarContent.includes("'audit'"), 'AdminSidebar includes audit navigation');
+assert(adminSidebarContent.includes("'settings'"), 'AdminSidebar includes settings navigation');
+assert(adminSidebarContent.includes('onSignOut'), 'AdminSidebar includes dedicated onSignOut handler');
+
+const adminHeaderPath = path.join(rootDir, 'src', 'components', 'admin', 'AdminHeader.tsx');
+assert(fs.existsSync(adminHeaderPath), 'AdminHeader.tsx exists');
+const adminHeaderContent = fs.readFileSync(adminHeaderPath, 'utf8');
+assert(adminHeaderContent.includes('bbtjbazbeyedxjfgnfcm'), 'AdminHeader displays Supabase project ref');
+assert(adminHeaderContent.includes('SUPER ADMIN'), 'AdminHeader displays SUPER ADMIN clearance');
+assert(adminHeaderContent.includes('onSignOut'), 'AdminHeader provides Sign Out action');
+
+const dedicatedAccessDeniedPath = path.join(rootDir, 'src', 'components', 'admin', 'AdminAccessDenied.tsx');
+assert(fs.existsSync(dedicatedAccessDeniedPath), 'AdminAccessDenied.tsx exists');
+const dedicatedAccessDeniedContent = fs.readFileSync(dedicatedAccessDeniedPath, 'utf8');
+assert(dedicatedAccessDeniedContent.includes('Administrative Clearance Required'), 'AdminAccessDenied informs non-admins of required clearance');
+assert(dedicatedAccessDeniedContent.includes('onNavigateLogin'), 'AdminAccessDenied provides login navigation');
+assert(dedicatedAccessDeniedContent.includes('onNavigatePortal'), 'AdminAccessDenied provides return to portal navigation');
+
+const manageRolesPath = path.join(rootDir, 'src', 'components', 'admin', 'ManageRolesAndPermissions.tsx');
+assert(fs.existsSync(manageRolesPath), 'ManageRolesAndPermissions.tsx exists');
+const manageRolesContent = fs.readFileSync(manageRolesPath, 'utf8');
+assert(manageRolesContent.includes('campusonegpa@gmail.com'), 'ManageRolesAndPermissions safeguards primary admin');
+assert(manageRolesContent.includes('prevent_role_escalation'), 'ManageRolesAndPermissions details trigger protections');
+assert(manageRolesContent.includes('confirmAdminElevation'), 'ManageRolesAndPermissions enforces 2-step confirmation');
+
+const manageNoticesEventsPath = path.join(rootDir, 'src', 'components', 'admin', 'ManageNoticesAndEvents.tsx');
+assert(fs.existsSync(manageNoticesEventsPath), 'ManageNoticesAndEvents.tsx exists');
+
+const manageAcademicPath = path.join(rootDir, 'src', 'components', 'admin', 'ManageAcademicRecords.tsx');
+assert(fs.existsSync(manageAcademicPath), 'ManageAcademicRecords.tsx exists');
+const manageAcademicContent = fs.readFileSync(manageAcademicPath, 'utf8');
+assert(manageAcademicContent.includes('getAttendanceSessions'), 'ManageAcademicRecords fetches authentic attendance sessions');
+assert(manageAcademicContent.includes('getStudyMaterials'), 'ManageAcademicRecords inspects study materials');
+
+const appPath = path.join(rootDir, 'src', 'App.tsx');
+const appContent = fs.readFileSync(appPath, 'utf8');
+assert(appContent.includes("currentPage === 'admin'"), 'App.tsx inspects dedicated admin route');
+assert(appContent.includes("currentPage === 'admin-auth'"), 'App.tsx inspects dedicated admin-auth route');
+assert(appContent.includes('<AdminLayout'), 'App.tsx renders standalone AdminLayout without student UI');
+assert(appContent.includes("role !== 'admin'"), 'App.tsx guards admin route against unauthorized roles');
+
 console.log('\n====================================================');
 console.log(`Results: ${passedTests}/${totalTests} tests passed (${Math.round((passedTests / totalTests) * 100)}%)`);
 console.log('====================================================\n');
