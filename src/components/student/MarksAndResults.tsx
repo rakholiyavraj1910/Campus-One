@@ -104,10 +104,10 @@ export const MarksAndResults: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center space-x-3">
-            <div className="bg-navy-950/70 p-4 rounded-2xl border border-navy-700 text-center min-w-[130px]">
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 w-full sm:w-auto">
+            <div className="flex-1 sm:flex-initial bg-navy-950/70 p-4 rounded-2xl border border-navy-700 text-center min-w-[120px] sm:min-w-[130px]">
               <span className="text-[10px] text-slate-400 uppercase font-bold">Internal Average</span>
-              <p className="text-3xl font-extrabold text-brand-cyan">
+              <p className="text-2xl sm:text-3xl font-extrabold text-brand-cyan">
                 {hasData ? `${averagePercentage}%` : '—'}
               </p>
               <span className="text-[10px] text-emerald-400 font-semibold">
@@ -115,9 +115,9 @@ export const MarksAndResults: React.FC = () => {
               </span>
             </div>
 
-            <div className="bg-navy-950/70 p-4 rounded-2xl border border-navy-700 text-center min-w-[130px]">
+            <div className="flex-1 sm:flex-initial bg-navy-950/70 p-4 rounded-2xl border border-navy-700 text-center min-w-[120px] sm:min-w-[130px]">
               <span className="text-[10px] text-slate-400 uppercase font-bold">Estimated SGPA</span>
-              <p className="text-3xl font-extrabold text-white">
+              <p className="text-2xl sm:text-3xl font-extrabold text-white">
                 {hasData ? estimatedSgpa.toFixed(2) : '—'}
               </p>
               <span className="text-[10px] text-brand-cyan font-semibold">
@@ -181,8 +181,8 @@ export const MarksAndResults: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+          <div className="overflow-x-auto momentum-scroll">
+            <table className="w-full text-left text-xs min-w-[640px]">
               <thead>
                 <tr className="border-b border-slate-200 dark:border-navy-800 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
                   <th className="py-3 px-3">Subject</th>

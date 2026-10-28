@@ -123,12 +123,12 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-[#090d16]/95 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-30 bg-[#090d16]/95 backdrop-blur-md border-b border-slate-800/80 px-3 sm:px-6 3xl:px-10 py-3 sm:py-3.5 pt-safe flex items-center justify-between gap-2 sm:gap-4">
       {/* Left: Mobile Toggle & Page Header */}
-      <div className="flex items-center space-x-3 sm:space-x-4 min-w-0">
+      <div className="flex items-center space-x-2 sm:space-x-4 min-w-0">
         <button
           onClick={onToggleSidebar}
-          className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 lg:hidden transition-colors shrink-0"
+          className="p-2 min-w-[40px] min-h-[40px] rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 lg:hidden transition-colors shrink-0 flex items-center justify-center btn-tactile"
           aria-label="Toggle navigation menu"
         >
           <Menu className="w-5 h-5" />
@@ -167,7 +167,7 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
         <button
           onClick={handleRefresh}
           disabled={isRefreshing}
-          className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors"
+          className="p-2 min-w-[38px] min-h-[38px] rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors flex items-center justify-center btn-tactile"
           title="Refresh Current Data"
         >
           <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-teal-400' : ''}`} />
@@ -176,7 +176,7 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
         {/* Theme Toggle */}
         <button
           onClick={toggleTheme}
-          className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors"
+          className="p-2 min-w-[38px] min-h-[38px] rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors flex items-center justify-center btn-tactile"
           title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
         >
           {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -186,7 +186,7 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setIsAccountOpen(prev => !prev)}
-            className="flex items-center space-x-2 p-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-800 text-left transition-all"
+            className="flex items-center space-x-2 p-1.5 min-h-[38px] sm:px-3 sm:py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-800 text-left transition-all btn-tactile"
             aria-expanded={isAccountOpen}
           >
             <UserAvatar
@@ -208,7 +208,7 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
 
           {/* Account Dropdown */}
           {isAccountOpen && (
-            <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-[#0c1220] border border-slate-800 shadow-2xl p-2 z-50 animate-scale-up space-y-1">
+            <div className="absolute right-0 mt-2 w-64 max-w-[calc(100vw-24px)] rounded-2xl bg-[#0c1220] border border-slate-800 shadow-2xl p-2 z-50 animate-scale-up space-y-1">
               {/* Profile Card Header */}
               <div className="p-3 border-b border-slate-800/80">
                 <p className="text-xs font-black text-white">

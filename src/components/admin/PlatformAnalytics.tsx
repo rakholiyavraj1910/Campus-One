@@ -208,7 +208,7 @@ export const PlatformAnalytics: React.FC<PlatformAnalyticsProps> = ({
       )}
 
       {/* 8 Primary Super Admin Metric Cards */}
-      <ScrollStagger staggerMs={25} className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+      <ScrollStagger staggerMs={25} className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-4 3xl:grid-cols-8 gap-3 sm:gap-4">
         {statCards.map((c) => {
           const Icon = c.icon;
           return (

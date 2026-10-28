@@ -197,10 +197,10 @@ export const FacultyAuthPage: React.FC<FacultyAuthPageProps> = ({
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-slate-100/70 to-slate-200 dark:from-navy-950 dark:via-navy-900 dark:to-[#0a1120] text-slate-800 dark:text-slate-100 flex flex-col font-sans transition-colors selection:bg-emerald-500/25 selection:text-emerald-500">
       
       {/* Top Bar */}
-      <header className="border-b border-slate-200/80 dark:border-navy-800 bg-white/80 dark:bg-navy-900/80 backdrop-blur-md px-4 sm:px-8 py-3 flex items-center justify-between">
+      <header className="border-b border-slate-200/80 dark:border-navy-800 bg-white/80 dark:bg-navy-900/80 backdrop-blur-md px-3 sm:px-8 py-3 pt-safe flex items-center justify-between">
         <button
           onClick={onNavigateHub}
-          className="inline-flex items-center space-x-1.5 text-xs text-slate-500 hover:text-navy-900 dark:text-slate-400 dark:hover:text-white font-medium transition-colors"
+          className="inline-flex items-center space-x-1.5 text-xs text-slate-500 hover:text-navy-900 dark:text-slate-400 dark:hover:text-white font-medium transition-colors min-h-[36px] px-1"
         >
           <ChevronLeft className="w-4 h-4" />
           <span>All Campus Portals</span>
@@ -225,8 +225,8 @@ export const FacultyAuthPage: React.FC<FacultyAuthPageProps> = ({
       </header>
 
       {/* Main Container */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8">
-        <div className="w-full max-w-md bg-white dark:bg-navy-900 rounded-3xl p-6 sm:p-8 border border-slate-200/90 dark:border-navy-700/80 shadow-2xl relative">
+      <div className="flex-1 flex items-center justify-center p-3 sm:p-6 lg:p-8 pb-safe">
+        <div className="w-full max-w-md bg-white dark:bg-navy-900 rounded-2xl sm:rounded-3xl p-4 sm:p-8 border border-slate-200/90 dark:border-navy-700/80 shadow-2xl relative">
           
           {/* Header */}
           <div className="text-center space-y-2 mb-6">

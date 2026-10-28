@@ -172,7 +172,7 @@ export const AttendanceTracker: React.FC = () => {
             </div>
 
             {hasData ? (
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
                 <div className="bg-navy-900/80 p-3 rounded-xl border border-emerald-500/30">
                   <span className="text-[10px] text-emerald-400 font-bold uppercase">Safe (&ge;75%)</span>
                   <p className="text-xl font-extrabold text-white mt-0.5">{safeCount} Subjects</p>
@@ -240,7 +240,7 @@ export const AttendanceTracker: React.FC = () => {
             </p>
           </div>
         ) : (
-          <ScrollStagger staggerMs={40} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <ScrollStagger staggerMs={40} className="grid grid-cols-1 md:grid-cols-2 3xl:grid-cols-3 gap-4">
             {summary?.subjects.map((item) => {
               const isSafe = item.percentage >= 75;
               const isWarning = item.percentage >= 70 && item.percentage < 75;

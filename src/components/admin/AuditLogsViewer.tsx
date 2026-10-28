@@ -53,8 +53,8 @@ export const AuditLogsViewer: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <div className="relative min-w-[220px]">
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
+            <div className="relative flex-1 sm:flex-initial sm:min-w-[220px]">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
               <input
                 type="text"
@@ -79,7 +79,7 @@ export const AuditLogsViewer: React.FC = () => {
             <button
               onClick={fetchLogs}
               disabled={loading}
-              className="p-2 rounded-xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-navy-800 text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors cursor-pointer disabled:opacity-50 btn-tactile"
+              className="p-2 min-w-[38px] min-h-[38px] rounded-xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-navy-800 text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors cursor-pointer disabled:opacity-50 btn-tactile flex items-center justify-center shrink-0"
               title="Refresh audit logs"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-brand-cyan' : ''}`} />
@@ -90,8 +90,8 @@ export const AuditLogsViewer: React.FC = () => {
 
       <ScrollReveal delayMs={30}>
         <div className="bg-white dark:bg-navy-900 rounded-3xl border border-slate-200/80 dark:border-navy-800 overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+          <div className="overflow-x-auto momentum-scroll">
+            <table className="w-full text-left text-xs min-w-[620px]">
               <thead className="bg-slate-50 dark:bg-navy-950/60 border-b border-slate-200 dark:border-navy-800 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
                 <tr>
                   <th className="py-3 px-4">Timestamp</th>

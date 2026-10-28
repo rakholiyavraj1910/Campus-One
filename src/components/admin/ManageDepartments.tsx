@@ -157,8 +157,8 @@ export const ManageDepartments: React.FC<ManageDepartmentsProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center space-x-2.5">
-          <div className="relative min-w-[220px]">
+        <div className="flex items-center space-x-2.5 w-full sm:w-auto">
+          <div className="relative flex-1 sm:flex-initial sm:min-w-[220px]">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="text"
@@ -172,7 +172,7 @@ export const ManageDepartments: React.FC<ManageDepartmentsProps> = ({
           <button
             type="button"
             onClick={loadData}
-            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-navy-800 dark:hover:bg-navy-700 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
+            className="p-2 min-w-[38px] min-h-[38px] rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-navy-800 dark:hover:bg-navy-700 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer flex items-center justify-center shrink-0"
             title="Reload counts"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -182,13 +182,13 @@ export const ManageDepartments: React.FC<ManageDepartmentsProps> = ({
 
       {/* Grid of 14 Departments */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-4">
           {[1, 2, 3, 4, 5, 6].map(i => (
             <div key={i} className="h-48 bg-white dark:bg-navy-900 rounded-3xl border border-slate-200/80 dark:border-navy-800 animate-pulse" />
           ))}
         </div>
       ) : filtered.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-4">
           {filtered.map(dept => {
             const stats = deptStats[dept.name] || { students: 0, faculty: 0 };
 

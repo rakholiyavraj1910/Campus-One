@@ -129,8 +129,8 @@ export const ManageFacultyRequests: React.FC = () => {
         </div>
 
         {/* Search and Refresh */}
-        <div className="flex items-center space-x-2">
-          <div className="relative min-w-[200px] sm:min-w-[240px]">
+        <div className="flex items-center space-x-2 w-full sm:w-auto">
+          <div className="relative flex-1 sm:flex-initial sm:min-w-[240px]">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="text"
@@ -144,7 +144,7 @@ export const ManageFacultyRequests: React.FC = () => {
           <button
             onClick={loadRequests}
             disabled={isLoading}
-            className="p-2 rounded-xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-navy-800 text-slate-600 dark:text-slate-300 hover:text-brand-cyan transition-colors"
+            className="p-2 rounded-xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-navy-800 text-slate-600 dark:text-slate-300 hover:text-brand-cyan transition-colors min-w-[38px] min-h-[38px] flex items-center justify-center"
             title="Refresh Requests"
           >
             <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
@@ -154,7 +154,7 @@ export const ManageFacultyRequests: React.FC = () => {
 
       {/* Department Filter Tabs */}
       {departments.length > 2 && (
-        <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
+        <div className="flex items-center space-x-1.5 overflow-x-auto momentum-scroll pb-1 scrollbar-none text-xs max-w-full">
           {departments.map(d => (
             <button
               key={d}

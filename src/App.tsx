@@ -408,7 +408,7 @@ const MainLayout: React.FC = () => {
         currentPage={currentPage}
       />
 
-      <div className={`flex-1 flex max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 transition-all duration-300 ${isSidebarOpen ? 'lg:gap-6' : 'gap-0'}`}>
+      <div className={`flex-1 flex max-w-7xl 2xl:max-w-(screen-2xl) 3xl:max-w-[1760px] 4xl:max-w-[2160px] w-full mx-auto px-3 sm:px-6 lg:px-8 3xl:px-12 pt-4 sm:pt-6 transition-all duration-300 ${isSidebarOpen ? 'lg:gap-6 3xl:gap-8' : 'gap-0'}`}>
         {/* 3. Collapsible Sidebar Navigation */}
         <Sidebar
           isOpen={isSidebarOpen}
@@ -518,7 +518,7 @@ const MainLayout: React.FC = () => {
 
       {/* 5. Production-Ready Footer */}
       <footer className="mt-auto bg-white dark:bg-navy-900 border-t border-slate-200 dark:border-navy-800 py-8 text-xs text-slate-500 transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl 2xl:max-w-(screen-2xl) 3xl:max-w-[1760px] 4xl:max-w-[2160px] mx-auto px-4 sm:px-6 lg:px-8 3xl:px-12 pb-safe">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <CampusOneLogo
               variant="full"

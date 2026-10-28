@@ -185,7 +185,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ onNavigate
   ];
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-navy-950/70 backdrop-blur-sm p-4 sm:p-6 md:p-20 flex justify-center items-start animate-fade-in">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-navy-950/70 backdrop-blur-sm p-3 sm:p-6 md:p-12 lg:p-16 flex justify-center items-start animate-fade-in">
       <div 
         className="relative w-full max-w-2xl bg-white dark:bg-navy-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-navy-700 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
@@ -264,7 +264,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ onNavigate
         </div>
 
         {/* Results List */}
-        <div className="max-h-96 overflow-y-auto p-2 divide-y divide-slate-100 dark:divide-navy-800/50">
+        <div className="max-h-[55vh] sm:max-h-96 overflow-y-auto momentum-scroll p-2 divide-y divide-slate-100 dark:divide-navy-800/50">
           {filteredResults.length === 0 ? (
             <div className="py-12 text-center text-slate-400">
               <Search className="w-10 h-10 mx-auto mb-2 opacity-30 text-brand-cyan" />

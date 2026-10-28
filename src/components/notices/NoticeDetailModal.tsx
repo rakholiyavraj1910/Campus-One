@@ -47,7 +47,7 @@ export const NoticeDetailModal: React.FC<NoticeDetailModalProps> = ({ notice, on
   return (
     <div 
       onClick={onClose}
-      className="fixed inset-0 z-50 overflow-y-auto bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in"
+      className="fixed inset-0 z-50 overflow-y-auto bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-fade-in"
     >
       <div 
         className="w-full max-w-2xl bg-white dark:bg-navy-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-navy-700 overflow-hidden flex flex-col max-h-[90vh]"
@@ -98,7 +98,7 @@ export const NoticeDetailModal: React.FC<NoticeDetailModalProps> = ({ notice, on
         </div>
 
         {/* Content Body */}
-        <div className="p-6 overflow-y-auto space-y-4">
+        <div className="p-4 sm:p-6 overflow-y-auto momentum-scroll space-y-4">
           <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white leading-tight">
             {notice.title}
           </h2>
@@ -128,7 +128,7 @@ export const NoticeDetailModal: React.FC<NoticeDetailModalProps> = ({ notice, on
 
           {/* Attachment Box */}
           {notice.attachmentName && (
-            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-navy-800/80 border border-slate-200/80 dark:border-navy-700 flex items-center justify-between">
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-navy-800/80 border border-slate-200/80 dark:border-navy-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 rounded-xl bg-brand-cyan/20 text-brand-cyan flex items-center justify-center font-bold">
                   <Download className="w-5 h-5" />

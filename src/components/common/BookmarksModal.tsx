@@ -53,9 +53,9 @@ export const BookmarksModal: React.FC<BookmarksModalProps> = ({ onNavigate }) =>
   if (!isBookmarksOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-navy-950/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-navy-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-fade-in">
       <div 
-        className="w-full max-w-lg bg-white dark:bg-navy-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-navy-700 overflow-hidden"
+        className="w-full max-w-lg bg-white dark:bg-navy-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-navy-700 overflow-hidden max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-navy-800 flex items-center justify-between">
@@ -76,7 +76,7 @@ export const BookmarksModal: React.FC<BookmarksModalProps> = ({ onNavigate }) =>
           </button>
         </div>
 
-        <div className="max-h-96 overflow-y-auto p-4 space-y-2.5">
+        <div className="max-h-96 overflow-y-auto momentum-scroll p-4 space-y-2.5">
           {savedItems.length === 0 ? (
             <div className="py-12 text-center text-slate-400">
               <Bookmark className="w-10 h-10 mx-auto mb-2 opacity-30 text-brand-cyan" />

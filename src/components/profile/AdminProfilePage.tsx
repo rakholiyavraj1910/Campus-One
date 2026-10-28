@@ -217,12 +217,12 @@ export const AdminProfilePage: React.FC<AdminProfilePageProps> = ({
   return (
     <div className="space-y-6 animate-fade-in pb-16">
       {/* 1. Header Hero Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0a1120] via-[#0d1b30] to-[#122844] text-white p-6 sm:p-8 border border-slate-800 shadow-2xl">
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-[#0a1120] via-[#0d1b30] to-[#122844] text-white p-4 sm:p-8 border border-slate-800 shadow-2xl">
         <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-5">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-5 min-w-0">
             {/* Avatar with Camera Overlay */}
             <div className="relative group shrink-0">
               <UserAvatar
@@ -262,7 +262,7 @@ export const AdminProfilePage: React.FC<AdminProfilePageProps> = ({
             </div>
 
             {/* Admin Info */}
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-teal-500/20 text-teal-300 border border-teal-500/40">
                   {user.adminLevel || 'Super Administrator'}
@@ -277,27 +277,27 @@ export const AdminProfilePage: React.FC<AdminProfilePageProps> = ({
                 <span className="text-xs text-slate-400">Government Polytechnic Ahmedabad</span>
               </div>
 
-              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight truncate">
                 {user.name || 'Super Administrator'}
               </h1>
 
-              <p className="text-xs sm:text-sm text-slate-300 font-medium">
+              <p className="text-xs sm:text-sm text-slate-300 font-medium truncate">
                 {user.designation || 'Institutional Super Administrator'} • <span className="text-teal-300 font-semibold">{user.department || 'Administrative Directorate'}</span>
               </p>
 
               <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400 pt-1 font-mono">
-                <span className="flex items-center space-x-1.5">
-                  <Mail className="w-3.5 h-3.5 text-teal-400" />
-                  <span className="text-slate-200">{user.email}</span>
+                <span className="flex items-center space-x-1.5 min-w-0">
+                  <Mail className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+                  <span className="text-slate-200 break-all">{user.email}</span>
                 </span>
                 {user.phone && (
                   <span className="flex items-center space-x-1.5">
-                    <Phone className="w-3.5 h-3.5 text-teal-400" />
+                    <Phone className="w-3.5 h-3.5 text-teal-400 shrink-0" />
                     <span className="text-slate-200">{user.phone}</span>
                   </span>
                 )}
                 <span className="flex items-center space-x-1.5">
-                  <Database className="w-3.5 h-3.5 text-teal-400" />
+                  <Database className="w-3.5 h-3.5 text-teal-400 shrink-0" />
                   <span className="text-slate-200">Role: ADMIN</span>
                 </span>
               </div>
@@ -406,7 +406,7 @@ export const AdminProfilePage: React.FC<AdminProfilePageProps> = ({
       {/* 3. Main Content Split: Profile Details vs Official Admin ID Card */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: Admin Details / Editor (8 Cols) */}
-        <div className="lg:col-span-8 bg-white dark:bg-navy-900 rounded-3xl p-6 sm:p-8 border border-slate-200/80 dark:border-navy-800 shadow-xs space-y-6">
+        <div className="lg:col-span-8 bg-white dark:bg-navy-900 rounded-2xl sm:rounded-3xl p-4 sm:p-8 border border-slate-200/80 dark:border-navy-800 shadow-xs space-y-6">
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-navy-800 pb-4">
             <div>
               <h2 className="text-lg font-bold text-slate-900 dark:text-white">
@@ -430,9 +430,9 @@ export const AdminProfilePage: React.FC<AdminProfilePageProps> = ({
                   <p className="font-bold text-slate-900 dark:text-white text-sm">{user.name || 'Super Administrator'}</p>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-navy-950/60 border border-slate-100 dark:border-navy-800 space-y-1">
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-navy-950/60 border border-slate-100 dark:border-navy-800 space-y-1 min-w-0">
                   <p className="text-slate-400 font-medium">Institutional Email Address</p>
-                  <p className="font-bold text-slate-900 dark:text-white text-sm font-mono">{user.email}</p>
+                  <p className="font-bold text-slate-900 dark:text-white text-sm font-mono break-all">{user.email}</p>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-slate-50 dark:bg-navy-950/60 border border-slate-100 dark:border-navy-800 space-y-1">
@@ -635,7 +635,7 @@ export const AdminProfilePage: React.FC<AdminProfilePageProps> = ({
 
         {/* Right Column: Administrator Official Identity Card (4 Cols) */}
         <div className="lg:col-span-4 space-y-5">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0c1322] via-[#101e36] to-[#0c1a2d] border-2 border-teal-500/40 p-6 text-white shadow-2xl space-y-5">
+          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#0c1322] via-[#101e36] to-[#0c1a2d] border-2 border-teal-500/40 p-4 sm:p-6 text-white shadow-2xl space-y-5">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center space-x-2">
                 <CampusOneIcon size={20} withBadge />

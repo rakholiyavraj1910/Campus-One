@@ -31,12 +31,12 @@ export const FacilitiesExplorer: React.FC = () => {
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center space-x-1.5 overflow-x-auto text-xs pb-1">
+        <div className="flex items-center space-x-1.5 overflow-x-auto momentum-scroll scrollbar-none text-xs pb-1 max-w-full">
           {categories.map((c) => (
             <button
               key={c}
               onClick={() => setCategoryFilter(c)}
-              className={`px-3 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap min-h-[38px] ${
                 categoryFilter === c
                   ? 'bg-navy-900 text-white dark:bg-brand-cyan dark:text-navy-950 shadow-sm'
                   : 'bg-slate-100 dark:bg-navy-800 text-slate-600 dark:text-slate-300'
@@ -49,7 +49,7 @@ export const FacilitiesExplorer: React.FC = () => {
       </div>
 
       {/* Facilities Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-4 sm:gap-6">
         {filtered.map((fac) => (
           <div
             key={fac.id}
@@ -118,12 +118,12 @@ export const FacilitiesExplorer: React.FC = () => {
 
       {/* Facility Details Modal */}
       {selectedFacility && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-fade-in">
           <div 
-            className="w-full max-w-xl bg-white dark:bg-navy-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-navy-700 overflow-hidden"
+            className="w-full max-w-xl bg-white dark:bg-navy-900 rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-navy-700 overflow-hidden max-h-[90vh] overflow-y-auto momentum-scroll"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="relative h-60 overflow-hidden">
+            <div className="relative h-48 sm:h-60 overflow-hidden">
               <img
                 src={selectedFacility.image}
                 alt={selectedFacility.name}
@@ -131,7 +131,7 @@ export const FacilitiesExplorer: React.FC = () => {
               />
               <button
                 onClick={() => setSelectedFacility(null)}
-                className="absolute top-4 right-4 p-2 rounded-full bg-black/60 text-white hover:bg-black/80"
+                className="absolute top-3 right-3 sm:top-4 sm:right-4 p-2 rounded-full bg-black/60 text-white hover:bg-black/80 min-w-[36px] min-h-[36px] flex items-center justify-center"
               >
                 ✕
               </button>

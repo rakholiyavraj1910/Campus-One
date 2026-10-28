@@ -7,6 +7,11 @@ export default {
   ],
   theme: {
     extend: {
+      screens: {
+        'xs': '430px',
+        '3xl': '1920px',
+        '4xl': '2560px',
+      },
       colors: {
         navy: {
           50: '#f0f5fa',

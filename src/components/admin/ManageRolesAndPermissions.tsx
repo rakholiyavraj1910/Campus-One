@@ -348,8 +348,8 @@ export const ManageRolesAndPermissions: React.FC<ManageRolesAndPermissionsProps>
         </div>
 
         {/* User Role Table */}
-        <div className="overflow-x-auto rounded-2xl border border-slate-800">
-          <table className="w-full text-left text-xs">
+        <div className="overflow-x-auto momentum-scroll rounded-2xl border border-slate-800">
+          <table className="w-full text-left text-xs min-w-[620px]">
             <thead className="bg-[#0c1220] border-b border-slate-800 text-[10px] font-black uppercase tracking-wider text-slate-400">
               <tr>
                 <th className="py-3 px-4">Account</th>
@@ -432,8 +432,8 @@ export const ManageRolesAndPermissions: React.FC<ManageRolesAndPermissionsProps>
 
       {/* Role Assignment Modal */}
       {selectedUser && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-[#0c1220] border border-slate-800 rounded-3xl max-w-md w-full shadow-2xl p-6 space-y-4 animate-scale-up">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-[#0c1220] border border-slate-800 rounded-2xl sm:rounded-3xl max-w-md w-full shadow-2xl p-4 sm:p-6 space-y-4 animate-scale-up max-h-[90vh] overflow-y-auto momentum-scroll">
             <div className="flex items-center space-x-3 pb-3 border-b border-slate-800">
               <div className="p-2 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/30">
                 <ShieldAlert className="w-5 h-5" />

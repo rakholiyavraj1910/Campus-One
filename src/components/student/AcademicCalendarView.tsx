@@ -112,7 +112,7 @@ export const AcademicCalendarView: React.FC = () => {
             <div className="grid grid-cols-7 gap-1 sm:gap-2 pt-2">
               {/* Padding empty slots */}
               {Array.from({ length: current.startDayOffset }).map((_, i) => (
-                <div key={`empty-${i}`} className="min-h-[72px] sm:min-h-[90px] rounded-2xl bg-slate-50/40 dark:bg-navy-950/20" />
+                <div key={`empty-${i}`} className="min-h-[56px] sm:min-h-[90px] rounded-xl sm:rounded-2xl bg-slate-50/40 dark:bg-navy-950/20" />
               ))}
 
               {/* Month days */}
@@ -123,7 +123,7 @@ export const AcademicCalendarView: React.FC = () => {
                 return (
                   <div
                     key={dayNum}
-                    className={`min-h-[72px] sm:min-h-[90px] p-2 rounded-2xl border transition-all flex flex-col justify-between ${
+                    className={`min-h-[56px] sm:min-h-[90px] p-1 sm:p-2 rounded-xl sm:rounded-2xl border transition-all flex flex-col justify-between ${
                       eventInfo?.type === 'holiday'
                         ? 'border-rose-300 dark:border-rose-900 bg-rose-50/40 dark:bg-rose-950/20'
                         : eventInfo?.type === 'exam'
@@ -134,19 +134,19 @@ export const AcademicCalendarView: React.FC = () => {
                     }`}
                   >
                     <div className="flex justify-between items-start">
-                      <span className={`text-xs font-bold ${eventInfo ? 'text-brand-cyan' : 'text-slate-700 dark:text-slate-300'}`}>
+                      <span className={`text-[10px] sm:text-xs font-bold ${eventInfo ? 'text-brand-cyan' : 'text-slate-700 dark:text-slate-300'}`}>
                         {dayNum}
                       </span>
                       {eventInfo && (
-                        <span className={`w-2 h-2 rounded-full ${
+                        <span className={`w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full ${
                           eventInfo.type === 'holiday' ? 'bg-rose-500' : eventInfo.type === 'exam' ? 'bg-amber-500' : 'bg-purple-500'
                         }`} />
                       )}
                     </div>
 
                     {eventInfo && (
-                      <div className="mt-1">
-                        <p className={`text-[10px] font-bold leading-tight line-clamp-2 ${
+                      <div className="mt-0.5 sm:mt-1">
+                        <p className={`text-[8px] sm:text-[10px] font-bold leading-tight line-clamp-2 ${
                           eventInfo.type === 'holiday'
                             ? 'text-rose-700 dark:text-rose-300'
                             : eventInfo.type === 'exam'

@@ -308,8 +308,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       </header>
 
       {/* Main Form Center */}
-      <main className="flex-1 flex items-center justify-center p-4 sm:p-6 relative z-10">
-        <div className="w-full max-w-lg bg-slate-950/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl transition-all">
+      <main className="flex-1 flex items-center justify-center p-3 sm:p-6 relative z-10 pb-safe">
+        <div className="w-full max-w-lg bg-slate-950/90 border border-slate-800 rounded-3xl p-4 sm:p-8 shadow-2xl backdrop-blur-xl transition-all">
           
           {/* 1. Primary Portal Switcher: Student vs Faculty */}
           <div className="mb-6">

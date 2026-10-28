@@ -58,7 +58,7 @@ export const EventsList: React.FC<EventsListProps> = ({ events, onRefreshEvents 
         </div>
 
         {/* Search */}
-        <div className="relative min-w-[260px]">
+        <div className="relative w-full sm:w-auto sm:min-w-[260px]">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
           <input
             type="text"
@@ -71,7 +71,7 @@ export const EventsList: React.FC<EventsListProps> = ({ events, onRefreshEvents 
       </div>
 
       {/* Category Pills */}
-      <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs">
+      <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs max-w-full scrollbar-none momentum-scroll">
         {categories.map((c) => (
           <button
             key={c}
@@ -88,7 +88,7 @@ export const EventsList: React.FC<EventsListProps> = ({ events, onRefreshEvents 
       </div>
 
       {/* Events Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-6">
         {filteredEvents.map((evt) => {
           const registered = isRegisteredForEvent(evt.id);
           const percentCapacity = Math.min(100, Math.round((evt.registeredCount / evt.maxCapacity) * 100));

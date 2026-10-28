@@ -78,8 +78,8 @@ export const StudyMaterialsHub: React.FC = () => {
         </div>
 
         {/* Search & Refresh Bar */}
-        <div className="flex items-center space-x-2">
-          <div className="relative min-w-[220px]">
+        <div className="flex items-center space-x-2 w-full sm:w-auto">
+          <div className="relative flex-1 sm:flex-initial sm:min-w-[220px]">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
             <input
               type="text"
@@ -93,7 +93,7 @@ export const StudyMaterialsHub: React.FC = () => {
           <button
             onClick={fetchMaterials}
             disabled={isLoading}
-            className="p-2 rounded-xl bg-slate-50 dark:bg-navy-800 border border-slate-200 dark:border-navy-700 text-slate-600 dark:text-slate-300 hover:text-brand-cyan transition-colors"
+            className="p-2 min-w-[38px] min-h-[38px] rounded-xl bg-slate-50 dark:bg-navy-800 border border-slate-200 dark:border-navy-700 text-slate-600 dark:text-slate-300 hover:text-brand-cyan transition-colors flex items-center justify-center shrink-0"
             title="Refresh Materials"
           >
             <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
@@ -104,7 +104,7 @@ export const StudyMaterialsHub: React.FC = () => {
       {/* Filter Row */}
       <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
         {/* Type Filter */}
-        <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 scrollbar-none">
+        <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 max-w-full scrollbar-none momentum-scroll">
           {['All', 'Lecture Notes', 'PYQ Question Papers', 'Lab Manuals', 'Reference Sheets'].map((type) => (
             <button
               key={type}
@@ -158,7 +158,7 @@ export const StudyMaterialsHub: React.FC = () => {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-4">
           {filtered.map((mat) => {
             const bookmarked = isBookmarked(mat.id);
 

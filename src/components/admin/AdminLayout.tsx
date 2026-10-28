@@ -130,7 +130,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
         />
 
         {/* Dynamic Section Content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-3 sm:p-6 lg:p-8 3xl:p-12 max-w-7xl 2xl:max-w-(screen-2xl) 3xl:max-w-[1760px] 4xl:max-w-[2160px] w-full mx-auto pb-safe">
           {currentSection === 'overview' && (
             <PlatformAnalytics
               onNavigateTab={(tab) => handleSelectSection(resolveSection(tab))}

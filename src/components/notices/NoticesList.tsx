@@ -71,7 +71,7 @@ export const NoticesList: React.FC<NoticesListProps> = ({ notices, onOpenNotice 
         </div>
 
         {/* Search input */}
-        <div className="relative min-w-[260px]">
+        <div className="relative w-full sm:w-auto sm:min-w-[260px]">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
           <input
             type="text"
@@ -86,7 +86,7 @@ export const NoticesList: React.FC<NoticesListProps> = ({ notices, onOpenNotice 
       {/* Filter and Sort Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
         {/* Category Pills */}
-        <div className="flex items-center space-x-1.5 overflow-x-auto pb-1">
+        <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 max-w-full scrollbar-none momentum-scroll">
           {categories.map((c) => (
             <button
               key={c}
@@ -121,7 +121,7 @@ export const NoticesList: React.FC<NoticesListProps> = ({ notices, onOpenNotice 
       </div>
 
       {/* Notices Grid / Feed */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 3xl:grid-cols-3 4xl:grid-cols-4 gap-4 sm:gap-5">
         {filteredNotices.length === 0 ? (
           <div className="col-span-full py-16 text-center text-slate-400 bg-white dark:bg-navy-900 rounded-3xl border border-slate-200/80 dark:border-navy-800">
             <Bell className="w-10 h-10 mx-auto mb-2 opacity-30 text-brand-cyan" />

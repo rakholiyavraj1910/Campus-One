@@ -243,8 +243,8 @@ export const AdminAuthPage: React.FC<AdminAuthPageProps> = ({
       </header>
 
       {/* Main Container */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8">
-        <div className="w-full max-w-md bg-navy-900/90 rounded-3xl p-6 sm:p-8 border border-navy-700/80 shadow-2xl relative backdrop-blur-sm">
+      <div className="flex-1 flex items-center justify-center p-3 sm:p-6 lg:p-8 pb-safe">
+        <div className="w-full max-w-md bg-navy-900/90 rounded-3xl p-4 sm:p-8 border border-navy-700/80 shadow-2xl relative backdrop-blur-sm">
           
           {/* Header */}
           <div className="text-center space-y-2 mb-6">

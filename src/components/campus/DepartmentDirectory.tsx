@@ -24,7 +24,7 @@ export const DepartmentDirectory: React.FC = () => {
     <div className="space-y-6">
       {/* Top Banner */}
       <ScrollReveal direction="down" distance={16}>
-        <div className="bg-white dark:bg-navy-900 rounded-3xl p-6 border border-slate-200/80 dark:border-navy-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="bg-white dark:bg-navy-900 rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200/80 dark:border-navy-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-brand-cyan/20 text-brand-cyan border border-brand-cyan/30">
               Academic Schools &amp; Faculties
@@ -46,29 +46,29 @@ export const DepartmentDirectory: React.FC = () => {
       </ScrollReveal>
 
       {/* Department Selector Grid */}
-      <ScrollStagger staggerMs={20} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <ScrollStagger staggerMs={20} className="grid grid-cols-2 sm:grid-cols-4 3xl:grid-cols-8 gap-2 sm:gap-3">
         {departments.map((dept) => (
           <button
             key={dept.id}
             onClick={() => setSelectedDept(dept)}
-            className={`p-4 rounded-2xl text-left border transition-all cursor-pointer interactive-card ${
+            className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl text-left border transition-all cursor-pointer interactive-card min-h-[44px] ${
               selectedDept.id === dept.id
                 ? 'bg-navy-900 text-white dark:bg-brand-cyan dark:text-navy-950 border-transparent shadow-md'
                 : 'bg-white dark:bg-navy-900 text-slate-700 dark:text-slate-300 border-slate-200/80 dark:border-navy-800 hover:border-brand-cyan/50'
             }`}
           >
             <span className="text-xs font-mono font-bold opacity-75">{dept.code}</span>
-            <h4 className="font-bold text-sm truncate mt-1">{dept.name}</h4>
-            <p className="text-[11px] opacity-75 mt-0.5">Est. {dept.establishedYear}</p>
+            <h4 className="font-bold text-xs sm:text-sm truncate mt-1">{dept.name}</h4>
+            <p className="text-[10px] sm:text-[11px] opacity-75 mt-0.5">Est. {dept.establishedYear}</p>
           </button>
         ))}
       </ScrollStagger>
 
       {/* Selected Department Showcase Card */}
       <ScrollReveal delayMs={30}>
-        <div className="bg-white dark:bg-navy-900 rounded-3xl border border-slate-200/80 dark:border-navy-800 overflow-hidden shadow-sm">
+        <div className="bg-white dark:bg-navy-900 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-navy-800 overflow-hidden shadow-sm">
         {/* Banner with image */}
-        <div className="relative h-56 bg-navy-950">
+        <div className="relative h-48 sm:h-56 bg-navy-950">
           <img
             src={selectedDept.bannerImage}
             alt={selectedDept.name}
@@ -76,21 +76,21 @@ export const DepartmentDirectory: React.FC = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-navy-950/90 via-navy-950/40 to-transparent" />
           
-          <div className="absolute bottom-6 left-6 right-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4 text-white">
+          <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4 text-white">
             <div>
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-brand-cyan text-navy-950">
                 Department Code: {selectedDept.code}
               </span>
-              <h3 className="text-2xl sm:text-3xl font-extrabold mt-1">{selectedDept.name}</h3>
-              <p className="text-xs text-slate-300 mt-1">Established in {selectedDept.establishedYear} • NBA & NAAC A++ Accredited</p>
+              <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold mt-1">{selectedDept.name}</h3>
+              <p className="text-xs text-slate-300 mt-1">Established in {selectedDept.establishedYear} • NBA &amp; NAAC A++ Accredited</p>
             </div>
 
-            <div className="flex items-center space-x-3 text-xs shrink-0">
-              <div className="bg-black/40 px-3 py-1.5 rounded-xl backdrop-blur-xs border border-white/20">
+            <div className="flex items-center space-x-2 sm:space-x-3 text-xs shrink-0">
+              <div className="bg-black/40 px-2.5 sm:px-3 py-1.5 rounded-xl backdrop-blur-xs border border-white/20">
                 <span className="text-slate-300">Students: </span>
                 <strong className="text-brand-cyan font-mono">{selectedDept.totalStudents}</strong>
               </div>
-              <div className="bg-black/40 px-3 py-1.5 rounded-xl backdrop-blur-xs border border-white/20">
+              <div className="bg-black/40 px-2.5 sm:px-3 py-1.5 rounded-xl backdrop-blur-xs border border-white/20">
                 <span className="text-slate-300">Faculty: </span>
                 <strong className="text-brand-cyan font-mono">{selectedDept.totalFaculty}</strong>
               </div>
@@ -99,7 +99,7 @@ export const DepartmentDirectory: React.FC = () => {
         </div>
 
         {/* Department Details Content */}
-        <div className="p-6 sm:p-8 space-y-6">
+        <div className="p-4 sm:p-6 sm:p-8 space-y-6">
           {/* Vision & Description */}
           <div className="space-y-3">
             <h4 className="font-extrabold text-sm uppercase tracking-wider text-slate-400">Department Overview & Vision</h4>

@@ -269,8 +269,8 @@ export const ManageStudents: React.FC<ManageStudentsProps> = ({
 
       {/* Students Table */}
       <div className="bg-white dark:bg-navy-900 rounded-3xl border border-slate-200/80 dark:border-navy-800 overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+        <div className="overflow-x-auto momentum-scroll">
+          <table className="w-full text-left text-xs min-w-[650px]">
             <thead className="bg-slate-50 dark:bg-navy-950/60 border-b border-slate-200 dark:border-navy-800 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
               <tr>
                 <th className="py-3 px-4">Student</th>

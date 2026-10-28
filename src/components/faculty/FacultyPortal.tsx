@@ -142,7 +142,7 @@ export const FacultyPortal: React.FC<FacultyPortalProps> = ({
       </div>
 
       {/* 2. Primary 7-Section Navigation Tabs */}
-      <div className="bg-white dark:bg-navy-900 rounded-2xl p-2 border border-slate-200/80 dark:border-navy-800 shadow-xs flex items-center space-x-1 overflow-x-auto scrollbar-none">
+      <div className="bg-white dark:bg-navy-900 rounded-2xl p-2 border border-slate-200/80 dark:border-navy-800 shadow-xs flex items-center space-x-1 overflow-x-auto scrollbar-none momentum-scroll">
         {NAVIGATION_TABS.map((t) => {
           const Icon = t.icon;
           const isActive = activeTab === t.id;
@@ -151,7 +151,7 @@ export const FacultyPortal: React.FC<FacultyPortalProps> = ({
             <button
               key={t.id}
               onClick={() => handleTabChange(t.id)}
-              className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+              className={`flex items-center space-x-2 px-4 py-2.5 min-h-[42px] rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 ${
                 isActive
                   ? 'bg-navy-900 text-white dark:bg-brand-cyan dark:text-navy-950 shadow-sm'
                   : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-navy-800'

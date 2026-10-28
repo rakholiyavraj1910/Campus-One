@@ -97,7 +97,7 @@ export const FeesManagement: React.FC = () => {
               </div>
 
               {/* Quick Student Identity Pill */}
-              <div className="bg-navy-900/90 backdrop-blur-md p-3.5 rounded-2xl border border-navy-700 text-xs shrink-0 space-y-1 shadow-inner min-w-[200px]">
+              <div className="bg-navy-900/90 backdrop-blur-md p-3.5 rounded-2xl border border-navy-700 text-xs shrink-0 space-y-1 shadow-inner w-full sm:w-auto sm:min-w-[200px]">
                 <div className="flex items-center justify-between text-slate-400 text-[11px]">
                   <span>Student</span>
                   <span className="font-mono text-teal-300 font-bold">{user.rollNumber || 'Enrolled'}</span>

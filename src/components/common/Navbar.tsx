@@ -53,17 +53,17 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onNavigate, cur
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 bg-white/90 dark:bg-navy-900/90 backdrop-blur-md border-b border-slate-200 dark:border-navy-800 transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-30 bg-white/90 dark:bg-navy-900/90 backdrop-blur-md border-b border-slate-200 dark:border-navy-800 transition-colors pt-safe">
+      <div className="max-w-7xl 2xl:max-w-(screen-2xl) 3xl:max-w-[1760px] 4xl:max-w-[2160px] mx-auto px-3 sm:px-6 lg:px-8 3xl:px-12">
         <div className="flex items-center justify-between h-16">
           
           {/* Left: Mobile hamburger & Logo */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
             {/* Hamburger / Menu toggle button (desktop & mobile) */}
             <button
               type="button"
               onClick={onToggleSidebar}
-              className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-navy-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-navy-800 focus:outline-none focus:ring-2 focus:ring-brand-cyan/40 btn-tactile active:scale-95 transition-all"
+              className="p-2 min-w-[40px] min-h-[40px] rounded-xl text-slate-600 dark:text-slate-300 hover:text-navy-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-navy-800 focus:outline-none focus:ring-2 focus:ring-brand-cyan/40 btn-tactile active:scale-95 transition-all flex items-center justify-center shrink-0"
               aria-label="Toggle navigation menu"
               title="Toggle sidebar navigation"
             >
@@ -97,11 +97,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onNavigate, cur
           </div>
 
           {/* Right: Actions & User Profile */}
-          <div className="flex items-center space-x-2 sm:space-x-3">
+          <div className="flex items-center space-x-1 sm:space-x-2 lg:space-x-3">
             {/* Mobile search icon */}
             <button
               onClick={() => setIsSearchOpen(true)}
-              className="md:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-navy-800 btn-tactile active:scale-95 transition-all"
+              className="md:hidden p-2 min-w-[40px] min-h-[40px] rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-navy-800 btn-tactile active:scale-95 transition-all flex items-center justify-center"
               aria-label="Open search dialog"
             >
               <Search className="w-5 h-5" />
@@ -110,7 +110,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onNavigate, cur
             {/* Bookmarks */}
             <button
               onClick={() => setIsBookmarksOpen(true)}
-              className="relative p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-navy-800 btn-tactile active:scale-95 transition-all"
+              className="relative p-2 min-w-[40px] min-h-[40px] rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-navy-800 btn-tactile active:scale-95 transition-all flex items-center justify-center"
               title="Saved Bookmarks"
               aria-label="Saved Bookmarks"
             >
@@ -125,7 +125,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onNavigate, cur
             {/* Notifications */}
             <button
               onClick={() => setIsNotificationsOpen(true)}
-              className="relative p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-navy-800 btn-tactile active:scale-95 transition-all"
+              className="relative p-2 min-w-[40px] min-h-[40px] rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-navy-800 btn-tactile active:scale-95 transition-all flex items-center justify-center"
               title="Notifications"
               aria-label="Notifications"
             >
@@ -140,7 +140,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onNavigate, cur
             {/* Dark / Light Toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-navy-800 btn-tactile active:scale-95 transition-all"
+              className="p-2 min-w-[40px] min-h-[40px] rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-navy-800 btn-tactile active:scale-95 transition-all flex items-center justify-center"
               title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
               aria-label={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
             >
@@ -229,7 +229,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onNavigate, cur
               {/* Dropdown Menu */}
               {profileDropdownOpen && (
                 <div 
-                  className="absolute right-0 mt-2 w-64 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-navy-800 shadow-2xl py-2 z-50 animate-scale-in"
+                  className="absolute right-0 mt-2 w-64 max-w-[calc(100vw-24px)] rounded-2xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-navy-800 shadow-2xl py-2 z-50 animate-scale-in"
                   onClick={() => setProfileDropdownOpen(false)}
                 >
                   <div className="px-4 py-3 border-b border-slate-100 dark:border-navy-800">

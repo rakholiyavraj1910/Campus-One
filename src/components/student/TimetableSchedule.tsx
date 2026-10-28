@@ -48,7 +48,7 @@ export const TimetableSchedule: React.FC = () => {
       {/* Filter Tabs */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         {/* Days */}
-        <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs">
+        <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs max-w-full scrollbar-none momentum-scroll">
           <button
             onClick={() => setSelectedDay('All')}
             className={`px-3 py-1.5 rounded-xl font-bold transition-all ${
@@ -75,12 +75,12 @@ export const TimetableSchedule: React.FC = () => {
         </div>
 
         {/* Type Filter */}
-        <div className="flex items-center space-x-1 text-xs">
+        <div className="flex items-center space-x-1 text-xs overflow-x-auto pb-1">
           {['All', 'Lecture', 'Lab', 'Tutorial'].map((t) => (
             <button
               key={t}
               onClick={() => setSelectedType(t)}
-              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
                 selectedType === t
                   ? 'bg-navy-900 text-white dark:bg-white dark:text-navy-950 font-bold'
                   : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
@@ -93,7 +93,7 @@ export const TimetableSchedule: React.FC = () => {
       </div>
 
       {/* Timetable Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-4">
         {filteredSlots.length === 0 ? (
           <div className="col-span-full py-16 text-center text-slate-400 bg-white dark:bg-navy-900 rounded-3xl border border-slate-200/80 dark:border-navy-800">
             <Calendar className="w-10 h-10 mx-auto mb-2 opacity-30 text-brand-cyan" />

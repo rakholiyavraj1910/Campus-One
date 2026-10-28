@@ -240,10 +240,10 @@ export const FacultyProfilePage: React.FC<FacultyProfilePageProps> = ({ onNaviga
   return (
     <div className="space-y-6 animate-fade-in pb-12">
       {/* Faculty Executive Header Card */}
-      <div className="bg-gradient-to-r from-navy-950 via-navy-900 to-[#0e2744] rounded-3xl p-6 sm:p-8 text-white border border-navy-700/80 shadow-2xl relative overflow-hidden">
+      <div className="bg-gradient-to-r from-navy-950 via-navy-900 to-[#0e2744] rounded-2xl sm:rounded-3xl p-4 sm:p-8 text-white border border-navy-700/80 shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-cyan-500/15 blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-6">
+        <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-4 sm:gap-6">
           {/* Avatar with digital badge & edit trigger */}
           <div className="relative shrink-0 group">
             <UserAvatar
@@ -259,7 +259,7 @@ export const FacultyProfilePage: React.FC<FacultyProfilePageProps> = ({ onNaviga
             <button
               type="button"
               onClick={() => setIsCropModalOpen(true)}
-              className="absolute inset-0 rounded-2xl bg-navy-950/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-teal-300 font-bold text-xs space-y-1 shadow-lg"
+              className="absolute inset-0 rounded-2xl bg-navy-950/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-teal-300 font-bold text-xs space-y-1 shadow-lg cursor-pointer"
               title="Change Profile Photo"
             >
               <Camera className="w-5 h-5 text-teal-300 animate-bounce" />
@@ -268,7 +268,7 @@ export const FacultyProfilePage: React.FC<FacultyProfilePageProps> = ({ onNaviga
           </div>
 
           {/* Details */}
-          <div className="flex-1 text-center md:text-left space-y-2">
+          <div className="flex-1 w-full min-w-0 text-center md:text-left space-y-2">
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white/10 text-teal-300 border border-teal-500/30 flex items-center space-x-1">
                 <GraduationCap className="w-3.5 h-3.5 text-teal-400" />
@@ -281,21 +281,21 @@ export const FacultyProfilePage: React.FC<FacultyProfilePageProps> = ({ onNaviga
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              <div className="min-w-0">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight truncate">
                   {user.name}
                 </h2>
-                <p className="text-sm text-slate-300 mt-0.5">
+                <p className="text-xs sm:text-sm text-slate-300 mt-0.5 truncate">
                   {user.designation || 'Assistant Professor'} &bull; Department of {user.department || 'Computer Engineering'}
                 </p>
               </div>
 
               {/* Edit / Change Photo Quick Action Button */}
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-2 shrink-0">
                 {!isEditing ? (
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="px-4 py-2 rounded-2xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 text-xs font-bold transition-all flex items-center space-x-1.5 shadow-sm"
+                    className="px-3.5 sm:px-4 py-2 rounded-2xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 text-xs font-bold transition-all flex items-center space-x-1.5 shadow-sm min-h-[38px] cursor-pointer"
                   >
                     <Edit3 className="w-3.5 h-3.5" />
                     <span>Edit Profile</span>
@@ -303,7 +303,7 @@ export const FacultyProfilePage: React.FC<FacultyProfilePageProps> = ({ onNaviga
                 ) : (
                   <button
                     onClick={handleCancelEdit}
-                    className="px-4 py-2 rounded-2xl bg-white/10 hover:bg-white/20 text-slate-300 text-xs font-bold transition-all flex items-center space-x-1.5"
+                    className="px-3.5 sm:px-4 py-2 rounded-2xl bg-white/10 hover:bg-white/20 text-slate-300 text-xs font-bold transition-all flex items-center space-x-1.5 min-h-[38px] cursor-pointer"
                   >
                     <X className="w-3.5 h-3.5" />
                     <span>Cancel</span>
@@ -312,7 +312,7 @@ export const FacultyProfilePage: React.FC<FacultyProfilePageProps> = ({ onNaviga
 
                 <button
                   onClick={() => setIsCropModalOpen(true)}
-                  className="px-3 py-2 rounded-2xl bg-navy-800/80 hover:bg-navy-800 text-slate-300 hover:text-white border border-navy-700 text-xs font-bold transition-all flex items-center space-x-1.5"
+                  className="px-3 py-2 rounded-2xl bg-navy-800/80 hover:bg-navy-800 text-slate-300 hover:text-white border border-navy-700 text-xs font-bold transition-all flex items-center space-x-1.5 min-h-[38px] cursor-pointer"
                   title="Upload or manage profile photo"
                 >
                   <Camera className="w-3.5 h-3.5 text-teal-400" />
@@ -322,25 +322,25 @@ export const FacultyProfilePage: React.FC<FacultyProfilePageProps> = ({ onNaviga
             </div>
 
             {/* Quick Metrics Bar */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3">
-              <div className="bg-navy-950/60 p-2.5 rounded-2xl border border-navy-800">
-                <span className="text-[10px] text-slate-400 uppercase font-semibold">Faculty Office</span>
-                <p className="text-sm font-bold text-white mt-0.5">{user.cabin || 'Faculty Room'}</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 pt-3">
+              <div className="bg-navy-950/60 p-2 sm:p-2.5 rounded-xl sm:rounded-2xl border border-navy-800 min-w-0">
+                <span className="text-[9px] sm:text-[10px] text-slate-400 uppercase font-semibold">Faculty Office</span>
+                <p className="text-xs sm:text-sm font-bold text-white mt-0.5 truncate">{user.cabin || 'Faculty Room'}</p>
               </div>
 
-              <div className="bg-navy-950/60 p-2.5 rounded-2xl border border-navy-800">
-                <span className="text-[10px] text-slate-400 uppercase font-semibold">Contact Phone</span>
-                <p className="text-sm font-mono font-bold text-teal-300 mt-0.5">{user.phone || 'Not Provided'}</p>
+              <div className="bg-navy-950/60 p-2 sm:p-2.5 rounded-xl sm:rounded-2xl border border-navy-800 min-w-0">
+                <span className="text-[9px] sm:text-[10px] text-slate-400 uppercase font-semibold">Contact Phone</span>
+                <p className="text-xs sm:text-sm font-mono font-bold text-teal-300 mt-0.5 truncate">{user.phone || 'Not Provided'}</p>
               </div>
 
-              <div className="bg-navy-950/60 p-2.5 rounded-2xl border border-navy-800">
-                <span className="text-[10px] text-slate-400 uppercase font-semibold">Consultation Hours</span>
-                <p className="text-sm font-bold text-white mt-0.5 truncate">{user.consultationHours || 'Mon-Fri 03:00 - 05:00 PM'}</p>
+              <div className="bg-navy-950/60 p-2 sm:p-2.5 rounded-xl sm:rounded-2xl border border-navy-800 min-w-0">
+                <span className="text-[9px] sm:text-[10px] text-slate-400 uppercase font-semibold">Consultation Hours</span>
+                <p className="text-xs sm:text-sm font-bold text-white mt-0.5 truncate">{user.consultationHours || 'Mon-Fri 03:00 - 05:00 PM'}</p>
               </div>
 
-              <div className="bg-navy-950/60 p-2.5 rounded-2xl border border-navy-800">
-                <span className="text-[10px] text-slate-400 uppercase font-semibold">Appointment</span>
-                <p className="text-sm font-bold text-emerald-400 mt-0.5">Permanent Full-Time</p>
+              <div className="bg-navy-950/60 p-2 sm:p-2.5 rounded-xl sm:rounded-2xl border border-navy-800 min-w-0">
+                <span className="text-[9px] sm:text-[10px] text-slate-400 uppercase font-semibold">Appointment</span>
+                <p className="text-xs sm:text-sm font-bold text-emerald-400 mt-0.5 truncate">Permanent Full-Time</p>
               </div>
             </div>
           </div>
@@ -394,7 +394,7 @@ export const FacultyProfilePage: React.FC<FacultyProfilePageProps> = ({ onNaviga
 
       {/* EDIT MODE: Form View */}
       {isEditing ? (
-        <form onSubmit={handleSaveProfile} className="bg-white dark:bg-navy-900 rounded-3xl p-6 sm:p-8 border border-teal-500/40 shadow-xl space-y-6">
+        <form onSubmit={handleSaveProfile} className="bg-white dark:bg-navy-900 rounded-2xl sm:rounded-3xl p-4 sm:p-8 border border-teal-500/40 shadow-xl space-y-6">
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-navy-800 pb-4">
             <div>
               <h3 className="font-extrabold text-slate-900 dark:text-white text-base flex items-center space-x-2">

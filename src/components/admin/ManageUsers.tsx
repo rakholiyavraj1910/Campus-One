@@ -693,8 +693,8 @@ export const ManageUsers: React.FC<ManageUsersProps> = () => {
 
       {/* Users Table */}
       <div className="bg-white dark:bg-navy-900 rounded-3xl border border-slate-200/80 dark:border-navy-800 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        <div className="overflow-x-auto momentum-scroll">
+          <table className="w-full text-left border-collapse min-w-[720px]">
             <thead>
               <tr className="bg-slate-50/80 dark:bg-navy-950/60 border-b border-slate-200 dark:border-navy-800 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 <th className="py-3.5 px-4 sm:px-6">User Account</th>
@@ -943,7 +943,7 @@ export const ManageUsers: React.FC<ManageUsersProps> = () => {
       {/* MODAL 1: EDIT USER DETAILS */}
       {/* ========================================================================= */}
       {editingUser && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
           <div className="bg-white dark:bg-navy-900 border border-slate-200 dark:border-navy-800 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-scale-up">
             <div className="p-6 border-b border-slate-100 dark:border-navy-800 flex items-center justify-between sticky top-0 bg-white/95 dark:bg-navy-900/95 backdrop-blur-xs z-10">
               <div className="flex items-center space-x-3">
@@ -1279,8 +1279,8 @@ export const ManageUsers: React.FC<ManageUsersProps> = () => {
       {/* MODAL 2: CHANGE USER ROLE (WITH 2-STEP CONFIRMATION & SAFEGUARDS) */}
       {/* ========================================================================= */}
       {roleModalUser && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-navy-900 border border-slate-200 dark:border-navy-800 rounded-3xl max-w-lg w-full shadow-2xl animate-scale-up">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-navy-900 border border-slate-200 dark:border-navy-800 rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-scale-up">
             <div className="p-6 border-b border-slate-100 dark:border-navy-800 flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className="p-2.5 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400">

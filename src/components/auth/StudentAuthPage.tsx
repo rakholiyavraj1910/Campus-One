@@ -217,8 +217,8 @@ export const StudentAuthPage: React.FC<StudentAuthPageProps> = ({
       </header>
 
       {/* Main Container */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8">
-        <div className="w-full max-w-md bg-white dark:bg-navy-900 rounded-3xl p-6 sm:p-8 border border-slate-200/90 dark:border-navy-700/80 shadow-2xl relative">
+      <div className="flex-1 flex items-center justify-center p-3 sm:p-6 lg:p-8 pb-safe">
+        <div className="w-full max-w-md bg-white dark:bg-navy-900 rounded-3xl p-4 sm:p-8 border border-slate-200/90 dark:border-navy-700/80 shadow-2xl relative">
           
           {/* Header */}
           <div className="text-center space-y-2 mb-6">

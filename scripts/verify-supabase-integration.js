@@ -989,6 +989,53 @@ assert(sidebarProfileContent.includes("handleNav('admin', 'profile')"), 'Sidebar
 const appProfileContent = fs.readFileSync(appPath, 'utf8');
 assert(appProfileContent.includes("second || tab"), 'App.tsx preserves deep link routing for /admin/profile');
 
+console.log('\n24. Checking Responsive Design, Viewport Scaling & Cross-Device Optimization:');
+const tailwindConfigPath = path.join(rootDir, 'tailwind.config.js');
+const tailwindConfigContent = fs.readFileSync(tailwindConfigPath, 'utf8');
+assert(tailwindConfigContent.includes("'xs': '430px'"), 'tailwind.config.js declares mobile xs breakpoint');
+assert(tailwindConfigContent.includes("'3xl': '1920px'"), 'tailwind.config.js declares ultrawide 3xl breakpoint');
+assert(tailwindConfigContent.includes("'4xl': '2560px'"), 'tailwind.config.js declares 4K TV 4xl breakpoint');
+
+const sec24IndexHtmlPath = path.join(rootDir, 'index.html');
+const sec24IndexHtmlContent = fs.readFileSync(sec24IndexHtmlPath, 'utf8');
+assert(sec24IndexHtmlContent.includes('viewport-fit=cover'), 'index.html includes viewport-fit=cover for device notch handling');
+
+const indexCssPath = path.join(rootDir, 'src', 'index.css');
+const indexCssContent = fs.readFileSync(indexCssPath, 'utf8');
+assert(indexCssContent.includes('pt-safe'), 'src/index.css defines safe-area top padding');
+assert(indexCssContent.includes('pb-safe'), 'src/index.css defines safe-area bottom padding');
+assert(indexCssContent.includes('.touch-target'), 'src/index.css defines min-44px touch target utility');
+assert(indexCssContent.includes('.momentum-scroll'), 'src/index.css defines smooth iOS momentum scroll utility');
+
+const sec24AppContent = fs.readFileSync(appPath, 'utf8');
+assert(sec24AppContent.includes('4xl:max-w-[2160px]'), 'App.tsx fluidly scales main container up to 4xl 2160px for ultrawide and 4K displays');
+
+const sec24AdminLayoutContent = fs.readFileSync(adminLayoutPath, 'utf8');
+assert(sec24AdminLayoutContent.includes('4xl:max-w-[2160px]'), 'AdminLayout.tsx fluidly scales workspace container up to 4xl 2160px');
+
+const sec24ManageUsersContent = fs.readFileSync(path.join(rootDir, 'src', 'components', 'admin', 'ManageUsers.tsx'), 'utf8');
+assert(sec24ManageUsersContent.includes('momentum-scroll'), 'ManageUsers.tsx enables momentum scroll on users table');
+assert(sec24ManageUsersContent.includes('min-w-[720px]'), 'ManageUsers.tsx guarantees minimum table width preventing compressed columns');
+
+const sec24ManageStudentsContent = fs.readFileSync(path.join(rootDir, 'src', 'components', 'admin', 'ManageStudents.tsx'), 'utf8');
+assert(sec24ManageStudentsContent.includes('momentum-scroll'), 'ManageStudents.tsx enables momentum scroll on student roster table');
+assert(sec24ManageStudentsContent.includes('min-w-[650px]'), 'ManageStudents.tsx guarantees minimum width preventing cramped roster layout');
+
+const sec24MarksContent = fs.readFileSync(path.join(rootDir, 'src', 'components', 'student', 'MarksAndResults.tsx'), 'utf8');
+assert(sec24MarksContent.includes('min-w-[640px]'), 'MarksAndResults.tsx guarantees minimum width on 8-column CIE assessment table');
+
+const sec24AnalyticsContent = fs.readFileSync(path.join(rootDir, 'src', 'components', 'admin', 'PlatformAnalytics.tsx'), 'utf8');
+assert(sec24AnalyticsContent.includes('3xl:grid-cols-8'), 'PlatformAnalytics.tsx scales metric cards to 8 columns on ultrawide monitors');
+
+const sec24QuickAccessContent = fs.readFileSync(path.join(rootDir, 'src', 'components', 'home', 'QuickAccessGrid.tsx'), 'utf8');
+assert(sec24QuickAccessContent.includes('3xl:grid-cols-8'), 'QuickAccessGrid.tsx scales 8 portal cards to single row on ultrawide monitors');
+
+const sec24GlobalSearchContent = fs.readFileSync(path.join(rootDir, 'src', 'components', 'common', 'GlobalSearchModal.tsx'), 'utf8');
+assert(sec24GlobalSearchContent.includes('momentum-scroll'), 'GlobalSearchModal.tsx enables momentum scrolling for search results on mobile');
+
+const sec24NoticeModalContent = fs.readFileSync(path.join(rootDir, 'src', 'components', 'notices', 'NoticeDetailModal.tsx'), 'utf8');
+assert(sec24NoticeModalContent.includes('momentum-scroll'), 'NoticeDetailModal.tsx enables smooth internal scrolling on notice detail modal');
+
 console.log('\n====================================================');
 console.log(`Results: ${passedTests}/${totalTests} tests passed (${Math.round((passedTests / totalTests) * 100)}%)`);
 console.log('====================================================\n');

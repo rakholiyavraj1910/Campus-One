@@ -88,8 +88,8 @@ export const ExamCenter: React.FC = () => {
             </span>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+          <div className="overflow-x-auto momentum-scroll">
+            <table className="w-full text-left text-xs min-w-[600px]">
               <thead>
                 <tr className="border-b border-slate-200 dark:border-navy-800 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
                   <th className="py-3 px-3">Date &amp; Time</th>
@@ -148,13 +148,13 @@ export const ExamCenter: React.FC = () => {
       {/* Hall Ticket Preview Modal */}
       {showHallTicketModal && (
         <div 
-          className="fixed inset-0 z-50 overflow-y-auto bg-navy-950/75 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in"
+          className="fixed inset-0 z-50 overflow-y-auto bg-navy-950/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-fade-in"
           onClick={(e) => {
             if (e.target === e.currentTarget) setShowHallTicketModal(false);
           }}
         >
           <div 
-            className="w-full max-w-2xl bg-white text-navy-950 rounded-3xl shadow-2xl p-6 sm:p-8 space-y-6 border border-slate-300 relative print:m-0 print:p-0 print:border-none"
+            className="w-full max-w-2xl bg-white text-navy-950 rounded-3xl shadow-2xl p-5 sm:p-8 space-y-6 border border-slate-300 relative print:m-0 print:p-0 print:border-none max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Top Close / Print bar */}

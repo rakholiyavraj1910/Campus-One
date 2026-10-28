@@ -230,7 +230,7 @@ export const ContactPage: React.FC = () => {
             </h3>
           </div>
 
-          <div className="relative min-w-[260px]">
+          <div className="relative w-full sm:w-auto sm:min-w-[260px]">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
             <input
               type="text"

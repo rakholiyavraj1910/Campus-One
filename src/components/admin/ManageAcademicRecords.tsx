@@ -73,10 +73,10 @@ export const ManageAcademicRecords: React.FC = () => {
     <div className="space-y-6 animate-fade-in">
       {/* Top Banner & Tab Navigation */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="bg-[#0c1220] p-1.5 rounded-2xl border border-slate-800 flex items-center space-x-2 max-w-md">
+        <div className="bg-[#0c1220] p-1.5 rounded-2xl border border-slate-800 flex items-center space-x-1 sm:space-x-2 w-full sm:max-w-md overflow-x-auto momentum-scroll">
           <button
             onClick={() => setActiveTab('attendance')}
-            className={`flex-1 flex items-center justify-center space-x-2 py-2 px-4 rounded-xl text-xs font-bold transition-all ${
+            className={`flex-1 flex items-center justify-center space-x-2 py-2 px-3 sm:px-4 rounded-xl text-xs font-bold transition-all min-h-[38px] ${
               activeTab === 'attendance'
                 ? 'bg-teal-500 text-navy-950 shadow-md font-extrabold'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
@@ -93,7 +93,7 @@ export const ManageAcademicRecords: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('materials')}
-            className={`flex-1 flex items-center justify-center space-x-2 py-2 px-4 rounded-xl text-xs font-bold transition-all ${
+            className={`flex-1 flex items-center justify-center space-x-2 py-2 px-3 sm:px-4 rounded-xl text-xs font-bold transition-all min-h-[38px] ${
               activeTab === 'materials'
                 ? 'bg-teal-500 text-navy-950 shadow-md font-extrabold'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
@@ -163,8 +163,8 @@ export const ManageAcademicRecords: React.FC = () => {
 
           {/* Table of Classroom Attendance Sessions */}
           <div className="rounded-3xl border border-slate-800 overflow-hidden bg-slate-900/80">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+            <div className="overflow-x-auto momentum-scroll">
+              <table className="w-full text-left text-xs min-w-[620px]">
                 <thead className="bg-[#0c1220] border-b border-slate-800 text-[10px] font-black uppercase tracking-wider text-slate-400">
                   <tr>
                     <th className="py-3 px-4">Subject &amp; Code</th>

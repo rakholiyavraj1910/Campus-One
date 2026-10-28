@@ -162,7 +162,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <button
                   type="button"
                   onClick={() => handleNav(item.id, item.subItems ? item.subItems[0].id : undefined)}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-medium text-sm transition-all cursor-pointer btn-tactile ${
+                  className={`w-full flex items-center justify-between px-3 py-2.5 min-h-[44px] rounded-xl font-medium text-sm transition-all cursor-pointer btn-tactile ${
                     isActive
                       ? 'bg-navy-900 text-white dark:bg-brand-cyan dark:text-navy-950 font-semibold shadow-sm'
                       : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-navy-800/80'
@@ -305,7 +305,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* 2. Mobile Drawer Navigation */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] bg-white dark:bg-navy-900 border-r border-slate-200 dark:border-navy-800 flex flex-col shadow-2xl lg:hidden transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] bg-white dark:bg-navy-900 border-r border-slate-200 dark:border-navy-800 flex flex-col shadow-2xl lg:hidden transition-transform duration-300 ease-in-out pt-safe pb-safe ${
           isOpen ? 'translate-x-0' : '-translate-x-full pointer-events-none'
         }`}
         aria-label="Mobile Navigation Drawer"
@@ -316,7 +316,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-navy-800 transition-colors focus:outline-none btn-tactile active:scale-95"
+            className="p-2 min-w-[40px] min-h-[40px] rounded-xl text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-navy-800 transition-colors focus:outline-none btn-tactile active:scale-95 flex items-center justify-center"
             aria-label="Close navigation menu"
           >
             <X className="w-5 h-5" />

@@ -252,7 +252,7 @@ export const StudentDirectory: React.FC<StudentDirectoryProps> = ({
       {/* Directory Grid of Real Students */}
       {!loading && !error && students.length > 0 && (
         <>
-          <ScrollStagger staggerMs={25} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <ScrollStagger staggerMs={25} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-4">
             {paginatedStudents.map((st) => (
               <div
                 key={st.id}
