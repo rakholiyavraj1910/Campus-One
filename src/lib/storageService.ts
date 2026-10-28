@@ -2971,6 +2971,79 @@ export const updateFacultyPersonalProfile = async (
   return updated;
 };
 
+export interface AdminProfileUpdates {
+  name: string;
+  phone?: string;
+  department?: string;
+  designation?: string;
+  avatarUrl?: string;
+}
+
+/**
+ * Updates an administrator's profile credentials:
+ * Name, Phone, Department, Designation, Avatar.
+ * Note: Role and AdminLevel are protected governance fields and cannot be altered here.
+ */
+export const updateAdminPersonalProfile = async (
+  userId: string,
+  updates: AdminProfileUpdates
+): Promise<UserProfile> => {
+  if (!userId || userId === 'guest') {
+    throw new Error('Authentication required: Sign in as administrator to update credentials.');
+  }
+
+  if (!updates.name || updates.name.trim().length < 2) {
+    throw new Error('Please enter a valid administrator name (at least 2 characters).');
+  }
+
+  if (isSupabaseConfigured && supabase) {
+    const payload: Record<string, any> = {
+      name: updates.name.trim(),
+      updated_at: new Date().toISOString(),
+    };
+    if (updates.phone !== undefined) payload.phone = updates.phone ? updates.phone.trim() : null;
+    if (updates.department !== undefined) payload.department = updates.department ? updates.department.trim() : null;
+    if (updates.designation !== undefined) payload.designation = updates.designation ? updates.designation.trim() : null;
+    if (updates.avatarUrl !== undefined) payload.avatar_url = updates.avatarUrl ? updates.avatarUrl.trim() : null;
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .update(payload)
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    await addAuditLog(
+      userId,
+      'admin',
+      'UPDATE_ADMIN_PROFILE',
+      'profiles',
+      userId,
+      `Administrator updated personal credentials (name: "${updates.name}").`
+    );
+
+    return mapProfileFromDb(data);
+  }
+
+  // Offline / Demo
+  const current = JSON.parse(localStorage.getItem('campusone_user_profile') || '{}');
+  const updated: UserProfile = {
+    ...current,
+    id: userId,
+    name: updates.name.trim(),
+    phone: updates.phone,
+    department: updates.department ?? current.department,
+    designation: updates.designation ?? current.designation,
+    avatarUrl: updates.avatarUrl ?? current.avatarUrl,
+  };
+  localStorage.setItem('campusone_user_profile', JSON.stringify(updated));
+  return updated;
+};
+
 // ==============================================================================
 // 16. STUDENT FEES & PAYMENT SERVICE
 // ==============================================================================

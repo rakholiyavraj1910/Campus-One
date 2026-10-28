@@ -12,6 +12,7 @@ import { ManageNoticesAndEvents } from './ManageNoticesAndEvents';
 import { ManageAcademicRecords } from './ManageAcademicRecords';
 import { AuditLogsViewer } from './AuditLogsViewer';
 import { SystemSettings } from './SystemSettings';
+import { AdminProfilePage } from '../profile/AdminProfilePage';
 import { useAuth } from '../../context/AuthContext';
 import { Notice, EventItem } from '../../types';
 import { 
@@ -41,11 +42,12 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     if (!sec) return 'overview';
     const valid: AdminSectionId[] = [
       'overview', 'users', 'students', 'faculty', 'roles', 
-      'approvals', 'departments', 'notices-events', 'academic', 'audit', 'settings'
+      'approvals', 'departments', 'notices-events', 'academic', 'audit', 'settings', 'profile'
     ];
     if (sec === 'notices' || sec === 'events') return 'notices-events';
     if (sec === 'faculty-requests') return 'approvals';
     if (sec === 'system' || sec === 'database') return 'settings';
+    if (sec === 'profile' || sec === 'my-profile' || sec === 'identity' || sec === 'account') return 'profile';
     return valid.includes(sec as AdminSectionId) ? (sec as AdminSectionId) : 'overview';
   };
 
@@ -185,6 +187,10 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
 
           {currentSection === 'settings' && (
             <SystemSettings />
+          )}
+
+          {currentSection === 'profile' && (
+            <AdminProfilePage onNavigateSection={handleSelectSection} />
           )}
         </main>
       </div>

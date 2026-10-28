@@ -45,7 +45,11 @@ const FACULTY_DESIGNATIONS = [
   'Adjunct Faculty / Visiting Expert'
 ];
 
-export const FacultyProfilePage: React.FC = () => {
+interface FacultyProfilePageProps {
+  onNavigateSection?: (sectionId: any) => void;
+}
+
+export const FacultyProfilePage: React.FC<FacultyProfilePageProps> = ({ onNavigateSection }) => {
   const { user, refreshProfile, updateLocalUserProfile } = useAuth();
   const { addNotification } = useNotifications();
 

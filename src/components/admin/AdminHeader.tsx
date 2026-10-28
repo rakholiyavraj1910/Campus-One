@@ -74,6 +74,10 @@ const SECTION_TITLES: Record<AdminSectionId, { title: string; subtitle: string }
   settings: {
     title: 'System & Database Architecture',
     subtitle: 'Supabase PostgreSQL configuration, schema validation, and institutional parameters'
+  },
+  profile: {
+    title: 'Administrator Identity & Clearance',
+    subtitle: 'Institutional credentials, executive department, authority clearance, and contact details'
   }
 };
 
@@ -220,6 +224,17 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
               </div>
 
               {/* Navigation Quick Links */}
+              <button
+                onClick={() => {
+                  onSelectSection('profile');
+                  setIsAccountOpen(false);
+                }}
+                className="w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-bold text-teal-300 hover:text-white hover:bg-teal-500/10 transition-colors text-left"
+              >
+                <ShieldCheck className="w-4 h-4 text-teal-400" />
+                <span>My Admin Profile</span>
+              </button>
+
               <button
                 onClick={() => {
                   onSelectSection('settings');

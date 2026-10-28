@@ -33,7 +33,8 @@ export type AdminSectionId =
   | 'notices-events' 
   | 'academic' 
   | 'audit' 
-  | 'settings';
+  | 'settings'
+  | 'profile';
 
 export interface AdminNavItem {
   id: AdminSectionId;
@@ -136,6 +137,12 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       label: 'System Settings',
       icon: Settings,
       description: 'Supabase telemetry & config'
+    },
+    {
+      id: 'profile',
+      label: 'Admin Profile',
+      icon: ShieldCheck,
+      description: 'Identity, credentials & security'
     }
   ];
 
@@ -248,7 +255,14 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
         {/* Footer / Admin Account Card */}
         <div className="p-4 border-t border-slate-800/80 bg-[#0c1220]/70 space-y-3">
-          <div className="flex items-center space-x-3">
+          <button
+            onClick={() => {
+              onSelectSection('profile');
+              onClose();
+            }}
+            className="w-full text-left flex items-center space-x-3 p-2 -mx-2 rounded-xl hover:bg-slate-800/60 transition-colors group cursor-pointer"
+            title="View & Edit Administrator Identity Profile"
+          >
             <UserAvatar
               name={adminUser?.name || 'Super Administrator'}
               src={adminUser?.avatar}
@@ -256,17 +270,17 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
               size="md"
             />
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-black text-white truncate">
+              <p className="text-xs font-black text-white group-hover:text-teal-300 transition-colors truncate">
                 {adminUser?.name || 'Super Administrator'}
               </p>
               <p className="text-[11px] font-mono text-slate-400 truncate">
                 {adminUser?.email || 'campusonegpa@gmail.com'}
               </p>
-              <span className="inline-block mt-0.5 text-[9px] font-black uppercase tracking-wider text-teal-400">
-                Super Admin Clearance
+              <span className="inline-block mt-0.5 text-[9px] font-black uppercase tracking-wider text-teal-400 group-hover:underline">
+                Super Admin Clearance • Edit Profile
               </span>
             </div>
-          </div>
+          </button>
 
           <div className="flex items-center space-x-2 pt-1">
             {onNavigatePublic && (

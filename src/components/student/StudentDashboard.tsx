@@ -1,5 +1,6 @@
 import React from 'react';
-import { ProfileCard } from './ProfileCard';
+import { useAuth } from '../../context/AuthContext';
+import { RoleAdaptiveProfile } from '../profile/RoleAdaptiveProfile';
 import { AttendanceTracker } from './AttendanceTracker';
 import { TimetableSchedule } from './TimetableSchedule';
 import { MarksAndResults } from './MarksAndResults';
@@ -17,7 +18,8 @@ import {
   Download, 
   Calendar,
   Sparkles,
-  Receipt 
+  Receipt,
+  ShieldCheck
 } from 'lucide-react';
 
 interface StudentDashboardProps {
@@ -29,8 +31,18 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
   currentSubTab = 'profile',
   onNavigateSubTab
 }) => {
+  const { role } = useAuth();
+
+  const profileLabel = role === 'admin' 
+    ? 'Administrator Identity' 
+    : role === 'faculty' 
+      ? 'Faculty Profile' 
+      : 'Student Profile';
+
+  const ProfileIcon = role === 'admin' ? ShieldCheck : User;
+
   const tabs = [
-    { id: 'profile', label: 'Student Profile', icon: User },
+    { id: 'profile', label: profileLabel, icon: ProfileIcon },
     { id: 'timetable', label: 'Class Timetable', icon: Clock },
     { id: 'attendance', label: 'Attendance Tracker', icon: CheckCircle2 },
     { id: 'marks', label: 'Internal Marks & SGPA', icon: Award },
@@ -43,6 +55,26 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
 
   return (
     <div className="space-y-6 animate-fade-in pb-12">
+      {/* Admin Preview Notice */}
+      {role === 'admin' && (
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-amber-900 dark:text-amber-200">
+          <div className="flex items-center space-x-3">
+            <ShieldCheck className="w-5 h-5 text-amber-500 shrink-0" />
+            <p className="text-xs font-medium">
+              <strong className="font-bold">Administrative View:</strong> You are currently previewing the Student Academic Dashboard. Your administrator credentials and clearance are preserved.
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              window.location.href = '/admin';
+            }}
+            className="px-3 py-1.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs hover:bg-amber-400 transition-colors whitespace-nowrap"
+          >
+            Go to Admin Control Center &rarr;
+          </button>
+        </div>
+      )}
+
       {/* Sub-tab Navigation Bar */}
       <div className="bg-white dark:bg-navy-900 rounded-2xl p-2 border border-slate-200/80 dark:border-navy-800 shadow-xs flex items-center space-x-1 overflow-x-auto scrollbar-none">
         {tabs.map((t) => {
@@ -67,7 +99,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
       </div>
 
       {/* Tab Contents */}
-      {currentSubTab === 'profile' && <ProfileCard />}
+      {currentSubTab === 'profile' && <RoleAdaptiveProfile />}
       {currentSubTab === 'timetable' && <TimetableSchedule />}
       {currentSubTab === 'attendance' && <AttendanceTracker />}
       {currentSubTab === 'marks' && <MarksAndResults />}

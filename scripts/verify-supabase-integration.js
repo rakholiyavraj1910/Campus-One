@@ -929,6 +929,66 @@ assert(portalSelectHubContent.includes('CampusOne for GPA'), 'PortalSelectHub fe
 assert(portalSelectHubContent.includes('Computer Engineering'), 'PortalSelectHub features GPA departments');
 assert(portalSelectHubContent.includes('Sign In'), 'PortalSelectHub features prominent Sign In action');
 
+console.log('\n23. Checking Role-Based Profile Separation & Dedicated Admin Profile Architecture:');
+const adminProfilePagePath = path.join(rootDir, 'src', 'components', 'profile', 'AdminProfilePage.tsx');
+assert(fs.existsSync(adminProfilePagePath), 'src/components/profile/AdminProfilePage.tsx exists');
+const adminProfileContent = fs.readFileSync(adminProfilePagePath, 'utf8');
+assert(adminProfileContent.includes('Administrator Identity'), 'AdminProfilePage displays Administrator Identity');
+assert(adminProfileContent.includes('Institutional Clearance'), 'AdminProfilePage displays Institutional Clearance');
+assert(adminProfileContent.includes('ADMIN_DEPARTMENTS'), 'AdminProfilePage provides administrative departments');
+assert(adminProfileContent.includes('ADMIN_DESIGNATIONS'), 'AdminProfilePage provides administrative designations');
+assert(!adminProfileContent.includes('Roll Number'), 'AdminProfilePage strictly excludes student Roll Number');
+assert(!adminProfileContent.includes('PRN Number'), 'AdminProfilePage strictly excludes student PRN Number');
+assert(!adminProfileContent.includes('Semester & Division'), 'AdminProfilePage strictly excludes student Semester & Division');
+assert(!adminProfileContent.includes('Current CGPA'), 'AdminProfilePage strictly excludes student CGPA');
+assert(!adminProfileContent.includes('Assigned Faculty Mentor'), 'AdminProfilePage strictly excludes student Mentor');
+assert(!adminProfileContent.includes('Active Student Roster'), 'AdminProfilePage strictly excludes student Roster');
+
+const roleAdaptiveProfilePath = path.join(rootDir, 'src', 'components', 'profile', 'RoleAdaptiveProfile.tsx');
+assert(fs.existsSync(roleAdaptiveProfilePath), 'src/components/profile/RoleAdaptiveProfile.tsx exists');
+const roleAdaptiveContent = fs.readFileSync(roleAdaptiveProfilePath, 'utf8');
+assert(roleAdaptiveContent.includes("role === 'admin'"), 'RoleAdaptiveProfile routes admin role to AdminProfilePage');
+assert(roleAdaptiveContent.includes("role === 'faculty'"), 'RoleAdaptiveProfile routes faculty role to FacultyProfilePage');
+assert(roleAdaptiveContent.includes("<AdminProfilePage"), 'RoleAdaptiveProfile renders dedicated AdminProfilePage');
+assert(roleAdaptiveContent.includes("<FacultyProfilePage"), 'RoleAdaptiveProfile renders dedicated FacultyProfilePage');
+
+const sec23ProfileCardContent = fs.readFileSync(profileCardPath, 'utf8');
+assert(sec23ProfileCardContent.includes("if (role === 'admin')"), 'ProfileCard guards against admin role leaking student fields');
+assert(sec23ProfileCardContent.includes("if (role === 'faculty')"), 'ProfileCard guards against faculty role leaking student fields');
+
+const sec23StudentDashboardContent = fs.readFileSync(studentDashboardPath, 'utf8');
+assert(sec23StudentDashboardContent.includes('RoleAdaptiveProfile'), 'StudentDashboard integrates RoleAdaptiveProfile');
+assert(sec23StudentDashboardContent.includes("role === 'admin'"), 'StudentDashboard adapts sub-tab label and preview banner for admins');
+
+const storageAdminUpdateContent = fs.readFileSync(storagePath, 'utf8');
+assert(storageAdminUpdateContent.includes('export const updateAdminPersonalProfile'), 'storageService exports updateAdminPersonalProfile');
+assert(storageAdminUpdateContent.includes('export interface AdminProfileUpdates'), 'storageService exports AdminProfileUpdates');
+assert(storageAdminUpdateContent.includes('UPDATE_ADMIN_PROFILE'), 'updateAdminPersonalProfile audits profile modifications');
+
+const adminSidebarProfileContent = fs.readFileSync(adminSidebarPath, 'utf8');
+assert(adminSidebarProfileContent.includes("| 'profile'"), 'AdminSidebar includes profile in AdminSectionId');
+assert(adminSidebarProfileContent.includes("id: 'profile'"), 'AdminSidebar includes Admin Profile in navItems');
+assert(adminSidebarProfileContent.includes("onSelectSection('profile')"), 'AdminSidebar footer account card links to admin profile');
+
+const sec23AdminHeaderPath = path.join(rootDir, 'src', 'components', 'admin', 'AdminHeader.tsx');
+const sec23AdminHeaderContent = fs.readFileSync(sec23AdminHeaderPath, 'utf8');
+assert(sec23AdminHeaderContent.includes('profile: {'), 'AdminHeader declares profile section metadata');
+assert(sec23AdminHeaderContent.includes("onSelectSection('profile')"), 'AdminHeader dropdown includes My Admin Profile quick action');
+
+const sec23AdminLayoutContent = fs.readFileSync(adminLayoutPath, 'utf8');
+assert(sec23AdminLayoutContent.includes("currentSection === 'profile'"), 'AdminLayout renders AdminProfilePage for profile section');
+assert(sec23AdminLayoutContent.includes("<AdminProfilePage"), 'AdminLayout imports and renders AdminProfilePage');
+
+const navbarProfileContent = fs.readFileSync(navbarPath, 'utf8');
+assert(navbarProfileContent.includes("onNavigate('admin', 'profile')"), 'Navbar profile dropdown includes My Admin Profile for admin role');
+assert(navbarProfileContent.includes("role === 'admin' ?"), 'Navbar profile card displays admin status instead of student roll number');
+
+const sidebarProfileContent = fs.readFileSync(sidebarPath, 'utf8');
+assert(sidebarProfileContent.includes("handleNav('admin', 'profile')"), 'Sidebar user card links admin to admin profile');
+
+const appProfileContent = fs.readFileSync(appPath, 'utf8');
+assert(appProfileContent.includes("second || tab"), 'App.tsx preserves deep link routing for /admin/profile');
+
 console.log('\n====================================================');
 console.log(`Results: ${passedTests}/${totalTests} tests passed (${Math.round((passedTests / totalTests) * 100)}%)`);
 console.log('====================================================\n');

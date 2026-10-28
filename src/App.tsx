@@ -97,9 +97,9 @@ function getPageFromLocation(): ParsedLocation {
     return { page: 'portal-select', subTab: tab };
   }
   if (first === 'home') return { page: 'home', subTab: tab };
-  if (first === 'student') return { page: 'student', subTab: tab || 'profile' };
-  if (first === 'faculty-portal' || first === 'faculty') return { page: 'faculty-portal', subTab: tab };
-  if (first === 'admin') return { page: 'admin', subTab: tab };
+  if (first === 'student') return { page: 'student', subTab: second || tab || 'profile' };
+  if (first === 'faculty-portal' || first === 'faculty') return { page: 'faculty-portal', subTab: second || tab };
+  if (first === 'admin') return { page: 'admin', subTab: second || tab };
   if (first === 'notices') return { page: 'notices', subTab: tab };
   if (first === 'events') return { page: 'events', subTab: tab };
   if (first === 'campus') return { page: 'campus', subTab: tab || 'departments' };

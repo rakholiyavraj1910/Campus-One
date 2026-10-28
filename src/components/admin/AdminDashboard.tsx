@@ -13,6 +13,7 @@ import { DatabaseOverview } from './DatabaseOverview';
 import { AuditLogsViewer } from './AuditLogsViewer';
 import { ManageFeedback } from './ManageFeedback';
 import { SystemSettings } from './SystemSettings';
+import { AdminProfilePage } from '../profile/AdminProfilePage';
 import { AdminAccessDenied } from '../common/AdminAccessDenied';
 import { LoadingScreen } from '../common/LoadingScreen';
 import { Notice, EventItem } from '../../types';
@@ -64,7 +65,8 @@ type TabId =
   | 'database' 
   | 'feedback' 
   | 'audit' 
-  | 'system';
+  | 'system'
+  | 'profile';
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   notices,
@@ -81,9 +83,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     if (!tab) return 'overview';
     if (tab === 'analytics') return 'overview';
     if (tab === 'users' || tab === 'user-management') return 'users';
+    if (tab === 'profile' || tab === 'my-profile' || tab === 'account' || tab === 'identity') return 'profile';
     const validTabs: TabId[] = [
       'overview', 'users', 'departments', 'faculty', 'students', 'faculty-requests',
-      'notices', 'events', 'materials', 'facilities', 'database', 'feedback', 'audit', 'system'
+      'notices', 'events', 'materials', 'facilities', 'database', 'feedback', 'audit', 'system', 'profile'
     ];
     return validTabs.includes(tab as TabId) ? (tab as TabId) : 'overview';
   };
@@ -389,6 +392,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
         {activeTab === 'system' && (
           <SystemSettings />
+        )}
+
+        {activeTab === 'profile' && (
+          <AdminProfilePage />
         )}
       </div>
     </div>

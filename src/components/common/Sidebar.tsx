@@ -264,7 +264,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onClick={() => {
               if (role === 'student') handleNav('student', 'profile');
               else if (role === 'faculty') handleNav('faculty-portal', 'profile');
-              else handleNav('admin', 'overview');
+              else if (role === 'admin') handleNav('admin', 'profile');
+              else handleNav('portal-select');
             }}
             className="w-full p-2.5 rounded-2xl bg-slate-50 dark:bg-navy-950/60 hover:bg-slate-100 dark:hover:bg-navy-800/80 border border-slate-200/80 dark:border-navy-800 flex items-center space-x-3 text-left transition-all group"
             title="Open My Profile"

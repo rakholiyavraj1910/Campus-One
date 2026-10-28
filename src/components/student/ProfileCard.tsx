@@ -33,6 +33,8 @@ import {
 } from '../../lib/storageService';
 import { COLLEGE_DEPARTMENTS } from '../../types';
 import confetti from 'canvas-confetti';
+import { AdminProfilePage } from '../profile/AdminProfilePage';
+import { FacultyProfilePage } from '../profile/FacultyProfilePage';
 
 const ACADEMIC_YEARS = [
   '2026 - 2027',
@@ -45,8 +47,16 @@ const ACADEMIC_YEARS = [
 const DIVISIONS = ['Div A', 'Div B', 'Div C', 'Div D', 'Div E'];
 
 export const ProfileCard: React.FC = () => {
-  const { user, refreshProfile, updateLocalUserProfile } = useAuth();
+  const { user, role, refreshProfile, updateLocalUserProfile } = useAuth();
   const { addNotification } = useNotifications();
+
+  // STRICT ROLE GUARD: Never render student academic records for administrators or faculty members
+  if (role === 'admin') {
+    return <AdminProfilePage />;
+  }
+  if (role === 'faculty') {
+    return <FacultyProfilePage />;
+  }
 
   // Edit Mode state
   const [isEditing, setIsEditing] = useState<boolean>(false);

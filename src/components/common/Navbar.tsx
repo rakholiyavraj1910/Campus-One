@@ -236,9 +236,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onNavigate, cur
                     <p className="text-xs text-slate-400">Signed in as</p>
                     <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{user.name}</p>
                     <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{user.email}</p>
-                    {user.rollNumber && (
+                    {role === 'admin' ? (
+                      <p className="text-[11px] font-bold text-teal-500 dark:text-teal-400 mt-1 uppercase tracking-wider flex items-center gap-1">
+                        <ShieldCheck className="w-3 h-3" />
+                        <span>{user.adminLevel || 'Super Administrator'}</span>
+                      </p>
+                    ) : role === 'faculty' ? (
+                      <p className="text-[11px] font-bold text-teal-500 dark:text-teal-400 mt-1 uppercase tracking-wider">
+                        {user.designation || 'Faculty Member'}
+                      </p>
+                    ) : user.rollNumber ? (
                       <p className="text-[11px] font-mono text-brand-cyan mt-1">Roll: {user.rollNumber} | {user.division}</p>
-                    )}
+                    ) : null}
                   </div>
 
                   <div className="py-1">
@@ -274,6 +283,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onNavigate, cur
 
                     {role === 'admin' && (
                       <>
+                        <button
+                          onClick={() => onNavigate('admin', 'profile')}
+                          className="w-full text-left px-4 py-2 text-xs text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-navy-800 flex items-center space-x-2 font-semibold"
+                        >
+                          <ShieldCheck className="w-4 h-4 text-teal-500" />
+                          <span>My Admin Profile</span>
+                        </button>
                         <button
                           onClick={() => onNavigate('admin', 'overview')}
                           className="w-full text-left px-4 py-2 text-xs text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-navy-800 flex items-center space-x-2 font-semibold"
