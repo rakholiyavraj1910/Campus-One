@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+  <!-- Homepage / Digital Campus Portal Hub -->
+  <url>
+    <loc>https://campus-oneweb.vercel.app/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.00</priority>
+  </url>
+
+  <!-- Campus Dashboard -->
+  <url>
+    <loc>https://campus-oneweb.vercel.app/home</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <!-- Official College Notices & Circulars -->
+  <url>
+    <loc>https://campus-oneweb.vercel.app/notices</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <!-- Campus Events, Seminars & Technical Workshops -->
+  <url>
+    <loc>https://campus-oneweb.vercel.app/events</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+  <!-- Engineering Departments & Academic Facilities -->
+  <url>
+    <loc>https://campus-oneweb.vercel.app/campus</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+  <!-- About Government Polytechnic Ahmedabad -->
+  <url>
+    <loc>https://campus-oneweb.vercel.app/about</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.70</priority>
+  </url>
+
+  <!-- Student Helpdesk & Campus Contacts -->
+  <url>
+    <loc>https://campus-oneweb.vercel.app/contact</loc>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.70</priority>
+  </url>
+
+</urlset>

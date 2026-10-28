@@ -1,0 +1,25 @@
+# ==============================================================================
+# CampusOne Robots Configuration for Google & Search Engine Crawlers
+# Host: https://campus-oneweb.vercel.app/
+# Target: Government Polytechnic Ahmedabad (GPA)
+# ==============================================================================
+
+User-agent: *
+Allow: /
+Allow: /home
+Allow: /notices
+Allow: /events
+Allow: /campus
+Allow: /about
+Allow: /contact
+
+# Protect private authentication & portal sections from indexing
+Disallow: /admin
+Disallow: /admin-auth
+Disallow: /student
+Disallow: /faculty-portal
+Disallow: /auth/
+Disallow: /confirm
+
+# XML Sitemap
+Sitemap: https://campus-oneweb.vercel.app/sitemap.xml

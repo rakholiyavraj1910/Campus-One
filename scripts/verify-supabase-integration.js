@@ -885,6 +885,50 @@ assert(facultySidebarContent.includes("{ id: 'events', label: 'Department Events
 assert(facultySidebarContent.includes("{ id: 'academic', label: 'Academic Resources' }"), 'Sidebar includes Academic Resources item');
 assert(facultySidebarContent.includes("{ id: 'profile', label: 'Faculty Profile' }"), 'Sidebar includes Faculty Profile item');
 
+console.log('\n22. Checking SEO, Google Indexing, Meta Tags & Sitemap Configuration:');
+const seoIndexPath = path.join(rootDir, 'index.html');
+const seoIndexHtmlContent = fs.readFileSync(seoIndexPath, 'utf8');
+assert(seoIndexHtmlContent.includes('<title>CampusOne for GPA | Government Polytechnic Ahmedabad</title>'), 'index.html sets exact title "CampusOne for GPA | Government Polytechnic Ahmedabad"');
+assert(seoIndexHtmlContent.includes('name="description" content="CampusOne is the digital campus portal for Government Polytechnic Ahmedabad (GPA) students and faculty.'), 'index.html sets descriptive meta description for GPA students and faculty');
+assert(seoIndexHtmlContent.includes('rel="canonical" href="https://campus-oneweb.vercel.app/"'), 'index.html declares canonical URL');
+assert(seoIndexHtmlContent.includes('name="robots" content="index, follow'), 'index.html allows Google indexing with index, follow');
+assert(seoIndexHtmlContent.includes('name="google-site-verification"'), 'index.html supports Google Search Console verification');
+assert(seoIndexHtmlContent.includes('property="og:title"'), 'index.html defines Open Graph og:title');
+assert(seoIndexHtmlContent.includes('property="og:image" content="https://campus-oneweb.vercel.app/og-image.png"'), 'index.html defines Open Graph image');
+assert(seoIndexHtmlContent.includes('name="twitter:card" content="summary_large_image"'), 'index.html defines Twitter summary_large_image card');
+assert(seoIndexHtmlContent.includes('"@type": "WebSite"'), 'index.html defines Schema.org WebSite structured data');
+assert(seoIndexHtmlContent.includes('"@type": "EducationalOrganization"'), 'index.html defines Schema.org EducationalOrganization structured data');
+assert(seoIndexHtmlContent.includes('"@type": "WebApplication"'), 'index.html defines Schema.org WebApplication structured data');
+
+const robotsTxtPath = path.join(rootDir, 'public', 'robots.txt');
+assert(fs.existsSync(robotsTxtPath), 'public/robots.txt exists');
+const robotsTxtContent = fs.readFileSync(robotsTxtPath, 'utf8');
+assert(robotsTxtContent.includes('User-agent: *'), 'robots.txt configures User-agent: *');
+assert(robotsTxtContent.includes('Allow: /'), 'robots.txt allows root indexing');
+assert(robotsTxtContent.includes('Disallow: /admin'), 'robots.txt disallows private admin section');
+assert(robotsTxtContent.includes('Disallow: /student'), 'robots.txt disallows private student portal');
+assert(robotsTxtContent.includes('Sitemap: https://campus-oneweb.vercel.app/sitemap.xml'), 'robots.txt points to sitemap.xml');
+
+const sitemapXmlPath = path.join(rootDir, 'public', 'sitemap.xml');
+assert(fs.existsSync(sitemapXmlPath), 'public/sitemap.xml exists');
+const sitemapXmlContent = fs.readFileSync(sitemapXmlPath, 'utf8');
+assert(sitemapXmlContent.includes('<loc>https://campus-oneweb.vercel.app/</loc>'), 'sitemap.xml includes root URL');
+assert(sitemapXmlContent.includes('<loc>https://campus-oneweb.vercel.app/home</loc>'), 'sitemap.xml includes /home');
+assert(sitemapXmlContent.includes('<loc>https://campus-oneweb.vercel.app/notices</loc>'), 'sitemap.xml includes /notices');
+assert(sitemapXmlContent.includes('<loc>https://campus-oneweb.vercel.app/events</loc>'), 'sitemap.xml includes /events');
+assert(sitemapXmlContent.includes('<loc>https://campus-oneweb.vercel.app/campus</loc>'), 'sitemap.xml includes /campus');
+assert(!sitemapXmlContent.includes('/admin'), 'sitemap.xml excludes private admin routes');
+assert(!sitemapXmlContent.includes('/student'), 'sitemap.xml excludes private student routes');
+
+const ogImagePath = path.join(rootDir, 'public', 'og-image.png');
+assert(fs.existsSync(ogImagePath), 'public/og-image.png exists');
+
+const portalSelectHubPath = path.join(rootDir, 'src', 'components', 'auth', 'PortalSelectHub.tsx');
+const portalSelectHubContent = fs.readFileSync(portalSelectHubPath, 'utf8');
+assert(portalSelectHubContent.includes('CampusOne for GPA'), 'PortalSelectHub features "CampusOne for GPA"');
+assert(portalSelectHubContent.includes('Computer Engineering'), 'PortalSelectHub features GPA departments');
+assert(portalSelectHubContent.includes('Sign In'), 'PortalSelectHub features prominent Sign In action');
+
 console.log('\n====================================================');
 console.log(`Results: ${passedTests}/${totalTests} tests passed (${Math.round((passedTests / totalTests) * 100)}%)`);
 console.log('====================================================\n');

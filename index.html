@@ -2,17 +2,94 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CampusOne for GPA | Government Polytechnic Ahmedabad</title>
+    
+    <!-- Primary SEO Metadata -->
+    <meta name="description" content="CampusOne is the digital campus portal for Government Polytechnic Ahmedabad (GPA) students and faculty. Access official circulars, academic notices, study materials, department directories, and student services." />
+    <meta name="keywords" content="CampusOne for GPA, CampusOne GPA, CampusOne Government Polytechnic Ahmedabad, Government Polytechnic Ahmedabad student portal, GPA college notices and study materials, GPA Ahmedabad portal, GTU diploma engineering, GPA student login, GPA faculty portal" />
+    <meta name="author" content="Government Polytechnic Ahmedabad" />
+    <meta name="theme-color" content="#00ADB5" />
+    <link rel="canonical" href="https://campus-oneweb.vercel.app/" />
+
+    <!-- Google Search Console & Crawler Indexing Directives -->
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="google-site-verification" content="google-site-verification-token" />
+
+    <!-- Open Graph / Facebook / WhatsApp Meta Tags -->
+    <meta property="og:locale" content="en_IN" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="CampusOne for GPA | Government Polytechnic Ahmedabad" />
+    <meta property="og:description" content="CampusOne is the digital campus portal for Government Polytechnic Ahmedabad (GPA) students and faculty. Access official circulars, academic notices, study materials, department directories, and student services." />
+    <meta property="og:url" content="https://campus-oneweb.vercel.app/" />
+    <meta property="og:site_name" content="CampusOne for GPA" />
+    <meta property="og:image" content="https://campus-oneweb.vercel.app/og-image.png" />
+    <meta property="og:image:secure_url" content="https://campus-oneweb.vercel.app/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="CampusOne for GPA — Government Polytechnic Ahmedabad Digital Portal" />
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="CampusOne for GPA | Government Polytechnic Ahmedabad" />
+    <meta name="twitter:description" content="CampusOne is the digital campus portal for Government Polytechnic Ahmedabad (GPA) students and faculty. Access official circulars, academic notices, study materials, department directories, and student services." />
+    <meta name="twitter:image" content="https://campus-oneweb.vercel.app/og-image.png" />
+    <meta name="twitter:image:alt" content="CampusOne for GPA — Government Polytechnic Ahmedabad Digital Portal" />
+
+    <!-- Icons & Manifest -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#00ADB5" />
     <link rel="manifest" href="/manifest.json" />
-    <title>CampusOne — Government Polytechnic Ahmedabad</title>
-    <meta name="description" content="Centralized college campus management and student intelligence portal for Government Polytechnic Ahmedabad. Timetables, attendance, notices, results, faculty, library and campus services." />
+
     <!-- Google Fonts: Inter & Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Schema.org JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://campus-oneweb.vercel.app/#website",
+          "url": "https://campus-oneweb.vercel.app/",
+          "name": "CampusOne for GPA",
+          "alternateName": [
+            "CampusOne GPA",
+            "CampusOne Government Polytechnic Ahmedabad",
+            "GPA Student Portal",
+            "CampusOne"
+          ],
+          "description": "Digital campus portal for Government Polytechnic Ahmedabad students and faculty.",
+          "inLanguage": "en"
+        },
+        {
+          "@type": "EducationalOrganization",
+          "@id": "https://campus-oneweb.vercel.app/#organization",
+          "name": "Government Polytechnic Ahmedabad",
+          "alternateName": ["GPA", "GP Ahmedabad", "Government Polytechnic, Ahmedabad"],
+          "url": "https://campus-oneweb.vercel.app/",
+          "logo": "https://campus-oneweb.vercel.app/favicon.svg",
+          "description": "Government Polytechnic Ahmedabad is a premier technical diploma institution in Ahmedabad, Gujarat, affiliated with Gujarat Technological University (GTU)."
+        },
+        {
+          "@type": "WebApplication",
+          "@id": "https://campus-oneweb.vercel.app/#application",
+          "name": "CampusOne",
+          "url": "https://campus-oneweb.vercel.app/",
+          "applicationCategory": "EducationalApplication",
+          "operatingSystem": "Web Browser",
+          "description": "Unified academic and campus management platform for Government Polytechnic Ahmedabad students and faculty providing timetables, verified lecture attendance, marks, study materials, and official circulars."
+        }
+      ]
+    }
+    </script>
+
+    <!-- Cache Purge & Module Chunk Loading Safety Script -->
     <script>
       // 1. Purge legacy ServiceWorker registrations and clear stale caches to prevent desktop white-screen
       if ('serviceWorker' in navigator) {
@@ -46,7 +123,43 @@
     </script>
   </head>
   <body class="bg-slate-50 text-slate-800 dark:bg-navy-950 dark:text-slate-100 antialiased selection:bg-brand-cyan/20 selection:text-brand-cyan transition-colors duration-200">
-    <div id="root"></div>
+    <div id="root">
+      <!-- Search Engine Crawlable Content & Fast Initial Paint Fallback -->
+      <header style="padding: 16px 24px; border-bottom: 1px solid #e2e8f0; background: #ffffff;">
+        <p style="font-size: 18px; font-weight: bold; color: #0f172a; margin: 0; font-family: sans-serif;">
+          CampusOne for GPA — Government Polytechnic Ahmedabad
+        </p>
+      </header>
+      <main style="max-width: 960px; margin: 0 auto; padding: 32px 24px; font-family: sans-serif; color: #334155;">
+        <h1 style="font-size: 28px; font-weight: 800; color: #0f172a; margin-bottom: 12px;">
+          CampusOne for GPA | Government Polytechnic Ahmedabad
+        </h1>
+        <p style="font-size: 16px; line-height: 1.6; color: #475569; margin-bottom: 24px;">
+          CampusOne is the unified digital campus portal for Government Polytechnic Ahmedabad (GPA) students and faculty. Access official circulars, academic notices, study materials, department directories, and student services.
+        </p>
+        
+        <h2 style="font-size: 20px; font-weight: 700; color: #0f172a; margin-top: 24px; margin-bottom: 12px;">
+          Government Polytechnic Ahmedabad Services &amp; Resources
+        </h2>
+        <ul style="line-height: 1.8; font-size: 15px;">
+          <li><strong>Student Academic Portal:</strong> Track class attendance, view weekly lecture timetables, inspect internal continuous assessment marks, and download examination hall tickets.</li>
+          <li><strong>Faculty Teaching Suite:</strong> Log daily classroom attendance, submit student internal evaluation marks, upload syllabus notes, and manage class rosters.</li>
+          <li><strong>Official College Notices:</strong> Real-time circulars for GTU diploma examinations, hall tickets, administrative announcements, and fee payment schedules.</li>
+          <li><strong>Study Materials Repository:</strong> Curated lecture notes, laboratory experiment manuals, syllabus documentation, and previous year question papers (PYQs).</li>
+          <li><strong>Academic Departments:</strong> Computer Engineering, Mechanical Engineering, Civil Engineering, Electrical Engineering, Automobile Engineering, IT, and more.</li>
+        </ul>
+        <p style="margin-top: 24px; font-size: 14px; color: #64748b;">
+          Initializing secure campus portal...
+        </p>
+      </main>
+    </div>
+    
+    <noscript>
+      <div style="padding: 16px; background-color: #fef3c7; color: #92400e; text-align: center; font-family: sans-serif; font-size: 14px;">
+        <strong>JavaScript Required:</strong> Please enable JavaScript in your browser to experience the full interactive capabilities of CampusOne for Government Polytechnic Ahmedabad.
+      </div>
+    </noscript>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

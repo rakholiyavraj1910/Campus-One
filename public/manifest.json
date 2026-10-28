@@ -1,11 +1,11 @@
 {
-  "name": "CampusOne — Government Polytechnic Ahmedabad",
-  "short_name": "CampusOne",
+  "name": "CampusOne for GPA | Government Polytechnic Ahmedabad",
+  "short_name": "CampusOne GPA",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0B192C",
   "theme_color": "#00ADB5",
-  "description": "Centralized college campus management, student intelligence portal, timetables, attendance, notices and results for Government Polytechnic Ahmedabad.",
+  "description": "Digital campus portal for Government Polytechnic Ahmedabad (GPA) students and faculty. Timetables, attendance, notices, results, faculty, library and campus services.",
   "icons": [
     {
       "src": "/favicon.svg",
