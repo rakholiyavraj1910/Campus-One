@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth, mapDbProfile } from '../../context/AuthContext';
+import { DEMO_USERS } from '../../lib/mockData';
 import { supabase, isSupabaseConfigured } from '../../lib/supabaseClient';
 import { 
   ShieldCheck, 
@@ -34,7 +35,7 @@ export const AdminAuthPage: React.FC<AdminAuthPageProps> = ({
   onNavigateHub = () => {},
   onSwitchPortal = () => {}
 }) => {
-  const { signInWithPassword, signOut, resetPassword } = useAuth();
+  const { signInWithPassword, signOut, resetPassword, setAuthenticatedProfile } = useAuth();
 
   const [mode, setMode] = useState<'signin' | 'forgot'>('signin');
   const [identifier, setIdentifier] = useState('');
@@ -101,7 +102,7 @@ export const AdminAuthPage: React.FC<AdminAuthPageProps> = ({
         // Query the admin's own profile row (allowed by RLS: auth.uid() = id)
         const { data: profile, error: profileErr } = await supabase
           .from('profiles')
-          .select('role, email, admin_level')
+          .select('*')
           .eq('id', session.user.id)
           .maybeSingle();
 
@@ -120,8 +121,6 @@ export const AdminAuthPage: React.FC<AdminAuthPageProps> = ({
             `Database role verification failed: ${profileErr.message}. ` +
             `Please ensure the admin profile row exists in public.profiles (run the SQL promotion script in Supabase SQL Editor) and try again.`
           );
-          // Sign out to clean up the partial session since we couldn't verify the role.
-          await signOut();
           return;
         }
 
@@ -129,11 +128,10 @@ export const AdminAuthPage: React.FC<AdminAuthPageProps> = ({
           // No profile row found for this authenticated user.
           // This means the admin was provisioned in Supabase Auth but the SQL role
           // promotion script was never run. Explain clearly instead of silently logging out.
-          await signOut();
           setIsSubmitting(false);
           setFormError(
-            'Access Denied: Your Supabase Auth account exists, but no administrator profile row was found in public.profiles. ' +
-            'Please run the role promotion SQL script in the Supabase SQL Editor to grant administrator clearance.'
+            `Access Denied: Your Supabase Auth account exists, but no administrator profile row was found in public.profiles for user ID: ${session.user.id}. ` +
+            `Please run the role promotion SQL script in the Supabase SQL Editor to grant administrator clearance.`
           );
           return;
         }
@@ -150,8 +148,10 @@ export const AdminAuthPage: React.FC<AdminAuthPageProps> = ({
           return;
         }
 
-        // Role confirmed as 'admin' from PostgreSQL — proceed
+        // Role confirmed as 'admin' from PostgreSQL — explicitly synchronize into AuthContext
         console.info('[CampusOne] AdminAuthPage: admin role confirmed in public.profiles.');
+        const fullAdminProfile = mapDbProfile(profile);
+        setAuthenticatedProfile(fullAdminProfile);
       } else {
         // Offline / demo fallback check: permit only the configured admin email or aliases
         const normalizedInput = identifier.trim().toLowerCase();
@@ -165,13 +165,14 @@ export const AdminAuthPage: React.FC<AdminAuthPageProps> = ({
           );
           return;
         }
+        setAuthenticatedProfile({ ...DEMO_USERS.admin });
       }
 
       setIsSubmitting(false);
       setSuccessMessage('Administrator clearance verified. Loading Control Center...');
       setTimeout(() => {
         onLoginSuccess();
-      }, 600);
+      }, 400);
 
     } catch (err: any) {
       setIsSubmitting(false);
@@ -281,7 +282,27 @@ export const AdminAuthPage: React.FC<AdminAuthPageProps> = ({
           {formError && (
             <div className="mb-4 p-3 rounded-xl bg-rose-950/50 border border-rose-800 text-rose-200 text-xs flex items-start space-x-2 animate-fade-in" role="alert">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
-              <span className="leading-relaxed">{formError}</span>
+              <div className="leading-relaxed flex-1 space-y-2">
+                <div>{formError}</div>
+                {formError.includes('public.profiles') && (
+                  <div className="pt-1 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => signOut('Admin cleared pending session')}
+                      className="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-navy-800 hover:bg-navy-700 text-slate-300 border border-navy-600 transition-colors cursor-pointer"
+                    >
+                      Sign Out Session
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleAdminSignIn}
+                      className="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-amber-500 hover:bg-amber-600 text-navy-950 transition-colors cursor-pointer"
+                    >
+                      Retry Verification
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

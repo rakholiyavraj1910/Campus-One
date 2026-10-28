@@ -82,7 +82,7 @@ export const AccountPendingApproval: React.FC = () => {
           </button>
 
           <button
-            onClick={signOut}
+            onClick={() => signOut()}
             className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs flex items-center justify-center space-x-2 transition-colors border border-slate-700 cursor-pointer"
           >
             <LogOut className="w-4 h-4" />

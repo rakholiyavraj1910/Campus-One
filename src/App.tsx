@@ -160,9 +160,9 @@ const MainLayout: React.FC = () => {
   // Synchronize location when authenticated user visits portal-select or auth pages
   useEffect(() => {
     if (isAuthenticated && !loading) {
-      // Do NOT redirect away from admin-auth while AdminAuthPage is actively performing
+      // Do NOT redirect away from admin-auth or admin while AdminAuthPage is actively performing
       // its own role verification. The page calls onLoginSuccess() itself when done.
-      if (currentPage === 'admin-auth') return;
+      if (currentPage === 'admin-auth' || currentPage === 'admin') return;
 
       if (
         currentPage === 'portal-select' || 
@@ -301,7 +301,7 @@ const MainLayout: React.FC = () => {
 
     // Dedicated Admin Auth — always accessible when not authenticated (also shown on admin-auth page
     // during the login flow before role verification completes)
-    if (currentPage === 'admin-auth') {
+    if (currentPage === 'admin-auth' || currentPage === 'admin') {
       return (
         <AdminAuthPage
           onLoginSuccess={() => handleNavigate('admin')}
@@ -328,6 +328,17 @@ const MainLayout: React.FC = () => {
         />
       );
     }
+  }
+
+  // Active admin authentication page guard for authenticated non-admin roles
+  if (currentPage === 'admin-auth' && role !== 'admin') {
+    return (
+      <AdminAuthPage
+        onLoginSuccess={() => handleNavigate('admin')}
+        onNavigateHub={() => handleNavigate('portal-select')}
+        onSwitchPortal={(p) => handleNavigate(p === 'student' ? 'student-auth' : 'faculty-auth')}
+      />
+    );
   }
 
   return (

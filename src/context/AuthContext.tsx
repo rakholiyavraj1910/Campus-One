@@ -36,14 +36,15 @@ export interface AuthContextType {
     cabin?: string,
     specialization?: string
   ) => Promise<{ success: boolean; error?: string; needsEmailConfirmation?: boolean }>;
-  signOut: () => Promise<void>;
+  signOut: (reason?: string) => Promise<void>;
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
   resendConfirmationEmail: (email: string) => Promise<{ success: boolean; error?: string }>;
   // Compatibility & Demo mode methods
   switchRole: (newRole: UserRole) => void;
   login: (email: string, role: UserRole, name?: string) => void;
   logout: () => void;
-  refreshProfile: () => Promise<void>;
+  refreshProfile: () => Promise<UserProfile | null>;
+  setAuthenticatedProfile: (profile: UserProfile) => void;
   updateLocalUserProfile: (updates: Partial<UserProfile>) => void;
 }
 
@@ -53,6 +54,33 @@ const GUEST_USER: UserProfile = {
   email: 'guest@campusone.edu',
   role: 'guest',
   department: 'General Public',
+};
+
+// Convert DB row to UserProfile
+export const mapDbProfile = (db: any): UserProfile => {
+  const isPendingApproval = db.admin_level === 'pending_faculty' || db.role === 'pending';
+  return {
+    id: db.id,
+    name: db.name || 'CampusOne User',
+    email: db.email,
+    role: isPendingApproval ? 'pending' : ((db.role as UserRole) || 'student'),
+    avatar: db.avatar_url || undefined,
+    phone: db.phone || undefined,
+    department: db.department || undefined,
+    rollNumber: db.roll_number || undefined,
+    prn: db.prn || undefined,
+    semester: db.semester || undefined,
+    academicYear: db.academic_year || undefined,
+    division: db.division || undefined,
+    cgpa: db.cgpa ? Number(db.cgpa) : undefined,
+    mentorName: db.mentor_name || undefined,
+    mentorEmail: db.mentor_email || undefined,
+    designation: db.designation || undefined,
+    cabin: db.cabin || undefined,
+    specialization: db.specialization || undefined,
+    consultationHours: db.consultation_hours || undefined,
+    adminLevel: db.admin_level || undefined,
+  };
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -87,37 +115,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return GUEST_USER;
   });
 
-  // Convert DB row to UserProfile
-  const mapDbProfile = (db: any): UserProfile => {
-    const isPendingApproval = db.admin_level === 'pending_faculty' || db.role === 'pending';
-    return {
-      id: db.id,
-      name: db.name || 'CampusOne User',
-      email: db.email,
-      role: isPendingApproval ? 'pending' : ((db.role as UserRole) || 'student'),
-      avatar: db.avatar_url || undefined,
-      phone: db.phone || undefined,
-      department: db.department || undefined,
-      rollNumber: db.roll_number || undefined,
-      prn: db.prn || undefined,
-      semester: db.semester || undefined,
-      academicYear: db.academic_year || undefined,
-      division: db.division || undefined,
-      cgpa: db.cgpa ? Number(db.cgpa) : undefined,
-      mentorName: db.mentor_name || undefined,
-      mentorEmail: db.mentor_email || undefined,
-      designation: db.designation || undefined,
-      cabin: db.cabin || undefined,
-      specialization: db.specialization || undefined,
-      consultationHours: db.consultation_hours || undefined,
-      adminLevel: db.admin_level || undefined,
-    };
-  };
-
   // Fetch user profile from Supabase profiles table
   const fetchProfile = useCallback(async (userId: string, userEmail?: string): Promise<UserProfile | null> => {
     if (!supabase) return null;
     try {
+      console.info('[CampusOne:Auth] fetchProfile starting query for userId:', userId);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -125,25 +127,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .maybeSingle();
 
       if (error) {
-        // RLS or network error — do NOT revoke the session; keep the user in their current state
-        // The profile may still be loading or temporarily inaccessible
-        console.warn('[CampusOne] fetchProfile: Supabase profile query failed:', error.message, '(code:', error.code, ')');
+        console.warn('[CampusOne:Auth] fetchProfile query error:', error.message, '(code:', error.code, ')');
         return null;
       }
 
       if (data) {
-        console.info('[CampusOne] fetchProfile: profile row found for', userId, '— role:', data.role);
+        console.info('[CampusOne:Auth] fetchProfile success. userId:', userId, 'role:', data.role, 'admin_level:', data.admin_level);
         return mapDbProfile(data);
       }
 
-      // GoTrue user exists but no public.profiles row yet (e.g. admin newly provisioned,
-      // or trigger race). Return null so the caller retains the previous state rather
-      // than downgrading to 'pending' and triggering AccountPendingApproval.
-      // The onAuthStateChange listener will retry when the session refreshes.
-      console.warn('[CampusOne] fetchProfile: no profile row found for', userId, '— retaining current session state');
+      console.warn('[CampusOne:Auth] fetchProfile: no profile row found in public.profiles for userId:', userId, '(retaining current session state)');
       return null;
     } catch (e: any) {
-      console.error('[CampusOne] fetchProfile: unexpected error:', e?.message);
+      console.error('[CampusOne:Auth] fetchProfile unexpected error:', e?.message);
       return null;
     }
   }, []);
@@ -161,33 +157,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const initAuth = async () => {
       try {
+        console.info('[CampusOne:Auth] initAuth: checking existing session...');
         const { data: { session }, error } = await client.auth.getSession();
         if (error) throw error;
 
         if (session?.user && isMounted) {
-          const profile = await fetchProfile(session.user.id, session.user.email);
+          console.info('[CampusOne:Auth] initAuth: session active for userId:', session.user.id);
+          let profile = await fetchProfile(session.user.id, session.user.email);
+          if (!profile) {
+            // Cold start retry
+            await new Promise(r => setTimeout(r, 400));
+            profile = await fetchProfile(session.user.id, session.user.email);
+          }
           if (isMounted) {
             if (profile) {
-              // Authenticated profile loaded from DB
+              console.info('[CampusOne:Auth] initAuth: profile restored with role:', profile.role);
               setCurrentUser(profile);
             } else {
-              // Session valid in GoTrue but profile not yet in DB (newly provisioned user).
-              // Build a minimal authenticated placeholder — the onAuthStateChange listener
-              // will refresh this when Supabase sends the next session event.
-              console.warn('[CampusOne] initAuth: session exists but no profile row. Setting placeholder for', session.user.email);
+              console.warn('[CampusOne:Auth] initAuth: session active but profile row missing in public.profiles for', session.user.email);
+              // Do NOT assign student role! Keep as guest so unauthenticated/guest guards handle gracefully
               setCurrentUser({
                 id: session.user.id,
                 email: session.user.email || '',
                 name: (session.user.email || '').split('@')[0],
-                role: 'student', // safe default; AdminAuthPage will re-verify role separately
+                role: 'guest',
               });
             }
           }
         } else if (isMounted) {
+          console.info('[CampusOne:Auth] initAuth: no active session found.');
           setCurrentUser(GUEST_USER);
         }
       } catch (err: any) {
-        console.warn('[CampusOne] Supabase session initialization error:', err.message);
+        console.warn('[CampusOne:Auth] initAuth session initialization error:', err.message);
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -199,34 +201,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: authListener } = client.auth.onAuthStateChange(
       async (event, session) => {
         if (!isMounted) return;
+        console.info('[CampusOne:Auth] onAuthStateChange event:', event, 'userId:', session?.user?.id);
 
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
           if (session?.user) {
-            console.info('[CampusOne] onAuthStateChange:', event, 'for', session.user.email);
             const profile = await fetchProfile(session.user.id, session.user.email);
-            if (isMounted) {
-              if (profile) {
-                setCurrentUser(profile);
-              } else {
-                // Profile row not yet in DB — build a minimal placeholder.
-                // Do NOT overwrite an already-authenticated admin/faculty/student with a downgraded state.
-                setCurrentUser(prev => {
-                  if (prev.id === session.user!.id && prev.role !== 'guest') {
-                    // Already set correctly by AdminAuthPage or previous fetch — keep it
-                    return prev;
-                  }
-                  return {
-                    id: session.user!.id,
-                    email: session.user!.email || '',
-                    name: (session.user!.email || '').split('@')[0],
-                    role: 'student',
-                  };
-                });
-              }
+            if (isMounted && profile) {
+              console.info('[CampusOne:Auth] onAuthStateChange: updated user profile to role:', profile.role);
+              setCurrentUser(profile);
             }
           }
         } else if (event === 'SIGNED_OUT') {
           if (isMounted) {
+            console.info('[CampusOne:Auth] onAuthStateChange: user signed out. Reverting to guest.');
             setCurrentUser(GUEST_USER);
           }
         }
@@ -309,19 +296,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
 
         if (!error && data.user) {
-          const profile = await fetchProfile(data.user.id, data.user.email);
+          console.info('[CampusOne:Auth] signInWithPassword GoTrue success. User ID:', data.user.id);
+          let profile = await fetchProfile(data.user.id, data.user.email);
+          if (!profile) {
+            // Brief wait and retry in case of replication or propagation delay
+            await new Promise(r => setTimeout(r, 350));
+            profile = await fetchProfile(data.user.id, data.user.email);
+          }
           if (profile) {
+            console.info('[CampusOne:Auth] signInWithPassword profile loaded. Role:', profile.role);
             setCurrentUser(profile);
+            setDemoRole(profile.role);
           } else {
-            // Profile row not yet in DB (newly provisioned). Build a placeholder
-            // so the app knows a real GoTrue session exists. The caller (AdminAuthPage)
-            // will perform its own authoritative role verification via a separate query.
-            console.warn('[CampusOne] signInWithPassword: no profile row for', data.user.email, '— GoTrue auth succeeded');
+            console.warn('[CampusOne:Auth] signInWithPassword: no profile row found in public.profiles for', data.user.email);
+            // Retain session user identity without assigning student role
             setCurrentUser({
               id: data.user.id,
               email: data.user.email || '',
               name: (data.user.email || '').split('@')[0],
-              role: 'student', // temporary; AdminAuthPage overrides after role verification
+              role: 'guest',
             });
           }
           return { success: true };
@@ -531,12 +524,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Live Supabase SignOut
-  const signOut = async (): Promise<void> => {
+  const signOut = async (reason?: string): Promise<void> => {
+    console.info(`[CampusOne:Auth] signOut initiated${reason ? `: ${reason}` : ''}`);
     if (isSupabaseConfigured && supabase) {
       try {
         await supabase.auth.signOut();
       } catch (err) {
-        console.warn('Supabase signOut error:', err);
+        console.warn('[CampusOne:Auth] Supabase signOut error:', err);
       }
     }
     setCurrentUser(GUEST_USER);
@@ -617,13 +611,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
-    signOut();
+    signOut('User initiated logout');
   };
 
-  const refreshProfile = async () => {
+  const refreshProfile = async (): Promise<UserProfile | null> => {
     if (isSupabaseConfigured && supabase && currentUser.id !== 'guest') {
       const updated = await fetchProfile(currentUser.id, currentUser.email);
-      if (updated) setCurrentUser(updated);
+      if (updated) {
+        setCurrentUser(updated);
+        return updated;
+      }
+    }
+    return null;
+  };
+
+  const setAuthenticatedProfile = (profile: UserProfile) => {
+    console.info(`[CampusOne:Auth] setAuthenticatedProfile explicitly called with role=${profile.role}, email=${profile.email}`);
+    setCurrentUser(profile);
+    setDemoRole(profile.role);
+    try {
+      localStorage.setItem('campusone_user_profile', JSON.stringify(profile));
+      localStorage.setItem('campusone_active_role', profile.role);
+    } catch {
+      // ignore
     }
   };
 
@@ -673,6 +683,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login,
         logout,
         refreshProfile,
+        setAuthenticatedProfile,
         updateLocalUserProfile,
       }}
     >

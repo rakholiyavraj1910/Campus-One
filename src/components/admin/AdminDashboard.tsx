@@ -13,6 +13,7 @@ import { AuditLogsViewer } from './AuditLogsViewer';
 import { ManageFeedback } from './ManageFeedback';
 import { SystemSettings } from './SystemSettings';
 import { AdminAccessDenied } from '../common/AdminAccessDenied';
+import { LoadingScreen } from '../common/LoadingScreen';
 import { Notice, EventItem } from '../../types';
 import { 
   BarChart3, 
@@ -71,7 +72,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onNavigate = () => {},
   initialSubTab
 }) => {
-  const { role, user } = useAuth();
+  const { role, user, loading } = useAuth();
   
   // Resolve initial tab, falling back to 'overview'
   const resolveInitialTab = (tab?: string): TabId => {
@@ -116,6 +117,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   useEffect(() => {
     refreshPendingCount();
   }, [activeTab]);
+
+  if (loading) {
+    return <LoadingScreen message="Restoring administrative session..." />;
+  }
 
   // Strict Security Gate: Only authenticated administrators can access the dashboard
   if (role !== 'admin') {
