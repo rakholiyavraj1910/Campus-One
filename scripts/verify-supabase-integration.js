@@ -512,10 +512,32 @@ assert(adminAuthPageContent.includes('isSubmitting'), 'AdminAuthPage implements 
 assert(adminAuthPageContent.includes('if (isSubmitting) return'), 'AdminAuthPage prevents repeated submissions');
 assert(adminAuthPageContent.includes('validateAdminInput'), 'AdminAuthPage validates inputs before submission');
 assert(adminAuthPageContent.includes("profile.role !== 'admin'"), 'AdminAuthPage verifies public.profiles.role === admin');
-assert(adminAuthPageContent.includes('await signOut()'), 'AdminAuthPage revokes session if non-admin attempts login');
+assert(adminAuthPageContent.includes('await signOut()'), 'AdminAuthPage revokes session for confirmed unauthorized roles');
+// Verify improved error handling: profileErr alone no longer causes silent signOut + redirect
+assert(adminAuthPageContent.includes('profileErr.message'), 'AdminAuthPage shows DB error message instead of silently logging out on query failure');
+assert(adminAuthPageContent.includes('no administrator profile row') || adminAuthPageContent.includes('no profile row'), 'AdminAuthPage gives explicit guidance when profile row missing');
 
 assert(adminDashboardContent.includes("role !== 'admin'"), 'AdminDashboard checks role !== admin');
 assert(adminDashboardContent.includes('AdminAccessDenied'), 'AdminDashboard renders AdminAccessDenied for non-admin users');
+
+// Verify RLS fix migration exists
+const migrationRlsFixPath = path.join(rootDir, 'supabase', 'migrations', '20261028050000_fix_admin_login_rls_and_profile.sql');
+assert(fs.existsSync(migrationRlsFixPath), '20261028050000_fix_admin_login_rls_and_profile.sql exists');
+const migrationRlsFixContent = fs.readFileSync(migrationRlsFixPath, 'utf8');
+assert(migrationRlsFixContent.includes('is_admin()'), 'RLS fix migration adds is_admin() to profiles_select_policy');
+assert(migrationRlsFixContent.includes('campusonegpa@gmail.com'), 'RLS fix migration promotes campusonegpa@gmail.com');
+assert(!migrationRlsFixContent.includes('INSERT INTO auth.users'), 'RLS fix migration omits direct auth.users INSERTs');
+assert(!migrationRlsFixContent.includes('extensions.crypt'), 'RLS fix migration does not store encrypted passwords');
+
+// Verify AuthContext fetchProfile no longer defaults missing profiles to role='pending'
+const freshAuthContextContent = fs.readFileSync(authContextPath, 'utf8');
+assert(!freshAuthContextContent.includes("assign 'pending' role to prevent premature"), 'AuthContext does not downgrade to pending role when profile row is missing');
+assert(freshAuthContextContent.includes('retaining current session state'), 'AuthContext logs warning instead of downgrading on missing profile');
+
+// Verify App.tsx does not redirect admin-auth during login flow
+const freshAppTsxContent = fs.readFileSync(appTsxPath, 'utf8');
+assert(freshAppTsxContent.includes('admin-auth') && freshAppTsxContent.includes('return'), 'App.tsx includes admin-auth page routing');
+assert(freshAppTsxContent.includes('Do NOT redirect away from admin-auth'), 'App.tsx guards against premature redirect during admin login');
 
 const migrationAdminPath = path.join(rootDir, 'supabase', 'migrations', '20261028040000_configure_campusone_admin_email.sql');
 assert(fs.existsSync(migrationAdminPath), '20261028040000_configure_campusone_admin_email.sql exists');

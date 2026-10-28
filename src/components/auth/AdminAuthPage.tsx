@@ -72,7 +72,7 @@ export const AdminAuthPage: React.FC<AdminAuthPageProps> = ({
           setFormError('Invalid administrator credentials. Please check your email and master password.');
         } else if (rawErr.toLowerCase().includes('email not confirmed')) {
           setFormError(
-            'Administrator account email confirmation is pending in Supabase Auth. In Supabase Dashboard (Authentication > Users), confirm the user email, or check your institutional inbox.'
+            'Administrator account email confirmation is pending. In the Supabase Dashboard (Authentication > Users), confirm the user email, or check your inbox.'
           );
         } else {
           setFormError(rawErr || 'Administrator authentication failed. Please verify credentials.');
@@ -80,39 +80,88 @@ export const AdminAuthPage: React.FC<AdminAuthPageProps> = ({
         return;
       }
 
-      // 2. Strict Database Verification: Verify administrator role from trusted public.profiles in PostgreSQL
+      // 2. Strict Database Role Verification — must confirm public.profiles.role = 'admin'
+      // Only run in live Supabase mode where a real database exists.
       if (isSupabaseConfigured && supabase) {
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session?.user) {
-          const { data: profile, error: profileErr } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', session.user.id)
-            .maybeSingle();
+        console.info('[CampusOne] AdminAuthPage: GoTrue sign-in succeeded. Verifying DB admin role...');
 
-          if (profileErr || !profile || profile.role !== 'admin') {
-            // Immediately revoke session if not an administrator
-            await signOut();
-            setIsSubmitting(false);
-            setFormError(
-              'Access Denied: This account does not possess institutional administrator clearance. Student and faculty accounts cannot access the Admin Control Center.'
-            );
-            return;
-          }
+        // Get the current session (freshly populated by signInWithPassword)
+        const { data: { session }, error: sessionErr } = await supabase.auth.getSession();
+
+        if (sessionErr || !session?.user) {
+          // Session couldn't be read — network or GoTrue error; don't log the user out,
+          // report the error and let them retry.
+          setIsSubmitting(false);
+          setFormError(
+            'Administrator session could not be established. Please check your network connection and try again.'
+          );
+          return;
         }
-      } else {
-        // Offline / demo fallback check: strictly permit only authorized admin accounts
-        const normalizedInput = identifier.trim().toLowerCase();
-        const isAdminInput = normalizedInput === DEFAULT_ADMIN_EMAIL.toLowerCase() ||
-                             normalizedInput === 'campusonegpa' ||
-                             normalizedInput === 'vibhusuvaliyacampusone' ||
-                             normalizedInput.startsWith('admin');
-        if (!isAdminInput) {
+
+        // Query the admin's own profile row (allowed by RLS: auth.uid() = id)
+        const { data: profile, error: profileErr } = await supabase
+          .from('profiles')
+          .select('role, email, admin_level')
+          .eq('id', session.user.id)
+          .maybeSingle();
+
+        console.info('[CampusOne] AdminAuthPage: profiles query result:', {
+          profile_role: profile?.role,
+          profile_email: profile?.email,
+          profileErr: profileErr?.message,
+          profileErrCode: profileErr?.code,
+        });
+
+        if (profileErr) {
+          // Database query error (RLS, network, etc.). Do NOT sign the user out —
+          // this is a transient or configuration error, not proof of unauthorized access.
+          setIsSubmitting(false);
+          setFormError(
+            `Database role verification failed: ${profileErr.message}. ` +
+            `Please ensure the admin profile row exists in public.profiles (run the SQL promotion script in Supabase SQL Editor) and try again.`
+          );
+          // Sign out to clean up the partial session since we couldn't verify the role.
+          await signOut();
+          return;
+        }
+
+        if (!profile) {
+          // No profile row found for this authenticated user.
+          // This means the admin was provisioned in Supabase Auth but the SQL role
+          // promotion script was never run. Explain clearly instead of silently logging out.
           await signOut();
           setIsSubmitting(false);
           setFormError(
-            'Access Denied: This account does not possess institutional administrator clearance. Student and faculty accounts cannot access the Admin Control Center.'
+            'Access Denied: Your Supabase Auth account exists, but no administrator profile row was found in public.profiles. ' +
+            'Please run the role promotion SQL script in the Supabase SQL Editor to grant administrator clearance.'
+          );
+          return;
+        }
+
+        if (profile.role !== 'admin') {
+          // The authenticated account exists in profiles but is a student or faculty.
+          // Revoke the session — this is a real unauthorized access attempt.
+          await signOut();
+          setIsSubmitting(false);
+          setFormError(
+            `Access Denied: The account (${session.user.email}) has role '${profile.role}' — not 'admin'. ` +
+            `Student and faculty accounts cannot access the Admin Control Center.`
+          );
+          return;
+        }
+
+        // Role confirmed as 'admin' from PostgreSQL — proceed
+        console.info('[CampusOne] AdminAuthPage: admin role confirmed in public.profiles.');
+      } else {
+        // Offline / demo fallback check: permit only the configured admin email or aliases
+        const normalizedInput = identifier.trim().toLowerCase();
+        const isAdminInput = normalizedInput === DEFAULT_ADMIN_EMAIL.toLowerCase() ||
+                             normalizedInput === 'campusonegpa' ||
+                             normalizedInput === 'vibhusuvaliyacampusone';
+        if (!isAdminInput) {
+          setIsSubmitting(false);
+          setFormError(
+            'Access Denied: This account does not possess institutional administrator clearance.'
           );
           return;
         }

@@ -570,7 +570,7 @@ ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
 -- 1. PROFILES POLICIES
 DROP POLICY IF EXISTS "profiles_select_policy" ON public.profiles;
 CREATE POLICY "profiles_select_policy" ON public.profiles FOR SELECT
-  USING (auth.uid() = id OR is_faculty());
+  USING (auth.uid() = id OR is_admin() OR is_faculty());
 
 DROP POLICY IF EXISTS "profiles_update_policy" ON public.profiles;
 CREATE POLICY "profiles_update_policy" ON public.profiles FOR UPDATE

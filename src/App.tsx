@@ -160,12 +160,15 @@ const MainLayout: React.FC = () => {
   // Synchronize location when authenticated user visits portal-select or auth pages
   useEffect(() => {
     if (isAuthenticated && !loading) {
+      // Do NOT redirect away from admin-auth while AdminAuthPage is actively performing
+      // its own role verification. The page calls onLoginSuccess() itself when done.
+      if (currentPage === 'admin-auth') return;
+
       if (
         currentPage === 'portal-select' || 
         currentPage === 'login' ||
         currentPage === 'student-auth' || 
-        currentPage === 'faculty-auth' || 
-        currentPage === 'admin-auth'
+        currentPage === 'faculty-auth'
       ) {
         const defaultPage = role === 'admin' ? 'admin' : role === 'faculty' ? 'faculty-portal' : 'student';
         handleNavigate(defaultPage);
@@ -245,11 +248,17 @@ const MainLayout: React.FC = () => {
   }
 
   // 2. Pending Verification Gate (Faculty or Student undergoing admin approval)
-  if (isPending) {
+  // IMPORTANT: Do NOT redirect the admin-auth page when role is temporarily 'student' (placeholder
+  // set during login before AdminAuthPage has completed its own DB role verification).
+  // Only show AccountPendingApproval for confirmed pending_faculty accounts NOT on the admin-auth page.
+  if (isPending && currentPage !== 'admin-auth') {
     return <AccountPendingApproval />;
   }
 
   // 3. Unauthenticated / Logged-Out Routing Gate
+  // NOTE: isAuthenticated is false when role is 'guest'. A temporary 'student' placeholder
+  // set during admin login is isAuthenticated=true (role !== 'guest'), so it passes through
+  // to the authenticated routes below, and AdminDashboard renders its own role === 'admin' check.
   if (!isAuthenticated) {
     // Unified Dual-Portal Login (/login)
     if (currentPage === 'login') {
@@ -290,8 +299,9 @@ const MainLayout: React.FC = () => {
       );
     }
 
-    // Dedicated Admin Auth
-    if (currentPage === 'admin-auth' || currentPage === 'admin') {
+    // Dedicated Admin Auth — always accessible when not authenticated (also shown on admin-auth page
+    // during the login flow before role verification completes)
+    if (currentPage === 'admin-auth') {
       return (
         <AdminAuthPage
           onLoginSuccess={() => handleNavigate('admin')}
