@@ -15,7 +15,6 @@ import {
   X,
   Camera,
   Trash2,
-  Lock,
   AlertCircle,
   Loader2,
   CheckCircle2,
@@ -33,7 +32,18 @@ import {
   removeProfileAvatar, 
   updateFacultyPersonalProfile 
 } from '../../lib/storageService';
+import { COLLEGE_DEPARTMENTS } from '../../types';
 import confetti from 'canvas-confetti';
+
+const FACULTY_DESIGNATIONS = [
+  'Head of Department & Professor',
+  'Professor',
+  'Associate Professor',
+  'Assistant Professor',
+  'Senior Lecturer',
+  'Lecturer',
+  'Adjunct Faculty / Visiting Expert'
+];
 
 export const FacultyProfilePage: React.FC = () => {
   const { user, refreshProfile, updateLocalUserProfile } = useAuth();
@@ -48,6 +58,8 @@ export const FacultyProfilePage: React.FC = () => {
   // Form Fields
   const [name, setName] = useState<string>(user.name || '');
   const [phone, setPhone] = useState<string>(user.phone || '');
+  const [department, setDepartment] = useState<string>(user.department || COLLEGE_DEPARTMENTS[0]);
+  const [designation, setDesignation] = useState<string>(user.designation || 'Assistant Professor');
   const [cabin, setCabin] = useState<string>(user.cabin || '');
   const [consultationHours, setConsultationHours] = useState<string>(user.consultationHours || '');
   const [specializationsText, setSpecializationsText] = useState<string>(
@@ -61,6 +73,8 @@ export const FacultyProfilePage: React.FC = () => {
   useEffect(() => {
     setName(user.name || '');
     setPhone(user.phone || '');
+    setDepartment(user.department || COLLEGE_DEPARTMENTS[0]);
+    setDesignation(user.designation || 'Assistant Professor');
     setCabin(user.cabin || '');
     setConsultationHours(user.consultationHours || '');
     setSpecializationsText(user.specialization ? user.specialization.join(', ') : '');
@@ -69,6 +83,8 @@ export const FacultyProfilePage: React.FC = () => {
   // Dirty check: are there unsaved modifications?
   const isDirty = name.trim() !== (user.name || '').trim() || 
                   phone.trim() !== (user.phone || '').trim() ||
+                  department !== (user.department || COLLEGE_DEPARTMENTS[0]) ||
+                  designation.trim() !== (user.designation || 'Assistant Professor').trim() ||
                   cabin.trim() !== (user.cabin || '').trim() ||
                   consultationHours.trim() !== (user.consultationHours || '').trim() ||
                   specializationsText.trim() !== (user.specialization ? user.specialization.join(', ') : '').trim();
@@ -125,6 +141,8 @@ export const FacultyProfilePage: React.FC = () => {
       const updated = await updateFacultyPersonalProfile(user.id, {
         name: name.trim(),
         phone: phone.trim() || undefined,
+        department: department.trim() || undefined,
+        designation: designation.trim() || undefined,
         cabin: cabin.trim() || undefined,
         consultationHours: consultationHours.trim() || undefined,
         specialization: parsedSpecializations.length > 0 ? parsedSpecializations : undefined,
@@ -134,6 +152,8 @@ export const FacultyProfilePage: React.FC = () => {
       updateLocalUserProfile({
         name: updated.name,
         phone: updated.phone,
+        department: updated.department,
+        designation: updated.designation,
         cabin: updated.cabin,
         consultationHours: updated.consultationHours,
         specialization: updated.specialization,
@@ -166,12 +186,14 @@ export const FacultyProfilePage: React.FC = () => {
   // Handle Cancel
   const handleCancelEdit = () => {
     if (isDirty) {
-      if (!window.confirm('You have unsaved changes. Discard modifications?')) {
+      if (!window.confirm('You have unsaved changes. Discard modifications and restore saved values?')) {
         return;
       }
     }
     setName(user.name || '');
     setPhone(user.phone || '');
+    setDepartment(user.department || COLLEGE_DEPARTMENTS[0]);
+    setDesignation(user.designation || 'Assistant Professor');
     setCabin(user.cabin || '');
     setConsultationHours(user.consultationHours || '');
     setSpecializationsText(user.specialization ? user.specialization.join(', ') : '');
@@ -475,29 +497,48 @@ export const FacultyProfilePage: React.FC = () => {
             </p>
           </div>
 
-          {/* Institutional Protected Fields Notice */}
-          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-navy-950/60 border border-slate-200/80 dark:border-navy-800 space-y-3">
-            <div className="flex items-center space-x-2 text-xs font-bold text-slate-700 dark:text-slate-300">
-              <Lock className="w-4 h-4 text-amber-500" />
-              <span>Institution-Controlled Appointment Fields (Locked)</span>
-            </div>
-            
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              Official Academic Department and Designation are governed by government appointment orders and verified by the Principal's Office. To request a department or designation amendment, contact the Academic Administration.
-            </p>
+          {/* Academic Appointment & Department Section */}
+          <div className="space-y-4 pt-2 border-t border-slate-100 dark:border-navy-800">
+            <h4 className="text-xs font-extrabold text-teal-600 dark:text-teal-400 uppercase tracking-wider flex items-center space-x-1.5">
+              <Building2 className="w-3.5 h-3.5" />
+              <span>Academic Appointment &amp; Department</span>
+            </h4>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2 text-xs">
-              <div className="bg-white dark:bg-navy-900 p-2.5 rounded-xl border border-slate-200 dark:border-navy-800">
-                <span className="text-[10px] text-slate-400 block font-semibold">Assigned Department</span>
-                <span className="font-bold text-slate-800 dark:text-white truncate block">{user.department || 'Computer Engineering'}</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Department */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Academic Department <span className="text-rose-500">*</span>
+                </label>
+                <select
+                  value={department}
+                  onChange={(e) => setDepartment(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-navy-700 bg-white dark:bg-navy-950 text-slate-900 dark:text-white text-xs font-semibold focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 outline-none transition-all"
+                >
+                  {COLLEGE_DEPARTMENTS.map((dept) => (
+                    <option key={dept} value={dept}>
+                      {dept}
+                    </option>
+                  ))}
+                </select>
               </div>
-              <div className="bg-white dark:bg-navy-900 p-2.5 rounded-xl border border-slate-200 dark:border-navy-800">
-                <span className="text-[10px] text-slate-400 block font-semibold">Official Designation</span>
-                <span className="font-bold text-slate-800 dark:text-white block font-mono">{user.designation || 'Assistant Professor'}</span>
-              </div>
-              <div className="bg-white dark:bg-navy-900 p-2.5 rounded-xl border border-slate-200 dark:border-navy-800">
-                <span className="text-[10px] text-slate-400 block font-semibold">Institutional Email</span>
-                <span className="font-bold text-slate-800 dark:text-white truncate block font-mono text-[11px]">{user.email}</span>
+
+              {/* Designation */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Academic Designation <span className="text-rose-500">*</span>
+                </label>
+                <select
+                  value={designation}
+                  onChange={(e) => setDesignation(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-navy-700 bg-white dark:bg-navy-950 text-slate-900 dark:text-white text-xs font-semibold focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 outline-none transition-all"
+                >
+                  {FACULTY_DESIGNATIONS.map((desig) => (
+                    <option key={desig} value={desig}>
+                      {desig}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>

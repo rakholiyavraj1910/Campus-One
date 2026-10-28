@@ -17,13 +17,12 @@ import {
   X,
   Camera,
   Trash2,
-  Lock,
   AlertCircle,
   Loader2,
   CheckCircle2,
   Info,
-  Clock,
-  ExternalLink
+  BookOpen,
+  UserCheck
 } from 'lucide-react';
 import { UserAvatar } from '../common/UserAvatar';
 import { ImageCropModal } from '../common/ImageCropModal';
@@ -32,7 +31,18 @@ import {
   removeProfileAvatar, 
   updateStudentPersonalProfile 
 } from '../../lib/storageService';
+import { COLLEGE_DEPARTMENTS } from '../../types';
 import confetti from 'canvas-confetti';
+
+const ACADEMIC_YEARS = [
+  '2026 - 2027',
+  '2025 - 2026',
+  '2024 - 2025',
+  '2023 - 2024',
+  '2022 - 2023'
+];
+
+const DIVISIONS = ['Div A', 'Div B', 'Div C', 'Div D', 'Div E'];
 
 export const ProfileCard: React.FC = () => {
   const { user, refreshProfile, updateLocalUserProfile } = useAuth();
@@ -44,9 +54,18 @@ export const ProfileCard: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Form Fields
+  // Form Fields State
   const [name, setName] = useState<string>(user.name || '');
   const [phone, setPhone] = useState<string>(user.phone || '');
+  const [department, setDepartment] = useState<string>(user.department || COLLEGE_DEPARTMENTS[0]);
+  const [rollNumber, setRollNumber] = useState<string>(user.rollNumber || '');
+  const [prn, setPrn] = useState<string>(user.prn || '');
+  const [semester, setSemester] = useState<number>(user.semester || 1);
+  const [division, setDivision] = useState<string>(user.division || 'Div A');
+  const [academicYear, setAcademicYear] = useState<string>(user.academicYear || '2025 - 2026');
+  const [cgpa, setCgpa] = useState<string>(user.cgpa !== undefined ? String(user.cgpa) : '8.00');
+  const [mentorName, setMentorName] = useState<string>(user.mentorName || '');
+  const [mentorEmail, setMentorEmail] = useState<string>(user.mentorEmail || '');
 
   // Photo Crop Modal state
   const [isCropModalOpen, setIsCropModalOpen] = useState<boolean>(false);
@@ -55,11 +74,30 @@ export const ProfileCard: React.FC = () => {
   useEffect(() => {
     setName(user.name || '');
     setPhone(user.phone || '');
+    setDepartment(user.department || COLLEGE_DEPARTMENTS[0]);
+    setRollNumber(user.rollNumber || '');
+    setPrn(user.prn || '');
+    setSemester(user.semester || 1);
+    setDivision(user.division || 'Div A');
+    setAcademicYear(user.academicYear || '2025 - 2026');
+    setCgpa(user.cgpa !== undefined ? String(user.cgpa) : '8.00');
+    setMentorName(user.mentorName || '');
+    setMentorEmail(user.mentorEmail || '');
   }, [user]);
 
   // Dirty check: are there unsaved modifications?
-  const isDirty = name.trim() !== (user.name || '').trim() || 
-                  phone.trim() !== (user.phone || '').trim();
+  const isDirty = 
+    name.trim() !== (user.name || '').trim() || 
+    phone.trim() !== (user.phone || '').trim() ||
+    department !== (user.department || COLLEGE_DEPARTMENTS[0]) ||
+    rollNumber.trim() !== (user.rollNumber || '').trim() ||
+    prn.trim() !== (user.prn || '').trim() ||
+    semester !== (user.semester || 1) ||
+    division.trim() !== (user.division || 'Div A').trim() ||
+    academicYear.trim() !== (user.academicYear || '2025 - 2026').trim() ||
+    cgpa.trim() !== (user.cgpa !== undefined ? String(user.cgpa) : '8.00').trim() ||
+    mentorName.trim() !== (user.mentorName || '').trim() ||
+    mentorEmail.trim() !== (user.mentorEmail || '').trim();
 
   // Warn before browser unload if dirty
   useEffect(() => {
@@ -73,14 +111,17 @@ export const ProfileCard: React.FC = () => {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [isEditing, isDirty]);
 
-  // Profile completion calculation based only on relevant student fields
+  // Profile completion calculation based across all student fields
   const calculateCompletion = () => {
     const fields = [
-      { key: 'name', value: user.name, weight: 20 },
-      { key: 'email', value: user.email, weight: 20 },
-      { key: 'department', value: user.department, weight: 20 },
-      { key: 'phone', value: user.phone, weight: 15 },
-      { key: 'avatar', value: user.avatar, weight: 15 },
+      { key: 'name', value: user.name, weight: 15 },
+      { key: 'email', value: user.email, weight: 15 },
+      { key: 'department', value: user.department, weight: 15 },
+      { key: 'rollNumber', value: user.rollNumber, weight: 10 },
+      { key: 'prn', value: user.prn, weight: 10 },
+      { key: 'phone', value: user.phone, weight: 10 },
+      { key: 'avatar', value: user.avatar, weight: 10 },
+      { key: 'cgpa', value: user.cgpa, weight: 5 },
       { key: 'mentor', value: user.mentorName, weight: 10 },
     ];
 
@@ -96,8 +137,25 @@ export const ProfileCard: React.FC = () => {
     setErrorMessage(null);
     setSuccessMessage(null);
 
+    // Validation
     if (!name.trim() || name.trim().length < 2) {
       setErrorMessage('Full name is required (at least 2 characters).');
+      return;
+    }
+
+    const parsedCgpa = parseFloat(cgpa);
+    if (!isNaN(parsedCgpa) && (parsedCgpa < 0 || parsedCgpa > 10)) {
+      setErrorMessage('CGPA must be a valid number between 0.00 and 10.00.');
+      return;
+    }
+
+    if (semester < 1 || semester > 8) {
+      setErrorMessage('Semester must be between 1 and 8.');
+      return;
+    }
+
+    if (mentorEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mentorEmail.trim())) {
+      setErrorMessage('Please enter a valid mentor email address.');
       return;
     }
 
@@ -107,27 +165,45 @@ export const ProfileCard: React.FC = () => {
       const updated = await updateStudentPersonalProfile(user.id, {
         name: name.trim(),
         phone: phone.trim() || undefined,
+        department: department.trim() || undefined,
+        rollNumber: rollNumber.trim() || undefined,
+        prn: prn.trim() || undefined,
+        semester: Number(semester),
+        division: division.trim() || undefined,
+        academicYear: academicYear.trim() || undefined,
+        cgpa: !isNaN(parsedCgpa) ? parsedCgpa : undefined,
+        mentorName: mentorName.trim() || undefined,
+        mentorEmail: mentorEmail.trim() || undefined,
       });
 
-      // Update AuthContext locally immediately
+      // Update AuthContext state locally immediately
       updateLocalUserProfile({
         name: updated.name,
         phone: updated.phone,
+        department: updated.department,
+        rollNumber: updated.rollNumber,
+        prn: updated.prn,
+        semester: updated.semester,
+        division: updated.division,
+        academicYear: updated.academicYear,
+        cgpa: updated.cgpa,
+        mentorName: updated.mentorName,
+        mentorEmail: updated.mentorEmail,
       });
 
       setIsSaving(false);
       setIsEditing(false);
-      setSuccessMessage('Student profile details saved successfully.');
+      setSuccessMessage('Student profile and academic curriculum details saved successfully.');
 
       confetti({
-        particleCount: 50,
-        spread: 45,
+        particleCount: 55,
+        spread: 50,
         origin: { y: 0.6 }
       });
 
       addNotification(
         'Profile Updated',
-        'Your student personal profile details were saved successfully.',
+        'All student profile and academic curriculum details were saved to database successfully.',
         'academic'
       );
 
@@ -142,12 +218,21 @@ export const ProfileCard: React.FC = () => {
   // Handle Cancel
   const handleCancelEdit = () => {
     if (isDirty) {
-      if (!window.confirm('You have unsaved changes. Discard changes?')) {
+      if (!window.confirm('You have unsaved modifications. Discard changes and restore saved values?')) {
         return;
       }
     }
     setName(user.name || '');
     setPhone(user.phone || '');
+    setDepartment(user.department || COLLEGE_DEPARTMENTS[0]);
+    setRollNumber(user.rollNumber || '');
+    setPrn(user.prn || '');
+    setSemester(user.semester || 1);
+    setDivision(user.division || 'Div A');
+    setAcademicYear(user.academicYear || '2025 - 2026');
+    setCgpa(user.cgpa !== undefined ? String(user.cgpa) : '8.00');
+    setMentorName(user.mentorName || '');
+    setMentorEmail(user.mentorEmail || '');
     setErrorMessage(null);
     setIsEditing(false);
   };
@@ -206,7 +291,7 @@ export const ProfileCard: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsCropModalOpen(true)}
-              className="absolute inset-0 rounded-2xl bg-navy-950/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-teal-300 font-bold text-xs space-y-1 shadow-lg"
+              className="absolute inset-0 rounded-2xl bg-navy-950/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-teal-300 font-bold text-xs space-y-1 shadow-lg cursor-pointer"
               title="Change Profile Photo"
             >
               <Camera className="w-5 h-5 text-teal-300 animate-bounce" />
@@ -242,7 +327,7 @@ export const ProfileCard: React.FC = () => {
                 {!isEditing ? (
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="px-4 py-2 rounded-2xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 text-xs font-bold transition-all flex items-center space-x-1.5 shadow-sm"
+                    className="px-4 py-2 rounded-2xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 text-xs font-bold transition-all flex items-center space-x-1.5 shadow-sm cursor-pointer"
                   >
                     <Edit3 className="w-3.5 h-3.5" />
                     <span>Edit Profile</span>
@@ -250,7 +335,7 @@ export const ProfileCard: React.FC = () => {
                 ) : (
                   <button
                     onClick={handleCancelEdit}
-                    className="px-4 py-2 rounded-2xl bg-white/10 hover:bg-white/20 text-slate-300 text-xs font-bold transition-all flex items-center space-x-1.5"
+                    className="px-4 py-2 rounded-2xl bg-white/10 hover:bg-white/20 text-slate-300 text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer"
                   >
                     <X className="w-3.5 h-3.5" />
                     <span>Cancel</span>
@@ -259,7 +344,7 @@ export const ProfileCard: React.FC = () => {
 
                 <button
                   onClick={() => setIsCropModalOpen(true)}
-                  className="px-3 py-2 rounded-2xl bg-navy-800/80 hover:bg-navy-800 text-slate-300 hover:text-white border border-navy-700 text-xs font-bold transition-all flex items-center space-x-1.5"
+                  className="px-3 py-2 rounded-2xl bg-navy-800/80 hover:bg-navy-800 text-slate-300 hover:text-white border border-navy-700 text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer"
                   title="Upload or manage profile photo"
                 >
                   <Camera className="w-3.5 h-3.5 text-teal-400" />
@@ -272,17 +357,17 @@ export const ProfileCard: React.FC = () => {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3">
               <div className="bg-navy-950/60 p-2.5 rounded-2xl border border-navy-800">
                 <span className="text-[10px] text-slate-400 uppercase font-semibold">Roll Number</span>
-                <p className="text-sm font-mono font-bold text-white mt-0.5">{user.rollNumber || 'Not Assigned'}</p>
+                <p className="text-sm font-mono font-bold text-white mt-0.5">{user.rollNumber || 'Not Set'}</p>
               </div>
 
               <div className="bg-navy-950/60 p-2.5 rounded-2xl border border-navy-800">
                 <span className="text-[10px] text-slate-400 uppercase font-semibold">PRN Number</span>
-                <p className="text-sm font-mono font-bold text-teal-300 mt-0.5">{user.prn || 'Verified Institutional ID'}</p>
+                <p className="text-sm font-mono font-bold text-teal-300 mt-0.5">{user.prn || 'Not Set'}</p>
               </div>
 
               <div className="bg-navy-950/60 p-2.5 rounded-2xl border border-navy-800">
                 <span className="text-[10px] text-slate-400 uppercase font-semibold">Semester &amp; Div</span>
-                <p className="text-sm font-bold text-white mt-0.5">Sem {user.semester || 1} ({user.division || 'A'})</p>
+                <p className="text-sm font-bold text-white mt-0.5">Sem {user.semester || 1} ({user.division || 'Div A'})</p>
               </div>
 
               <div className="bg-navy-950/60 p-2.5 rounded-2xl border border-navy-800">
@@ -324,7 +409,7 @@ export const ProfileCard: React.FC = () => {
           <span>
             {completionPercent === 100 
               ? 'Your student profile is comprehensive and up to date.' 
-              : 'Add your contact phone number and verified photo to reach 100% completion.'}
+              : 'Complete your contact details, PRN, and mentor information to reach 100% completion.'}
           </span>
           <span className="text-[10px] text-slate-400">Institutional records active</span>
         </p>
@@ -345,17 +430,17 @@ export const ProfileCard: React.FC = () => {
         </div>
       )}
 
-      {/* EDIT MODE: Form View */}
+      {/* EDIT MODE: Fully Editable Profile Form */}
       {isEditing ? (
         <form onSubmit={handleSaveProfile} className="bg-white dark:bg-navy-900 rounded-3xl p-6 sm:p-8 border border-teal-500/40 shadow-xl space-y-6">
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-navy-800 pb-4">
             <div>
               <h3 className="font-extrabold text-slate-900 dark:text-white text-base flex items-center space-x-2">
                 <Edit3 className="w-4 h-4 text-teal-500" />
-                <span>Edit Personal Information</span>
+                <span>Edit Student Profile Details</span>
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Update your verified personal details. Academic identifiers are locked by institutional policy.
+                Update your personal information, academic enrollment, and mentorship details.
               </p>
             </div>
 
@@ -366,81 +451,237 @@ export const ProfileCard: React.FC = () => {
             )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {/* Full Name */}
-            <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                Full Name <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-navy-700 bg-white dark:bg-navy-950 text-slate-900 dark:text-white text-xs font-semibold focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 outline-none transition-all"
-                placeholder="e.g. Aarav Patel"
-              />
-              <p className="text-[11px] text-slate-400 mt-1">
-                Your official name as recognized in college records
-              </p>
-            </div>
+          {/* Section 1: Personal & Contact Information */}
+          <div className="space-y-4">
+            <h4 className="text-xs font-extrabold text-teal-600 dark:text-teal-400 uppercase tracking-wider flex items-center space-x-1.5">
+              <User className="w-3.5 h-3.5" />
+              <span>Personal &amp; Contact Information</span>
+            </h4>
 
-            {/* Phone Number */}
-            <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                Contact Phone Number
-              </label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-navy-700 bg-white dark:bg-navy-950 text-slate-900 dark:text-white text-xs font-semibold focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 outline-none transition-all"
-                placeholder="+91 98765 43210"
-              />
-              <p className="text-[11px] text-slate-400 mt-1">
-                Used for urgent institutional notifications &amp; mentor contact
-              </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Full Name */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Full Name <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-navy-700 bg-white dark:bg-navy-950 text-slate-900 dark:text-white text-xs font-semibold focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 outline-none transition-all"
+                  placeholder="e.g. Aarav Sharma"
+                />
+              </div>
+
+              {/* Contact Phone */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Contact Phone Number
+                </label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-navy-700 bg-white dark:bg-navy-950 text-slate-900 dark:text-white text-xs font-semibold focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 outline-none transition-all"
+                  placeholder="+91 98765 43210"
+                />
+              </div>
+
+              {/* Official Email (Identity Record) */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Institutional Account Email
+                </label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    value={user.email}
+                    disabled
+                    readOnly
+                    className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-navy-800 bg-slate-100 dark:bg-navy-950/80 text-slate-500 dark:text-slate-400 text-xs font-mono cursor-not-allowed"
+                    title="Account email is managed through Supabase Authentication"
+                  />
+                  <span className="absolute right-3 top-2.5 text-[10px] font-semibold text-slate-400">
+                    Auth ID
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Institutional Protected Fields Notice */}
-          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-navy-950/60 border border-slate-200/80 dark:border-navy-800 space-y-3">
-            <div className="flex items-center space-x-2 text-xs font-bold text-slate-700 dark:text-slate-300">
-              <Lock className="w-4 h-4 text-amber-500" />
-              <span>Institution-Controlled Academic Fields (Locked)</span>
-            </div>
-            
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              Academic identifiers (Roll Number, PRN, Academic Department, Semester, Division, and CGPA) are verified by the Registrar of Government Polytechnic Ahmedabad and cannot be self-edited. If a correction is required, please submit an official request to your Department HOD.
-            </p>
+          {/* Section 2: Academic Curriculum & Enrollment Details */}
+          <div className="space-y-4 pt-2 border-t border-slate-100 dark:border-navy-800">
+            <h4 className="text-xs font-extrabold text-teal-600 dark:text-teal-400 uppercase tracking-wider flex items-center space-x-1.5">
+              <GraduationCap className="w-3.5 h-3.5" />
+              <span>Academic Curriculum &amp; Enrollment</span>
+            </h4>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 text-xs">
-              <div className="bg-white dark:bg-navy-900 p-2 rounded-xl border border-slate-200 dark:border-navy-800">
-                <span className="text-[10px] text-slate-400 block font-semibold">Department</span>
-                <span className="font-bold text-slate-800 dark:text-white truncate block">{user.department || 'Computer Engineering'}</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+              {/* Department */}
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Academic Department <span className="text-rose-500">*</span>
+                </label>
+                <select
+                  value={department}
+                  onChange={(e) => setDepartment(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-navy-700 bg-white dark:bg-navy-950 text-slate-900 dark:text-white text-xs font-semibold focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 outline-none transition-all"
+                >
+                  {COLLEGE_DEPARTMENTS.map((dept) => (
+                    <option key={dept} value={dept}>
+                      {dept}
+                    </option>
+                  ))}
+                </select>
               </div>
-              <div className="bg-white dark:bg-navy-900 p-2 rounded-xl border border-slate-200 dark:border-navy-800">
-                <span className="text-[10px] text-slate-400 block font-semibold">Roll Number</span>
-                <span className="font-bold text-slate-800 dark:text-white block font-mono">{user.rollNumber || '21CE101'}</span>
+
+              {/* Roll Number */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Roll Number
+                </label>
+                <input
+                  type="text"
+                  value={rollNumber}
+                  onChange={(e) => setRollNumber(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-navy-700 bg-white dark:bg-navy-950 text-slate-900 dark:text-white text-xs font-mono font-semibold focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 outline-none transition-all"
+                  placeholder="e.g. 21CS104"
+                />
               </div>
-              <div className="bg-white dark:bg-navy-900 p-2 rounded-xl border border-slate-200 dark:border-navy-800">
-                <span className="text-[10px] text-slate-400 block font-semibold">Semester</span>
-                <span className="font-bold text-slate-800 dark:text-white block">Semester {user.semester || 1}</span>
+
+              {/* PRN Number */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  PRN Number
+                </label>
+                <input
+                  type="text"
+                  value={prn}
+                  onChange={(e) => setPrn(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-navy-700 bg-white dark:bg-navy-950 text-slate-900 dark:text-white text-xs font-mono font-semibold focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 outline-none transition-all"
+                  placeholder="e.g. 2021016400987654"
+                />
               </div>
-              <div className="bg-white dark:bg-navy-900 p-2 rounded-xl border border-slate-200 dark:border-navy-800">
-                <span className="text-[10px] text-slate-400 block font-semibold">Official Email</span>
-                <span className="font-bold text-slate-800 dark:text-white truncate block font-mono text-[11px]">{user.email}</span>
+
+              {/* Semester */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Semester
+                </label>
+                <select
+                  value={semester}
+                  onChange={(e) => setSemester(Number(e.target.value))}
+                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-navy-700 bg-white dark:bg-navy-950 text-slate-900 dark:text-white text-xs font-semibold focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 outline-none transition-all"
+                >
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
+                    <option key={s} value={s}>
+                      Semester {s}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Division */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Division / Section
+                </label>
+                <select
+                  value={division}
+                  onChange={(e) => setDivision(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-navy-700 bg-white dark:bg-navy-950 text-slate-900 dark:text-white text-xs font-semibold focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 outline-none transition-all"
+                >
+                  {DIVISIONS.map((div) => (
+                    <option key={div} value={div}>
+                      {div}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Academic Year */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Academic Year
+                </label>
+                <select
+                  value={academicYear}
+                  onChange={(e) => setAcademicYear(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-navy-700 bg-white dark:bg-navy-950 text-slate-900 dark:text-white text-xs font-semibold focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 outline-none transition-all"
+                >
+                  {ACADEMIC_YEARS.map((yr) => (
+                    <option key={yr} value={yr}>
+                      {yr}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* CGPA */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Cumulative CGPA (0.00 - 10.00)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="10"
+                  value={cgpa}
+                  onChange={(e) => setCgpa(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-navy-700 bg-white dark:bg-navy-950 text-slate-900 dark:text-white text-xs font-bold font-mono focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 outline-none transition-all"
+                  placeholder="8.92"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Section 3: Mentorship & Advisory Information */}
+          <div className="space-y-4 pt-2 border-t border-slate-100 dark:border-navy-800">
+            <h4 className="text-xs font-extrabold text-teal-600 dark:text-teal-400 uppercase tracking-wider flex items-center space-x-1.5">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Assigned Faculty Mentorship &amp; Advisory</span>
+            </h4>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Mentor Name */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Mentor Faculty Name
+                </label>
+                <input
+                  type="text"
+                  value={mentorName}
+                  onChange={(e) => setMentorName(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-navy-700 bg-white dark:bg-navy-950 text-slate-900 dark:text-white text-xs font-semibold focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 outline-none transition-all"
+                  placeholder="e.g. Dr. Radhika Sen"
+                />
+              </div>
+
+              {/* Mentor Email */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Mentor Email Address
+                </label>
+                <input
+                  type="email"
+                  value={mentorEmail}
+                  onChange={(e) => setMentorEmail(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-navy-700 bg-white dark:bg-navy-950 text-slate-900 dark:text-white text-xs font-semibold focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 outline-none transition-all"
+                  placeholder="e.g. radhika.sen@campusone.edu"
+                />
               </div>
             </div>
           </div>
 
           {/* Form Actions */}
-          <div className="flex items-center justify-end space-x-3 pt-2 border-t border-slate-100 dark:border-navy-800">
+          <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-100 dark:border-navy-800">
             <button
               type="button"
               onClick={handleCancelEdit}
               disabled={isSaving}
-              className="px-5 py-2.5 rounded-2xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-navy-800 transition-colors"
+              className="px-5 py-2.5 rounded-2xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-navy-800 transition-colors cursor-pointer"
             >
               Cancel
             </button>
@@ -450,7 +691,7 @@ export const ProfileCard: React.FC = () => {
               disabled={isSaving || !isDirty}
               className={`px-6 py-2.5 rounded-2xl text-xs font-extrabold transition-all flex items-center space-x-2 ${
                 isDirty && !isSaving
-                  ? 'bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-navy-950 shadow-md shadow-teal-500/20'
+                  ? 'bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-navy-950 shadow-md shadow-teal-500/20 cursor-pointer'
                   : 'bg-slate-200 dark:bg-navy-800 text-slate-400 cursor-not-allowed'
               }`}
             >
@@ -479,7 +720,7 @@ export const ProfileCard: React.FC = () => {
               <GraduationCap className="w-5 h-5 text-teal-500" />
               <span>Academic Curriculum &amp; Enrollment</span>
             </h3>
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+            <span className="text-[11px] font-bold text-teal-600 dark:text-teal-400 uppercase tracking-wider">
               Enrolled
             </span>
           </div>
@@ -487,7 +728,7 @@ export const ProfileCard: React.FC = () => {
           <div className="space-y-3 text-sm divide-y divide-slate-100 dark:divide-navy-800">
             <div className="flex justify-between py-2">
               <span className="text-slate-500 dark:text-slate-400">Department</span>
-              <span className="font-bold text-slate-800 dark:text-white">{user.department || 'Computer Engineering'}</span>
+              <span className="font-bold text-slate-800 dark:text-white">{user.department || 'Computer Science & Engineering'}</span>
             </div>
             <div className="flex justify-between py-2">
               <span className="text-slate-500 dark:text-slate-400">Program</span>
@@ -499,11 +740,19 @@ export const ProfileCard: React.FC = () => {
             </div>
             <div className="flex justify-between py-2">
               <span className="text-slate-500 dark:text-slate-400">Semester &amp; Division</span>
-              <span className="font-bold text-slate-800 dark:text-white">Semester {user.semester || 1} — Division {user.division || 'A'}</span>
+              <span className="font-bold text-slate-800 dark:text-white">Semester {user.semester || 1} — {user.division || 'Div A'}</span>
             </div>
             <div className="flex justify-between py-2">
-              <span className="text-slate-500 dark:text-slate-400">Admission Mode</span>
-              <span className="font-bold text-slate-800 dark:text-white">ACPC State Merit Quota</span>
+              <span className="text-slate-500 dark:text-slate-400">Roll Number</span>
+              <span className="font-bold font-mono text-slate-800 dark:text-white">{user.rollNumber || 'Not Set'}</span>
+            </div>
+            <div className="flex justify-between py-2">
+              <span className="text-slate-500 dark:text-slate-400">Permanent Registration (PRN)</span>
+              <span className="font-mono text-xs font-semibold text-teal-600 dark:text-teal-400">{user.prn || 'Not Set'}</span>
+            </div>
+            <div className="flex justify-between py-2">
+              <span className="text-slate-500 dark:text-slate-400">Current CGPA</span>
+              <span className="font-bold text-emerald-500 dark:text-emerald-400">{user.cgpa ? `${user.cgpa} / 10.0` : '8.00 / 10.0'}</span>
             </div>
             <div className="flex justify-between py-2">
               <span className="text-slate-500 dark:text-slate-400">Institutional Email</span>
@@ -561,9 +810,9 @@ export const ProfileCard: React.FC = () => {
           <div className="p-4 rounded-2xl bg-slate-50 dark:bg-navy-950/40 border border-slate-200/80 dark:border-navy-800 flex items-start space-x-3 text-xs text-slate-600 dark:text-slate-400">
             <Info className="w-4 h-4 text-teal-500 shrink-0 mt-0.5" />
             <div>
-              <p className="font-bold text-slate-800 dark:text-white">Need an official record amendment?</p>
+              <p className="font-bold text-slate-800 dark:text-white">Profile Modifications</p>
               <p className="mt-0.5 leading-relaxed">
-                Contact the Registrar Office with your admission receipt or submit an inquiry through the Student Grievance desk.
+                Click <strong>Edit Profile</strong> at any time to update your personal information, department, PRN, or academic details directly.
               </p>
             </div>
           </div>

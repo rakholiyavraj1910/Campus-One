@@ -64,6 +64,9 @@ export const ManageStudents: React.FC<ManageStudentsProps> = ({
   const [editDivision, setEditDivision] = useState<string>('A');
   const [editCgpa, setEditCgpa] = useState<number>(8.0);
   const [editPhone, setEditPhone] = useState<string>('');
+  const [editAcademicYear, setEditAcademicYear] = useState<string>('2025 - 2026');
+  const [editMentorName, setEditMentorName] = useState<string>('');
+  const [editMentorEmail, setEditMentorEmail] = useState<string>('');
 
   const fetchStudents = async () => {
     setIsLoading(true);
@@ -92,6 +95,9 @@ export const ManageStudents: React.FC<ManageStudentsProps> = ({
     setEditDivision(student.division || 'A');
     setEditCgpa(student.cgpa || 8.0);
     setEditPhone(student.phone || '');
+    setEditAcademicYear(student.academicYear || '2025 - 2026');
+    setEditMentorName(student.mentorName || '');
+    setEditMentorEmail(student.mentorEmail || '');
   };
 
   const handleSaveStudent = async (e: React.FormEvent) => {
@@ -110,6 +116,9 @@ export const ManageStudents: React.FC<ManageStudentsProps> = ({
         division: editDivision.trim(),
         cgpa: editCgpa,
         phone: editPhone.trim(),
+        academicYear: editAcademicYear.trim() || undefined,
+        mentorName: editMentorName.trim() || undefined,
+        mentorEmail: editMentorEmail.trim() || undefined,
       });
 
       if (updated) {
@@ -623,6 +632,45 @@ export const ManageStudents: React.FC<ManageStudentsProps> = ({
                   placeholder="+91 98765 43210"
                   className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-navy-950 border border-slate-200 dark:border-navy-800 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-brand-cyan"
                 />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Academic Year
+                  </label>
+                  <input
+                    type="text"
+                    value={editAcademicYear}
+                    onChange={(e) => setEditAcademicYear(e.target.value)}
+                    placeholder="2025 - 2026"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-navy-950 border border-slate-200 dark:border-navy-800 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-brand-cyan"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Mentor Name
+                  </label>
+                  <input
+                    type="text"
+                    value={editMentorName}
+                    onChange={(e) => setEditMentorName(e.target.value)}
+                    placeholder="Dr. Radhika Sen"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-navy-950 border border-slate-200 dark:border-navy-800 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-brand-cyan"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Mentor Email
+                  </label>
+                  <input
+                    type="email"
+                    value={editMentorEmail}
+                    onChange={(e) => setEditMentorEmail(e.target.value)}
+                    placeholder="mentor@campusone.edu"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-navy-950 border border-slate-200 dark:border-navy-800 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-brand-cyan"
+                  />
+                </div>
               </div>
 
               <div className="flex items-center justify-end space-x-2.5 pt-3 border-t border-slate-100 dark:border-navy-800">

@@ -1984,6 +1984,9 @@ export const updateStudentProfile = async (
     if (updates.division !== undefined) payload.division = updates.division;
     if (updates.cgpa !== undefined) payload.cgpa = Number(updates.cgpa);
     if (updates.phone !== undefined) payload.phone = updates.phone;
+    if (updates.academicYear !== undefined) payload.academic_year = updates.academicYear;
+    if (updates.mentorName !== undefined) payload.mentor_name = updates.mentorName;
+    if (updates.mentorEmail !== undefined) payload.mentor_email = updates.mentorEmail;
 
     try {
       const { data, error } = await supabase
@@ -2531,17 +2534,28 @@ export const removeProfileAvatar = async (userId: string): Promise<void> => {
   }
 };
 
+export interface StudentProfileUpdates {
+  name: string;
+  phone?: string;
+  department?: string;
+  rollNumber?: string;
+  prn?: string;
+  semester?: number;
+  academicYear?: string;
+  division?: string;
+  cgpa?: number;
+  mentorName?: string;
+  mentorEmail?: string;
+}
+
 /**
- * Updates a student's self-editable profile fields (Name, Phone).
- * Institution-controlled academic fields (roll number, department, PRN, CGPA, semester)
- * cannot be edited here.
+ * Updates a student's full profile fields in Supabase profiles table:
+ * Name, Phone, Department, Roll Number, PRN, Semester, Academic Year,
+ * Division, CGPA, Mentor Name, Mentor Email.
  */
 export const updateStudentPersonalProfile = async (
   userId: string,
-  updates: {
-    name: string;
-    phone?: string;
-  }
+  updates: StudentProfileUpdates
 ): Promise<UserProfile> => {
   if (!userId || userId === 'guest') {
     throw new Error('Authentication required: Sign in to update your profile.');
@@ -2551,14 +2565,37 @@ export const updateStudentPersonalProfile = async (
     throw new Error('Please enter a valid full name (at least 2 characters).');
   }
 
+  if (updates.cgpa !== undefined && updates.cgpa !== null) {
+    const num = Number(updates.cgpa);
+    if (isNaN(num) || num < 0 || num > 10) {
+      throw new Error('CGPA must be a valid number between 0.00 and 10.00.');
+    }
+  }
+
+  if (updates.semester !== undefined && updates.semester !== null) {
+    const sem = Number(updates.semester);
+    if (isNaN(sem) || sem < 1 || sem > 12) {
+      throw new Error('Semester must be between 1 and 12.');
+    }
+  }
+
   if (isSupabaseConfigured && supabase) {
     const payload: Record<string, any> = {
       name: updates.name.trim(),
       updated_at: new Date().toISOString(),
     };
-    if (updates.phone !== undefined) {
-      payload.phone = updates.phone ? updates.phone.trim() : null;
+    if (updates.phone !== undefined) payload.phone = updates.phone ? updates.phone.trim() : null;
+    if (updates.department !== undefined) payload.department = updates.department ? updates.department.trim() : null;
+    if (updates.rollNumber !== undefined) payload.roll_number = updates.rollNumber ? updates.rollNumber.trim() : null;
+    if (updates.prn !== undefined) payload.prn = updates.prn ? updates.prn.trim() : null;
+    if (updates.semester !== undefined && updates.semester !== null) {
+      payload.semester = updates.semester ? Number(updates.semester) : null;
     }
+    if (updates.academicYear !== undefined) payload.academic_year = updates.academicYear ? updates.academicYear.trim() : null;
+    if (updates.division !== undefined) payload.division = updates.division ? updates.division.trim() : null;
+    if (updates.cgpa !== undefined && updates.cgpa !== null) payload.cgpa = Number(updates.cgpa);
+    if (updates.mentorName !== undefined) payload.mentor_name = updates.mentorName ? updates.mentorName.trim() : null;
+    if (updates.mentorEmail !== undefined) payload.mentor_email = updates.mentorEmail ? updates.mentorEmail.trim() : null;
 
     const { data, error } = await supabase
       .from('profiles')
@@ -2574,10 +2611,10 @@ export const updateStudentPersonalProfile = async (
     await addAuditLog(
       userId,
       'student',
-      'UPDATE_PERSONAL_PROFILE',
+      'UPDATE_STUDENT_PROFILE',
       'profiles',
       userId,
-      `Student updated personal details (name: "${updates.name}").`
+      `Student updated profile details (name: "${updates.name}").`
     );
 
     return mapProfileFromDb(data);
@@ -2590,25 +2627,37 @@ export const updateStudentPersonalProfile = async (
     id: userId,
     name: updates.name.trim(),
     phone: updates.phone,
+    department: updates.department ?? current.department,
+    rollNumber: updates.rollNumber ?? current.rollNumber,
+    prn: updates.prn ?? current.prn,
+    semester: updates.semester !== undefined ? Number(updates.semester) : current.semester,
+    academicYear: updates.academicYear ?? current.academicYear,
+    division: updates.division ?? current.division,
+    cgpa: updates.cgpa !== undefined ? Number(updates.cgpa) : current.cgpa,
+    mentorName: updates.mentorName ?? current.mentorName,
+    mentorEmail: updates.mentorEmail ?? current.mentorEmail,
   };
   localStorage.setItem('campusone_user_profile', JSON.stringify(updated));
   return updated;
 };
 
+export interface FacultyProfileUpdates {
+  name: string;
+  phone?: string;
+  department?: string;
+  designation?: string;
+  cabin?: string;
+  consultationHours?: string;
+  specialization?: string[];
+}
+
 /**
- * Updates a faculty member's self-editable profile fields:
- * Name, Phone, Cabin, Consultation Hours, Specialization.
- * Department, Designation, and Approval Status are institutionally protected.
+ * Updates a faculty member's profile fields:
+ * Name, Phone, Department, Designation, Cabin, Consultation Hours, Specialization.
  */
 export const updateFacultyPersonalProfile = async (
   userId: string,
-  updates: {
-    name: string;
-    phone?: string;
-    cabin?: string;
-    consultationHours?: string;
-    specialization?: string[];
-  }
+  updates: FacultyProfileUpdates
 ): Promise<UserProfile> => {
   if (!userId || userId === 'guest') {
     throw new Error('Authentication required: Sign in to update your profile.');
@@ -2624,6 +2673,8 @@ export const updateFacultyPersonalProfile = async (
       updated_at: new Date().toISOString(),
     };
     if (updates.phone !== undefined) payload.phone = updates.phone ? updates.phone.trim() : null;
+    if (updates.department !== undefined) payload.department = updates.department ? updates.department.trim() : null;
+    if (updates.designation !== undefined) payload.designation = updates.designation ? updates.designation.trim() : null;
     if (updates.cabin !== undefined) payload.cabin = updates.cabin ? updates.cabin.trim() : null;
     if (updates.consultationHours !== undefined) {
       payload.consultation_hours = updates.consultationHours ? updates.consultationHours.trim() : null;
@@ -2650,6 +2701,8 @@ export const updateFacultyPersonalProfile = async (
         updated_at: new Date().toISOString(),
       };
       if (updates.phone !== undefined) dirPayload.phone = updates.phone;
+      if (updates.department !== undefined) dirPayload.department = updates.department;
+      if (updates.designation !== undefined) dirPayload.designation = updates.designation;
       if (updates.cabin !== undefined) dirPayload.cabin = updates.cabin;
       if (updates.consultationHours !== undefined) dirPayload.consultation_hours = updates.consultationHours;
       if (updates.specialization !== undefined) dirPayload.specialization = updates.specialization;
@@ -2681,6 +2734,8 @@ export const updateFacultyPersonalProfile = async (
     id: userId,
     name: updates.name.trim(),
     phone: updates.phone,
+    department: updates.department ?? current.department,
+    designation: updates.designation ?? current.designation,
     cabin: updates.cabin,
     consultationHours: updates.consultationHours,
     specialization: updates.specialization,

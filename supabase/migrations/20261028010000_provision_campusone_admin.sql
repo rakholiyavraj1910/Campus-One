@@ -24,55 +24,28 @@ SECURITY DEFINER
 SET search_path = ''
 AS $$
 BEGIN
-  -- Strict Privilege Separation: Non-admins cannot alter their role, approval status, CGPA, ID, or email
-  -- When auth.uid() IS NULL, the operation is an internal migration or postgres superuser command
+  -- Strict Privilege Separation: Non-admins cannot alter authentication identity, account role, or admin privileges
   IF auth.uid() IS NOT NULL AND NOT public.is_admin() THEN
+    IF (OLD.id IS DISTINCT FROM NEW.id) THEN
+      RAISE EXCEPTION 'Unauthorized: Account ID cannot be altered.';
+    END IF;
+    IF (OLD.email IS DISTINCT FROM NEW.email) THEN
+      RAISE EXCEPTION 'Unauthorized: Account email cannot be altered directly via profile update.';
+    END IF;
     IF (OLD.role IS DISTINCT FROM NEW.role) THEN
       RAISE EXCEPTION 'Unauthorized: Only institutional administrators can change account roles.';
     END IF;
     IF (OLD.admin_level IS DISTINCT FROM NEW.admin_level) THEN
       RAISE EXCEPTION 'Unauthorized: Only institutional administrators can modify admin levels or approval status.';
     END IF;
-    IF (OLD.cgpa IS DISTINCT FROM NEW.cgpa) THEN
-      RAISE EXCEPTION 'Unauthorized: Only institutional academic officers can modify student CGPA.';
-    END IF;
-    IF (OLD.id IS DISTINCT FROM NEW.id) THEN
-      RAISE EXCEPTION 'Unauthorized: Account ID cannot be altered.';
-    END IF;
-    IF (OLD.email IS DISTINCT FROM NEW.email) THEN
-      RAISE EXCEPTION 'Unauthorized: Account email cannot be altered directly.';
+
+    -- Database-level validation for academic metrics
+    IF NEW.cgpa IS NOT NULL AND (NEW.cgpa < 0.00 OR NEW.cgpa > 10.00) THEN
+      RAISE EXCEPTION 'Invalid CGPA: CGPA must be between 0.00 and 10.00.';
     END IF;
 
-    -- Student Protected Academic Fields
-    IF (OLD.role = 'student'::public.user_role_type) THEN
-      IF (OLD.roll_number IS DISTINCT FROM NEW.roll_number) THEN
-        RAISE EXCEPTION 'Unauthorized: Student Roll Number is institutionally assigned.';
-      END IF;
-      IF (OLD.prn IS DISTINCT FROM NEW.prn) THEN
-        RAISE EXCEPTION 'Unauthorized: Student PRN is institutionally assigned.';
-      END IF;
-      IF (OLD.department IS DISTINCT FROM NEW.department) THEN
-        RAISE EXCEPTION 'Unauthorized: Academic Department assignment requires administrative approval.';
-      END IF;
-      IF (OLD.semester IS DISTINCT FROM NEW.semester) THEN
-        RAISE EXCEPTION 'Unauthorized: Semester progression is controlled through official academic promotion.';
-      END IF;
-      IF (OLD.division IS DISTINCT FROM NEW.division) THEN
-        RAISE EXCEPTION 'Unauthorized: Division allocation is managed by the department coordinator.';
-      END IF;
-      IF (OLD.academic_year IS DISTINCT FROM NEW.academic_year) THEN
-        RAISE EXCEPTION 'Unauthorized: Academic year cannot be self-edited.';
-      END IF;
-    END IF;
-
-    -- Faculty Protected Administrative Fields
-    IF (OLD.role = 'faculty'::public.user_role_type) THEN
-      IF (OLD.department IS DISTINCT FROM NEW.department) THEN
-        RAISE EXCEPTION 'Unauthorized: Faculty department transfers must be processed by administration.';
-      END IF;
-      IF (OLD.designation IS DISTINCT FROM NEW.designation) THEN
-        RAISE EXCEPTION 'Unauthorized: Academic designation is governed by institutional appointment.';
-      END IF;
+    IF NEW.semester IS NOT NULL AND (NEW.semester < 1 OR NEW.semester > 12) THEN
+      RAISE EXCEPTION 'Invalid Semester: Semester must be between 1 and 12.';
     END IF;
   END IF;
 

@@ -595,9 +595,17 @@ assert(profileMigrationContent.includes('(storage.foldername(name))[1]'), 'Migra
 assert(profileMigrationContent.includes('avatars_user_upload'), 'Migration defines avatars_user_upload policy');
 assert(profileMigrationContent.includes('avatars_user_update'), 'Migration defines avatars_user_update policy');
 assert(profileMigrationContent.includes('avatars_user_delete'), 'Migration defines avatars_user_delete policy');
-assert(profileMigrationContent.includes('OLD.role = \'student\'::public.user_role_type'), 'Migration protects student institutional academic fields');
-assert(profileMigrationContent.includes('OLD.role = \'faculty\'::public.user_role_type'), 'Migration protects faculty appointment fields');
-assert(profileMigrationContent.includes('auth.uid() IS NOT NULL AND NOT public.is_admin()'), 'Migration preserves database operations in prevent_role_escalation');
+
+const editableProfileMigrationPath = path.join(rootDir, 'supabase', 'migrations', '20261028030000_make_all_profile_fields_editable.sql');
+assert(fs.existsSync(editableProfileMigrationPath), '20261028030000_make_all_profile_fields_editable.sql exists');
+const editableProfileMigrationContent = fs.readFileSync(editableProfileMigrationPath, 'utf8');
+assert(editableProfileMigrationContent.includes('prevent_role_escalation'), 'Migration defines updated prevent_role_escalation');
+assert(editableProfileMigrationContent.includes('OLD.role IS DISTINCT FROM NEW.role'), 'prevent_role_escalation prevents unauthorized role changes');
+assert(editableProfileMigrationContent.includes('OLD.id IS DISTINCT FROM NEW.id'), 'prevent_role_escalation protects immutable account ID');
+assert(editableProfileMigrationContent.includes('OLD.email IS DISTINCT FROM NEW.email'), 'prevent_role_escalation protects immutable account email');
+assert(editableProfileMigrationContent.includes('NEW.cgpa < 0.00 OR NEW.cgpa > 10.00'), 'prevent_role_escalation enforces database-level CGPA validation');
+assert(editableProfileMigrationContent.includes('NEW.semester < 1 OR NEW.semester > 12'), 'prevent_role_escalation enforces database-level semester validation');
+assert(editableProfileMigrationContent.includes('profiles_update_policy'), 'Migration configures profiles_update_policy');
 
 const userAvatarPath = path.join(rootDir, 'src', 'components', 'common', 'UserAvatar.tsx');
 assert(fs.existsSync(userAvatarPath), 'UserAvatar.tsx exists');
@@ -613,9 +621,21 @@ assert(imageCropModalContent.includes('5 * 1024 * 1024'), 'ImageCropModal enforc
 assert(fs.existsSync(profileCardPath), 'ProfileCard.tsx exists');
 const updatedProfileCardContent = fs.readFileSync(profileCardPath, 'utf8');
 assert(updatedProfileCardContent.includes('calculateCompletion'), 'ProfileCard calculates profile completion percentage');
-assert(updatedProfileCardContent.includes('updateStudentPersonalProfile'), 'ProfileCard updates personal profile in database');
+assert(updatedProfileCardContent.includes('updateStudentPersonalProfile'), 'ProfileCard updates personal and academic profile in database');
 assert(updatedProfileCardContent.includes('ImageCropModal'), 'ProfileCard integrates ImageCropModal');
 assert(updatedProfileCardContent.includes('beforeunload'), 'ProfileCard guards against unsaved form modifications');
+assert(!updatedProfileCardContent.includes('Institution-Controlled Academic Fields (Locked)'), 'ProfileCard removes locked academic fields section');
+assert(!updatedProfileCardContent.includes('cannot be self-edited'), 'ProfileCard removes cannot be self-edited messages');
+assert(updatedProfileCardContent.includes('COLLEGE_DEPARTMENTS'), 'ProfileCard provides department dropdown');
+assert(updatedProfileCardContent.includes('rollNumber'), 'ProfileCard allows editing roll number');
+assert(updatedProfileCardContent.includes('prn'), 'ProfileCard allows editing PRN');
+assert(updatedProfileCardContent.includes('semester'), 'ProfileCard allows editing semester');
+assert(updatedProfileCardContent.includes('division'), 'ProfileCard allows editing division');
+assert(updatedProfileCardContent.includes('academicYear'), 'ProfileCard allows editing academic year');
+assert(updatedProfileCardContent.includes('cgpa'), 'ProfileCard allows editing CGPA');
+assert(updatedProfileCardContent.includes('mentorName'), 'ProfileCard allows editing mentor name');
+assert(updatedProfileCardContent.includes('mentorEmail'), 'ProfileCard allows editing mentor email');
+assert(updatedProfileCardContent.includes('handleCancelEdit'), 'ProfileCard implements Cancel action restoring values');
 
 const facultyProfilePagePath = path.join(rootDir, 'src', 'components', 'profile', 'FacultyProfilePage.tsx');
 assert(fs.existsSync(facultyProfilePagePath), 'FacultyProfilePage.tsx exists');
@@ -623,6 +643,9 @@ const facultyProfilePageContent = fs.readFileSync(facultyProfilePagePath, 'utf8'
 assert(facultyProfilePageContent.includes('updateFacultyPersonalProfile'), 'FacultyProfilePage updates faculty details in database');
 assert(facultyProfilePageContent.includes('consultationHours'), 'FacultyProfilePage manages consultation hours');
 assert(facultyProfilePageContent.includes('specialization'), 'FacultyProfilePage manages academic specializations');
+assert(!facultyProfilePageContent.includes('Institution-Controlled Appointment Fields (Locked)'), 'FacultyProfilePage removes locked appointment notice');
+assert(facultyProfilePageContent.includes('COLLEGE_DEPARTMENTS'), 'FacultyProfilePage allows editing department');
+assert(facultyProfilePageContent.includes('FACULTY_DESIGNATIONS'), 'FacultyProfilePage allows editing designation');
 
 const updatedFacultyPortalContent = fs.readFileSync(facultyPortalPath, 'utf8');
 assert(updatedFacultyPortalContent.includes('FacultyProfilePage'), 'FacultyPortal integrates FacultyProfilePage');
