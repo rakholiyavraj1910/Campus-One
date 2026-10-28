@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PlatformAnalytics } from './PlatformAnalytics';
+import { ManageUsers } from './ManageUsers';
 import { ManageDepartments } from './ManageDepartments';
 import { ManageFaculty } from './ManageFaculty';
 import { ManageStudents } from './ManageStudents';
@@ -51,6 +52,7 @@ interface AdminDashboardProps {
 
 type TabId = 
   | 'overview' 
+  | 'users'
   | 'departments' 
   | 'faculty' 
   | 'students' 
@@ -78,8 +80,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const resolveInitialTab = (tab?: string): TabId => {
     if (!tab) return 'overview';
     if (tab === 'analytics') return 'overview';
+    if (tab === 'users' || tab === 'user-management') return 'users';
     const validTabs: TabId[] = [
-      'overview', 'departments', 'faculty', 'students', 'faculty-requests',
+      'overview', 'users', 'departments', 'faculty', 'students', 'faculty-requests',
       'notices', 'events', 'materials', 'facilities', 'database', 'feedback', 'audit', 'system'
     ];
     return validTabs.includes(tab as TabId) ? (tab as TabId) : 'overview';
@@ -129,7 +132,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   // Cross-module navigation handler
   const handleNavigateTab = (tab: string, filter?: string) => {
-    if (tab === 'students') {
+    if (tab === 'users' || tab === 'user-management') {
+      setActiveTab('users');
+    } else if (tab === 'students') {
       if (filter) setStudentDeptFilter(filter);
       setActiveTab('students');
     } else if (tab === 'faculty') {
@@ -172,6 +177,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     badgeColor?: string;
   }[] = [
     { id: 'overview', label: 'Platform Analytics', icon: BarChart3 },
+    { id: 'users', label: 'User & Role Management', icon: ShieldCheck },
     { id: 'departments', label: '14 Departments', icon: Building2, count: 14 },
     { id: 'faculty', label: 'Faculty Roster', icon: Users },
     { id: 'students', label: 'Student Directory', icon: GraduationCap },
@@ -309,6 +315,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             onNavigateTab={handleNavigateTab} 
             onRefreshAll={handleRefreshAll} 
           />
+        )}
+
+        {activeTab === 'users' && (
+          <ManageUsers onNavigateTab={handleNavigateTab} />
         )}
 
         {activeTab === 'departments' && (

@@ -238,6 +238,9 @@ export const mapProfileFromDb = (row: any): UserProfile => ({
   specialization: row.specialization || undefined,
   consultationHours: row.consultation_hours || undefined,
   adminLevel: row.admin_level || undefined,
+  createdAt: row.created_at || undefined,
+  updatedAt: row.updated_at || undefined,
+  status: row.admin_level === 'suspended' ? 'suspended' : 'active',
 });
 
 // ----------------- NOTICES CRUD -----------------
@@ -2791,4 +2794,325 @@ export const getStudentFeeRecords = async (studentId: string): Promise<StudentFe
 
   return [];
 };
+
+// ==============================================================================
+// 17. SUPER ADMIN COMPLETE USER & ROLE MANAGEMENT SERVICE
+// ==============================================================================
+
+export interface UserManagementFilters {
+  role?: string;
+  department?: string;
+  status?: string;
+  search?: string;
+}
+
+export const getAllManageableUsers = async (
+  filters?: UserManagementFilters
+): Promise<UserProfile[]> => {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      let query = supabase.from('profiles').select('*');
+
+      if (filters?.role && filters.role !== 'All') {
+        if (filters.role === 'pending') {
+          query = query.eq('admin_level', 'pending_faculty');
+        } else {
+          query = query.eq('role', filters.role);
+        }
+      }
+
+      if (filters?.department && filters.department !== 'All') {
+        query = query.eq('department', filters.department);
+      }
+
+      if (filters?.status && filters.status !== 'All') {
+        if (filters.status === 'suspended') {
+          query = query.eq('admin_level', 'suspended');
+        } else if (filters.status === 'active') {
+          query = query.neq('admin_level', 'suspended');
+        }
+      }
+
+      if (filters?.search && filters.search.trim()) {
+        const s = `%${filters.search.trim()}%`;
+        query = query.or(`name.ilike.${s},email.ilike.${s},roll_number.ilike.${s},prn.ilike.${s}`);
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
+
+      if (error) {
+        console.warn('Error fetching all users from Supabase:', error.message);
+        return [];
+      }
+
+      return (data || []).map(mapProfileFromDb);
+    } catch (e) {
+      console.error('Exception in getAllManageableUsers:', e);
+      return [];
+    }
+  }
+
+  // Offline / Demo fallback
+  const demoList: UserProfile[] = [
+    {
+      id: '5684dc47-ced1-472b-9b52-6d827d88d657',
+      name: 'Super Administrator',
+      email: 'campusonegpa@gmail.com',
+      role: 'admin',
+      department: 'Central Administration',
+      adminLevel: 'Super Administrator',
+      status: 'active',
+      createdAt: '2026-08-01T00:00:00Z',
+      updatedAt: '2026-10-28T00:00:00Z'
+    },
+    {
+      id: 'faculty-hitesh-patel',
+      name: 'Prof. Hitesh Patel',
+      email: 'hitesh.patel@gpa.ac.in',
+      role: 'faculty',
+      department: 'Computer Engineering',
+      designation: 'Head of Department',
+      cabin: 'Block A, Room 301',
+      specialization: ['Database Systems', 'Cloud Computing'],
+      status: 'active',
+      createdAt: '2026-08-10T00:00:00Z',
+      updatedAt: '2026-10-20T00:00:00Z'
+    },
+    {
+      id: 'student-rohit-sharma',
+      name: 'Rohit Sharma',
+      email: 'rohit.sharma@campusone.edu',
+      role: 'student',
+      department: 'Computer Engineering',
+      rollNumber: '210020107001',
+      prn: '20210020107001',
+      semester: 6,
+      academicYear: '2025 - 2026',
+      division: 'A',
+      cgpa: 8.85,
+      status: 'active',
+      createdAt: '2026-08-15T00:00:00Z',
+      updatedAt: '2026-10-25T00:00:00Z'
+    }
+  ];
+  const demoMohini: UserProfile = {
+    id: 'user-mohini-mishra',
+    name: 'Mohini Mishra',
+    email: 'mohini.mishra@campusone.edu',
+    role: 'student',
+    department: 'Computer Engineering',
+    rollNumber: 'FAC-REQ-09',
+    prn: '20240987654321',
+    semester: 1,
+    academicYear: '2025 - 2026',
+    division: 'A',
+    cgpa: 9.1,
+    designation: 'Assistant Professor',
+    cabin: 'Faculty Tower, Room 302',
+    adminLevel: 'pending_faculty',
+    status: 'active',
+    createdAt: '2026-09-15T09:30:00Z',
+    updatedAt: '2026-10-20T11:00:00Z'
+  };
+
+  const allMock = [...demoList, demoMohini];
+  return allMock.filter(u => {
+    if (filters?.role && filters.role !== 'All' && u.role !== filters.role) return false;
+    if (filters?.department && filters.department !== 'All' && u.department !== filters.department) return false;
+    if (filters?.status && filters.status !== 'All' && u.status !== filters.status) return false;
+    if (filters?.search && filters.search.trim()) {
+      const q = filters.search.toLowerCase();
+      const match = u.name.toLowerCase().includes(q) ||
+                    u.email.toLowerCase().includes(q) ||
+                    (u.rollNumber && u.rollNumber.toLowerCase().includes(q)) ||
+                    (u.prn && u.prn.toLowerCase().includes(q));
+      if (!match) return false;
+    }
+    return true;
+  });
+};
+
+export const updateAnyUserProfile = async (
+  userId: string,
+  updates: Partial<UserProfile>,
+  actorName: string = 'Super Administrator'
+): Promise<UserProfile> => {
+  assertCanMutateContent();
+
+  if (isSupabaseConfigured && supabase) {
+    const payload: any = {
+      updated_at: new Date().toISOString()
+    };
+
+    if (updates.name !== undefined) payload.name = updates.name.trim();
+    if (updates.phone !== undefined) payload.phone = updates.phone;
+    if (updates.department !== undefined) payload.department = updates.department;
+    if (updates.avatar !== undefined) payload.avatar_url = updates.avatar;
+
+    // Academic fields
+    if (updates.rollNumber !== undefined) payload.roll_number = updates.rollNumber;
+    if (updates.prn !== undefined) payload.prn = updates.prn;
+    if (updates.semester !== undefined) payload.semester = Number(updates.semester);
+    if (updates.academicYear !== undefined) payload.academic_year = updates.academicYear;
+    if (updates.division !== undefined) payload.division = updates.division;
+    if (updates.cgpa !== undefined) payload.cgpa = Number(updates.cgpa);
+    if (updates.mentorName !== undefined) payload.mentor_name = updates.mentorName;
+    if (updates.mentorEmail !== undefined) payload.mentor_email = updates.mentorEmail;
+
+    // Faculty fields
+    if (updates.designation !== undefined) payload.designation = updates.designation;
+    if (updates.cabin !== undefined) payload.cabin = updates.cabin;
+    if (updates.specialization !== undefined) payload.specialization = updates.specialization;
+    if (updates.consultationHours !== undefined) payload.consultation_hours = updates.consultationHours;
+
+    // Account status
+    if (updates.status !== undefined) {
+      if (updates.status === 'suspended') {
+        payload.admin_level = 'suspended';
+      } else {
+        // If restoring from suspended, clear suspended mark
+        payload.admin_level = null;
+      }
+    }
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .update(payload)
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to update profile: ${error.message}`);
+    }
+
+    await addAuditLog(
+      actorName,
+      'admin',
+      'UPDATE_USER_PROFILE',
+      'profiles',
+      userId,
+      `Updated user profile details for ${updates.name || userId}.`
+    );
+
+    return mapProfileFromDb(data);
+  }
+
+  // Offline / Demo
+  return {
+    ...updates,
+    id: userId,
+    name: updates.name || 'User',
+    email: updates.email || 'user@campusone.edu',
+    role: updates.role || 'student'
+  } as UserProfile;
+};
+
+export const changeUserRole = async (
+  targetUser: UserProfile,
+  newRole: UserRole,
+  reason: string,
+  actor: { id: string; name: string; email: string }
+): Promise<UserProfile> => {
+  assertCanMutateContent();
+
+  // Safeguard 1: Protect the primary Super Admin from demotion
+  if (targetUser.email.toLowerCase() === 'campusonegpa@gmail.com' && newRole !== 'admin') {
+    throw new Error('Institutional Safeguard: The primary Super Administrator account (campusonegpa@gmail.com) cannot be demoted or removed.');
+  }
+
+  // Safeguard 2: Prevent accidental self-demotion lockout
+  if (targetUser.id === actor.id && targetUser.role === 'admin' && newRole !== 'admin') {
+    throw new Error('Lockout Safeguard: Administrators cannot remove their own administrator privileges.');
+  }
+
+  if (isSupabaseConfigured && supabase) {
+    const payload: any = {
+      role: newRole,
+      updated_at: new Date().toISOString()
+    };
+
+    if (newRole === 'faculty') {
+      payload.admin_level = null;
+      if (!targetUser.designation) payload.designation = 'Assistant Professor';
+      if (!targetUser.cabin) payload.cabin = 'Faculty Tower';
+    } else if (newRole === 'admin') {
+      payload.admin_level = 'Super Administrator';
+      if (!targetUser.designation) payload.designation = 'Institutional Administrator';
+    } else {
+      payload.admin_level = null;
+    }
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .update(payload)
+      .eq('id', targetUser.id)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to change role: ${error.message}`);
+    }
+
+    await addAuditLog(
+      actor.name || 'Super Administrator',
+      'admin',
+      'CHANGE_USER_ROLE',
+      'profiles',
+      targetUser.id,
+      `Changed role from '${targetUser.role}' to '${newRole}' for ${targetUser.name} (${targetUser.email}). Reason: ${reason || 'Administrative reclassification.'}`
+    );
+
+    return mapProfileFromDb(data);
+  }
+
+  // Offline demo
+  return {
+    ...targetUser,
+    role: newRole,
+    adminLevel: newRole === 'admin' ? 'Super Administrator' : undefined
+  };
+};
+
+export const sendUserPasswordReset = async (email: string): Promise<{ success: boolean; error?: string }> => {
+  if (!email || !email.includes('@')) {
+    return { success: false, error: 'A valid email address is required.' };
+  }
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const redirectUrl = `${window.location.origin}/login?mode=reset`;
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: redirectUrl
+      });
+
+      if (error) return { success: false, error: error.message };
+      return { success: true };
+    } catch (e: any) {
+      return { success: false, error: e?.message || 'Failed to dispatch password recovery email.' };
+    }
+  }
+
+  return { success: true };
+};
+
+export const findMohiniMishraAccounts = async (): Promise<UserProfile[]> => {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .or('name.ilike.%mohini%,email.ilike.%mohini%,name.ilike.%mishra%,email.ilike.%mishra%');
+
+      if (!error && data) {
+        return data.map(mapProfileFromDb);
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  return [];
+};
+
 

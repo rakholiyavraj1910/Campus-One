@@ -710,6 +710,41 @@ assert(updatedSidebarContent.includes("{ id: 'fees', label: 'Fees & Payment' }")
 const freshStorageContent = fs.readFileSync(storagePath, 'utf8');
 assert(freshStorageContent.includes('getStudentFeeRecords'), 'storageService exports getStudentFeeRecords');
 
+console.log('\n19. Checking Super Admin User & Role Management & Safeguards:');
+const userMgmtMigrationPath = path.join(rootDir, 'supabase', 'migrations', '20261028070000_user_role_management_and_safeguards.sql');
+assert(fs.existsSync(userMgmtMigrationPath), '20261028070000_user_role_management_and_safeguards.sql exists');
+const userMgmtMigrationSql = fs.readFileSync(userMgmtMigrationPath, 'utf8');
+assert(userMgmtMigrationSql.includes('campusonegpa@gmail.com'), 'Migration protects primary admin campusonegpa@gmail.com');
+assert(userMgmtMigrationSql.includes('The primary institutional administrator account (campusonegpa@gmail.com) cannot be demoted'), 'Migration triggers explicit primary admin demotion guard');
+assert(userMgmtMigrationSql.includes('auth.uid() = OLD.id'), 'Migration triggers self-demotion lockout guard');
+assert(userMgmtMigrationSql.includes('Mohini Mishra'), 'Migration defines idempotent faculty reclassification for Mohini Mishra');
+
+const manageUsersPath = path.join(rootDir, 'src', 'components', 'admin', 'ManageUsers.tsx');
+assert(fs.existsSync(manageUsersPath), 'ManageUsers.tsx exists');
+const manageUsersContent = fs.readFileSync(manageUsersPath, 'utf8');
+assert(manageUsersContent.includes('getAllManageableUsers'), 'ManageUsers imports getAllManageableUsers');
+assert(manageUsersContent.includes('updateAnyUserProfile'), 'ManageUsers imports updateAnyUserProfile');
+assert(manageUsersContent.includes('changeUserRole'), 'ManageUsers imports changeUserRole');
+assert(manageUsersContent.includes('sendUserPasswordReset'), 'ManageUsers imports sendUserPasswordReset');
+assert(manageUsersContent.includes('findMohiniMishraAccounts'), 'ManageUsers imports findMohiniMishraAccounts');
+assert(manageUsersContent.includes('Mohini Mishra is currently cataloged with role'), 'ManageUsers displays Mohini Mishra spotlight banner');
+assert(manageUsersContent.includes('handlePromoteMohini'), 'ManageUsers provides 1-click Mohini Mishra faculty restoration');
+assert(manageUsersContent.includes('adminPromotionConfirmed'), 'ManageUsers implements 2-step confirmation for Super Admin promotion');
+assert(manageUsersContent.includes('campusonegpa@gmail.com'), 'ManageUsers guards primary admin against demotion');
+assert(manageUsersContent.includes('currentAdmin?.id'), 'ManageUsers guards logged-in admin against self-demotion');
+assert(manageUsersContent.includes('pageSize'), 'ManageUsers implements configurable pagination');
+
+const userMgmtAdminDashboardContent = fs.readFileSync(adminDashboardPath, 'utf8');
+assert(userMgmtAdminDashboardContent.includes('ManageUsers'), 'AdminDashboard imports ManageUsers');
+assert(userMgmtAdminDashboardContent.includes("id: 'users'"), 'AdminDashboard includes users tab in navigation');
+assert(userMgmtAdminDashboardContent.includes('User & Role Management'), 'AdminDashboard displays User & Role Management label');
+
+assert(freshStorageContent.includes('export const getAllManageableUsers'), 'storageService exports getAllManageableUsers');
+assert(freshStorageContent.includes('export const updateAnyUserProfile'), 'storageService exports updateAnyUserProfile');
+assert(freshStorageContent.includes('export const changeUserRole'), 'storageService exports changeUserRole');
+assert(freshStorageContent.includes('export const sendUserPasswordReset'), 'storageService exports sendUserPasswordReset');
+assert(freshStorageContent.includes('export const findMohiniMishraAccounts'), 'storageService exports findMohiniMishraAccounts');
+
 console.log('\n====================================================');
 console.log(`Results: ${passedTests}/${totalTests} tests passed (${Math.round((passedTests / totalTests) * 100)}%)`);
 console.log('====================================================\n');

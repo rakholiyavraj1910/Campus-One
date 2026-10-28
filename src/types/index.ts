@@ -43,6 +43,9 @@ export interface UserProfile {
   consultationHours?: string;
   // Admin specific
   adminLevel?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  status?: 'active' | 'suspended';
 }
 
 export interface Notice {

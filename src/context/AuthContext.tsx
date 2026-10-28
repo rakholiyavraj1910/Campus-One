@@ -80,6 +80,9 @@ export const mapDbProfile = (db: any): UserProfile => {
     specialization: db.specialization || undefined,
     consultationHours: db.consultation_hours || undefined,
     adminLevel: db.admin_level || undefined,
+    createdAt: db.created_at || undefined,
+    updatedAt: db.updated_at || undefined,
+    status: db.admin_level === 'suspended' ? 'suspended' : 'active',
   };
 };
 
