@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { StudentAttendanceSummary, AttendanceStatus } from '../../types';
 import { getStudentAttendanceSummary } from '../../lib/storageService';
+import { SkeletonCard } from '../common/SkeletonLoader';
+import { ScrollStagger } from '../common/ScrollReveal';
 import { 
   CheckCircle2, 
   AlertTriangle, 
@@ -82,9 +84,14 @@ export const AttendanceTracker: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="bg-white dark:bg-navy-900 rounded-3xl p-12 text-center text-slate-400 space-y-3 border border-slate-200/80 dark:border-navy-800">
-        <RefreshCw className="w-8 h-8 mx-auto animate-spin text-brand-cyan" />
-        <p className="text-xs font-semibold">Loading verified attendance records from Supabase...</p>
+      <div className="space-y-6 animate-fade-in">
+        <SkeletonCard rows={2} className="h-44" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <SkeletonCard rows={3} />
+          <SkeletonCard rows={3} />
+          <SkeletonCard rows={3} />
+          <SkeletonCard rows={3} />
+        </div>
       </div>
     );
   }
@@ -233,7 +240,7 @@ export const AttendanceTracker: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <ScrollStagger staggerMs={40} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {summary?.subjects.map((item) => {
               const isSafe = item.percentage >= 75;
               const isWarning = item.percentage >= 70 && item.percentage < 75;
@@ -294,7 +301,7 @@ export const AttendanceTracker: React.FC = () => {
                 </div>
               );
             })}
-          </div>
+          </ScrollStagger>
         )}
       </div>
 

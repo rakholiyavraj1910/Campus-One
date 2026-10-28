@@ -24,6 +24,7 @@ import {
   Check
 } from 'lucide-react';
 import { CampusOneLogo } from '../common/CampusOneLogo';
+import { ScrollReveal, ScrollStagger } from '../common/ScrollReveal';
 
 interface PortalSelectHubProps {
   onSelectPortal: (portal: 'student' | 'faculty' | 'admin', mode?: 'signin' | 'register') => void;
@@ -147,7 +148,7 @@ export const PortalSelectHub: React.FC<PortalSelectHubProps> = ({
 
         {/* 3 Dedicated Portal Cards */}
         <section aria-label="CampusOne Dedicated Portals">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+          <ScrollStagger staggerMs={60} className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
             
             {/* 1. Student Portal Card */}
             <div className="bg-white dark:bg-navy-900/90 rounded-3xl p-6 sm:p-8 border border-slate-200/90 dark:border-navy-700/80 shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col justify-between group hover:border-brand-cyan/50 relative overflow-hidden">
@@ -345,11 +346,12 @@ export const PortalSelectHub: React.FC<PortalSelectHubProps> = ({
               </div>
             </div>
 
-          </div>
+          </ScrollStagger>
         </section>
 
         {/* 4. Deep Informational Section: Purpose & Core Services */}
-        <section className="bg-white dark:bg-navy-900 rounded-3xl p-6 sm:p-10 border border-slate-200/80 dark:border-navy-800 shadow-sm space-y-8" aria-labelledby="features-heading">
+        <ScrollReveal direction="up" delay={40}>
+          <section className="bg-white dark:bg-navy-900 rounded-3xl p-6 sm:p-10 border border-slate-200/80 dark:border-navy-800 shadow-sm space-y-8" aria-labelledby="features-heading">
           <div className="max-w-3xl space-y-2">
             <span className="text-xs font-bold uppercase tracking-wider text-brand-cyan">
               Autonomous College Architecture
@@ -412,8 +414,10 @@ export const PortalSelectHub: React.FC<PortalSelectHubProps> = ({
             </div>
           </div>
         </section>
+      </ScrollReveal>
 
-        {/* 5. Academic Departments at GPA */}
+      {/* 5. Academic Departments at GPA */}
+      <ScrollReveal direction="up" delay={50}>
         <section className="space-y-4" aria-labelledby="departments-heading">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
@@ -450,8 +454,10 @@ export const PortalSelectHub: React.FC<PortalSelectHubProps> = ({
             ))}
           </div>
         </section>
+      </ScrollReveal>
 
-        {/* 6. Public Campus Resources Grid */}
+      {/* 6. Public Campus Resources Grid */}
+      <ScrollReveal direction="up" delay={50}>
         <section className="pt-6 border-t border-slate-200/80 dark:border-navy-800 space-y-4" aria-labelledby="public-resources-heading">
           <div className="flex items-center justify-between">
             <div>
@@ -502,6 +508,7 @@ export const PortalSelectHub: React.FC<PortalSelectHubProps> = ({
             </button>
           </div>
         </section>
+      </ScrollReveal>
 
         {/* 7. Institutional Transparency & Disclaimer */}
         <section className="p-4 rounded-2xl bg-slate-100 dark:bg-navy-900/60 border border-slate-200 dark:border-navy-800 text-xs text-slate-500 dark:text-slate-400 space-y-1">

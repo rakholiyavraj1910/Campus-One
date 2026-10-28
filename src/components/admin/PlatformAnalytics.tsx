@@ -22,6 +22,8 @@ import {
   SuperAdminMetrics 
 } from '../../lib/storageService';
 import { getBackendStatus, BackendStatus, subscribeToBackendHealth } from '../../lib/supabaseClient';
+import { ScrollReveal, ScrollStagger } from '../common/ScrollReveal';
+import { Skeleton } from '../common/SkeletonLoader';
 
 interface PlatformAnalyticsProps {
   onNavigateTab?: (tab: string, filter?: string) => void;
@@ -149,46 +151,48 @@ export const PlatformAnalytics: React.FC<PlatformAnalyticsProps> = ({
     <div className="space-y-6">
       
       {/* Top Quick Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-navy-900 rounded-3xl p-4 sm:p-5 border border-slate-200/80 dark:border-navy-800 shadow-sm">
-        <div>
-          <h3 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center space-x-2">
-            <span>Live Institutional Operations Overview</span>
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          </h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Live metrics calculated directly from verified Supabase database records
-          </p>
-        </div>
+      <ScrollReveal direction="down" distance={16}>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-navy-900 rounded-3xl p-4 sm:p-5 border border-slate-200/80 dark:border-navy-800 shadow-sm">
+          <div>
+            <h3 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center space-x-2">
+              <span>Live Institutional Operations Overview</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Live metrics calculated directly from verified Supabase database records
+            </p>
+          </div>
 
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
-          <button
-            type="button"
-            onClick={() => onNavigateTab('users')}
-            className="px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold flex items-center space-x-1.5 transition-colors cursor-pointer btn-tactile shadow-xs"
-            title="Open User & Role Management"
-          >
-            <Users className="w-3.5 h-3.5" />
-            <span>User & Role Management</span>
-          </button>
-          <button
-            type="button"
-            onClick={handleManualRefresh}
-            disabled={refreshing}
-            className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-navy-800 dark:hover:bg-navy-700 text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center space-x-1.5 transition-colors cursor-pointer disabled:opacity-50"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-            <span>Sync Live Metrics</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => onNavigateTab('database')}
-            className="px-3.5 py-2 rounded-xl bg-navy-900 hover:bg-navy-800 dark:bg-amber-500 dark:hover:bg-amber-600 text-white dark:text-navy-950 text-xs font-bold flex items-center space-x-1.5 transition-colors cursor-pointer btn-tactile shadow-xs"
-          >
-            <Database className="w-3.5 h-3.5" />
-            <span>Database Monitor</span>
-          </button>
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => onNavigateTab('users')}
+              className="px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold flex items-center space-x-1.5 transition-colors cursor-pointer btn-tactile shadow-xs"
+              title="Open User & Role Management"
+            >
+              <Users className="w-3.5 h-3.5" />
+              <span>User & Role Management</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleManualRefresh}
+              disabled={refreshing}
+              className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-navy-800 dark:hover:bg-navy-700 text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center space-x-1.5 transition-colors cursor-pointer disabled:opacity-50 btn-tactile"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+              <span>Sync Live Metrics</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onNavigateTab('database')}
+              className="px-3.5 py-2 rounded-xl bg-navy-900 hover:bg-navy-800 dark:bg-amber-500 dark:hover:bg-amber-600 text-white dark:text-navy-950 text-xs font-bold flex items-center space-x-1.5 transition-colors cursor-pointer btn-tactile shadow-xs"
+            >
+              <Database className="w-3.5 h-3.5" />
+              <span>Database Monitor</span>
+            </button>
+          </div>
         </div>
-      </div>
+      </ScrollReveal>
 
       {/* Warnings & Diagnostics */}
       {metrics && metrics.systemWarnings.length > 0 && (
@@ -204,14 +208,14 @@ export const PlatformAnalytics: React.FC<PlatformAnalyticsProps> = ({
       )}
 
       {/* 8 Primary Super Admin Metric Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+      <ScrollStagger staggerMs={25} className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         {statCards.map((c) => {
           const Icon = c.icon;
           return (
             <div
               key={c.id}
               onClick={() => onNavigateTab(c.targetTab)}
-              className={`bg-white dark:bg-navy-900 rounded-3xl p-4 sm:p-5 border transition-all duration-200 hover:shadow-md cursor-pointer group flex flex-col justify-between ${
+              className={`bg-white dark:bg-navy-900 rounded-3xl p-4 sm:p-5 border transition-all duration-200 hover:shadow-md cursor-pointer group flex flex-col justify-between interactive-card ${
                 c.highlight 
                   ? 'border-amber-400/80 dark:border-amber-500/80 ring-2 ring-amber-400/20' 
                   : 'border-slate-200/80 dark:border-navy-800 hover:border-slate-300 dark:hover:border-navy-700'
@@ -228,7 +232,7 @@ export const PlatformAnalytics: React.FC<PlatformAnalyticsProps> = ({
 
               <div>
                 <h4 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white group-hover:text-amber-500 dark:group-hover:text-amber-400 transition-colors">
-                  {loading ? '...' : c.value}
+                  {loading ? <Skeleton className="h-7 sm:h-8 w-20 rounded-md" /> : c.value}
                 </h4>
                 <div className="flex items-center justify-between mt-1">
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
@@ -240,10 +244,11 @@ export const PlatformAnalytics: React.FC<PlatformAnalyticsProps> = ({
             </div>
           );
         })}
-      </div>
+      </ScrollStagger>
 
       {/* Dual Panel: Recent Additions & Live Activity Trail */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <ScrollReveal delayMs={40}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Left: Recently Enrolled Students & Faculty */}
         <div className="bg-white dark:bg-navy-900 rounded-3xl p-5 sm:p-6 border border-slate-200/80 dark:border-navy-800 shadow-sm flex flex-col justify-between">
@@ -408,6 +413,7 @@ export const PlatformAnalytics: React.FC<PlatformAnalyticsProps> = ({
         </div>
 
       </div>
+    </ScrollReveal>
 
     </div>
   );

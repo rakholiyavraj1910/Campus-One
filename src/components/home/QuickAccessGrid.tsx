@@ -1,4 +1,5 @@
 import React from 'react';
+import { ScrollStagger } from '../common/ScrollReveal';
 import { 
   Clock, 
   CheckCircle2, 
@@ -119,7 +120,7 @@ export const QuickAccessGrid: React.FC<QuickAccessGridProps> = ({ onNavigate }) 
         </span>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+      <ScrollStagger staggerMs={35} className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         {quickCards.map((card) => {
           const Icon = card.icon;
           return (
@@ -157,7 +158,7 @@ export const QuickAccessGrid: React.FC<QuickAccessGridProps> = ({ onNavigate }) 
             </div>
           );
         })}
-      </div>
+      </ScrollStagger>
     </div>
   );
 };

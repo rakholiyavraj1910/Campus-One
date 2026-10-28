@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Notice } from '../../types';
 import { 
   X, 
@@ -22,6 +22,15 @@ interface NoticeDetailModalProps {
 export const NoticeDetailModal: React.FC<NoticeDetailModalProps> = ({ notice, onClose }) => {
   const { toggleBookmark, isBookmarked, addNotification } = useNotifications();
 
+  useEffect(() => {
+    if (!notice) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [notice, onClose]);
+
   if (!notice) return null;
 
   const bookmarked = isBookmarked(notice.id);
@@ -36,7 +45,10 @@ export const NoticeDetailModal: React.FC<NoticeDetailModalProps> = ({ notice, on
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+    <div 
+      onClick={onClose}
+      className="fixed inset-0 z-50 overflow-y-auto bg-navy-950/70 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in"
+    >
       <div 
         className="w-full max-w-2xl bg-white dark:bg-navy-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-navy-700 overflow-hidden flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}

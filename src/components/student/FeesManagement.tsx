@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { StudentFeeRecord } from '../../types';
 import { getStudentFeeRecords } from '../../lib/storageService';
+import { ScrollReveal, ScrollStagger } from '../common/ScrollReveal';
 
 const GTU_PORTAL_URL = 'https://student.gtu.ac.in/Login.aspx';
 
@@ -53,50 +54,66 @@ export const FeesManagement: React.FC = () => {
     };
   }, [user.id]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isGpaModalOpen) {
+        setIsGpaModalOpen(false);
+      }
+    };
+    if (isGpaModalOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isGpaModalOpen]);
+
   return (
     <div className="space-y-6 animate-fade-in pb-12">
       {/* Top Banner / Identity Header */}
-      <div className="bg-gradient-to-r from-navy-950 via-navy-900 to-[#0e2744] rounded-3xl p-6 sm:p-8 text-white border border-navy-700/80 shadow-2xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-teal-500/15 blur-3xl pointer-events-none" />
+      <ScrollReveal direction="down" distance={16}>
+        <div className="bg-gradient-to-r from-navy-950 via-navy-900 to-[#0e2744] rounded-3xl p-6 sm:p-8 text-white border border-navy-700/80 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-teal-500/15 blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 space-y-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-teal-500/20 text-teal-300 border border-teal-500/30 flex items-center space-x-1.5">
-              <Receipt className="w-3.5 h-3.5" />
-              <span>Fees &amp; Financial Governance Desk</span>
-            </span>
-            <span className="text-xs text-slate-300 font-medium">
-              Government Polytechnic Ahmedabad &bull; GTU Affiliated
-            </span>
-          </div>
-
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                Student Fees &amp; Official Payment Portals
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed mt-1">
-                Access official Gujarat Technological University (GTU) examination payment services and Government Polytechnic Ahmedabad (GPA) institutional fee guidelines without intermediary credential collection.
-              </p>
+          <div className="relative z-10 space-y-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-teal-500/20 text-teal-300 border border-teal-500/30 flex items-center space-x-1.5">
+                <Receipt className="w-3.5 h-3.5" />
+                <span>Fees &amp; Financial Governance Desk</span>
+              </span>
+              <span className="text-xs text-slate-300 font-medium">
+                Government Polytechnic Ahmedabad &bull; GTU Affiliated
+              </span>
             </div>
 
-            {/* Quick Student Identity Pill */}
-            <div className="bg-navy-900/90 backdrop-blur-md p-3.5 rounded-2xl border border-navy-700 text-xs shrink-0 space-y-1 shadow-inner min-w-[200px]">
-              <div className="flex items-center justify-between text-slate-400 text-[11px]">
-                <span>Student</span>
-                <span className="font-mono text-teal-300 font-bold">{user.rollNumber || 'Enrolled'}</span>
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                  Student Fees &amp; Official Payment Portals
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed mt-1">
+                  Access official Gujarat Technological University (GTU) examination payment services and Government Polytechnic Ahmedabad (GPA) institutional fee guidelines without intermediary credential collection.
+                </p>
               </div>
-              <p className="font-bold text-white truncate">{user.name}</p>
-              <p className="text-[11px] text-slate-400 truncate">
-                {user.department || 'Computer Engineering'} &bull; Sem {user.semester || 1}
-              </p>
+
+              {/* Quick Student Identity Pill */}
+              <div className="bg-navy-900/90 backdrop-blur-md p-3.5 rounded-2xl border border-navy-700 text-xs shrink-0 space-y-1 shadow-inner min-w-[200px]">
+                <div className="flex items-center justify-between text-slate-400 text-[11px]">
+                  <span>Student</span>
+                  <span className="font-mono text-teal-300 font-bold">{user.rollNumber || 'Enrolled'}</span>
+                </div>
+                <p className="font-bold text-white truncate">{user.name}</p>
+                <p className="text-[11px] text-slate-400 truncate">
+                  {user.department || 'Computer Engineering'} &bull; Sem {user.semester || 1}
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </ScrollReveal>
 
       {/* THE TWO SEPARATE ATTRACTIVE PAYMENT CARDS */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <ScrollStagger staggerMs={35} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* OPTION A: GTU FEES CARD */}
         <div className="bg-white dark:bg-navy-900 rounded-3xl p-6 sm:p-7 border border-slate-200/80 dark:border-navy-800 shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-6 relative overflow-hidden group">
@@ -266,17 +283,18 @@ export const FeesManagement: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsGpaModalOpen(true)}
-              className="w-full py-3 px-5 rounded-2xl bg-slate-900 hover:bg-slate-800 dark:bg-navy-800 dark:hover:bg-navy-700 text-white font-extrabold text-xs shadow-md border border-slate-700 transition-all flex items-center justify-center space-x-2 group-hover:scale-[1.01]"
+              className="w-full py-3 px-5 rounded-2xl bg-slate-900 hover:bg-slate-800 dark:bg-navy-800 dark:hover:bg-navy-700 text-white font-extrabold text-xs shadow-md border border-slate-700 transition-all flex items-center justify-center space-x-2 group-hover:scale-[1.01] cursor-pointer btn-tactile"
             >
               <span>Pay GPA Fees</span>
               <ArrowRight className="w-4 h-4 text-teal-400" />
             </button>
           </div>
         </div>
-      </div>
+      </ScrollStagger>
 
       {/* FEE INFORMATION & LEDGER HISTORY AREA */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <ScrollReveal delayMs={40}>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Real Ledger Records & Electronic Receipts (2 Cols) */}
         <div className="lg:col-span-2 bg-white dark:bg-navy-900 rounded-3xl p-6 border border-slate-200/80 dark:border-navy-800 shadow-sm space-y-4">
@@ -400,7 +418,8 @@ export const FeesManagement: React.FC = () => {
           </div>
         </div>
 
-      </div>
+        </div>
+      </ScrollReveal>
 
       {/* GPA FEES OFFICIAL GUIDANCE MODAL */}
       {isGpaModalOpen && (
@@ -408,8 +427,14 @@ export const FeesManagement: React.FC = () => {
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/75 backdrop-blur-xs animate-fade-in"
           role="dialog"
           aria-modal="true"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsGpaModalOpen(false);
+          }}
         >
-          <div className="w-full max-w-lg bg-white dark:bg-navy-900 rounded-3xl p-6 sm:p-7 border border-slate-200 dark:border-navy-800 shadow-2xl relative animate-scale-up space-y-4">
+          <div 
+            className="w-full max-w-lg bg-white dark:bg-navy-900 rounded-3xl p-6 sm:p-7 border border-slate-200 dark:border-navy-800 shadow-2xl relative animate-scale-up space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
             
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-navy-800 pb-3">

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { UserProfile, COLLEGE_DEPARTMENTS } from '../../types';
 import { getStudents } from '../../lib/storageService';
+import { ScrollReveal, ScrollStagger } from '../common/ScrollReveal';
+import { SkeletonCard } from '../common/SkeletonLoader';
 import { 
   Search, 
   Filter, 
@@ -82,111 +84,113 @@ export const StudentDirectory: React.FC<StudentDirectoryProps> = ({
   return (
     <div className="space-y-6">
       {/* Header & Controls Card */}
-      <div className="bg-white dark:bg-navy-900 rounded-3xl p-6 border border-slate-200/80 dark:border-navy-800 shadow-sm space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center space-x-2">
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-brand-cyan/20 text-brand-cyan border border-brand-cyan/30">
-                Institutional Directory
-              </span>
-              <span className="text-xs text-slate-400 font-medium">Real-Time Supabase Roster</span>
-            </div>
-            <h2 className="text-xl sm:text-2xl font-black text-navy-900 dark:text-white mt-1">
-              Enrolled Student Directory
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Access student profiles, verified PRN numbers, attendance records, and academic evaluations for Government Polytechnic Ahmedabad.
-            </p>
-          </div>
-
-          <div className="flex items-center space-x-3">
-            <button
-              onClick={loadStudentRecords}
-              disabled={loading}
-              className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-navy-800 hover:bg-slate-200 dark:hover:bg-navy-700 transition-colors disabled:opacity-50"
-              title="Refresh directory from Supabase"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-brand-cyan' : ''}`} />
-              <span>Refresh</span>
-            </button>
-            <div className="text-right">
-              <p className="text-xs font-bold text-navy-900 dark:text-white">
-                {loading ? 'Counting...' : `${students.length} Students`}
+      <ScrollReveal direction="down" distance={16}>
+        <div className="bg-white dark:bg-navy-900 rounded-3xl p-6 border border-slate-200/80 dark:border-navy-800 shadow-sm space-y-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-brand-cyan/20 text-brand-cyan border border-brand-cyan/30">
+                  Institutional Directory
+                </span>
+                <span className="text-xs text-slate-400 font-medium">Real-Time Supabase Roster</span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-black text-navy-900 dark:text-white mt-1">
+                Enrolled Student Directory
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Access student profiles, verified PRN numbers, attendance records, and academic evaluations for Government Polytechnic Ahmedabad.
               </p>
-              <p className="text-[10px] text-slate-400">Active Records</p>
+            </div>
+
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={loadStudentRecords}
+                disabled={loading}
+                className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-navy-800 hover:bg-slate-200 dark:hover:bg-navy-700 transition-colors disabled:opacity-50 cursor-pointer btn-tactile"
+                title="Refresh directory from Supabase"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-brand-cyan' : ''}`} />
+                <span>Refresh</span>
+              </button>
+              <div className="text-right">
+                <p className="text-xs font-bold text-navy-900 dark:text-white">
+                  {loading ? 'Counting...' : `${students.length} Students`}
+                </p>
+                <p className="text-[10px] text-slate-400">Active Records</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Filter Controls Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 pt-2">
+            {/* Search input */}
+            <div className="lg:col-span-4 relative">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by name, roll, PRN, or email..."
+                className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-navy-950/70 border border-slate-200/80 dark:border-navy-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-cyan/40 transition-all"
+              />
+              {search && (
+                <button 
+                  onClick={() => setSearch('')}
+                  className="absolute right-3 top-3 text-[11px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+
+            {/* Department Filter */}
+            <div className="lg:col-span-4">
+              <select
+                value={selectedDept}
+                onChange={(e) => setSelectedDept(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-2xl bg-slate-50 dark:bg-navy-950/70 border border-slate-200/80 dark:border-navy-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-cyan/40 transition-all truncate"
+              >
+                <option value="All">All 14 Departments</option>
+                {COLLEGE_DEPARTMENTS.map((dept) => (
+                  <option key={dept} value={dept}>
+                    {dept}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Semester Filter */}
+            <div className="lg:col-span-2">
+              <select
+                value={selectedSem}
+                onChange={(e) => setSelectedSem(e.target.value)}
+                className="w-full px-3 py-2.5 rounded-2xl bg-slate-50 dark:bg-navy-950/70 border border-slate-200/80 dark:border-navy-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-cyan/40 transition-all"
+              >
+                <option value="All">All Semesters</option>
+                {[1, 2, 3, 4, 5, 6].map((sem) => (
+                  <option key={sem} value={String(sem)}>
+                    Semester {sem}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Division Filter */}
+            <div className="lg:col-span-2">
+              <select
+                value={selectedDiv}
+                onChange={(e) => setSelectedDiv(e.target.value)}
+                className="w-full px-3 py-2.5 rounded-2xl bg-slate-50 dark:bg-navy-950/70 border border-slate-200/80 dark:border-navy-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-cyan/40 transition-all"
+              >
+                <option value="All">All Divisions</option>
+                <option value="A">Division A</option>
+                <option value="B">Division B</option>
+                <option value="C">Division C</option>
+              </select>
             </div>
           </div>
         </div>
-
-        {/* Filter Controls Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 pt-2">
-          {/* Search input */}
-          <div className="lg:col-span-4 relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by name, roll, PRN, or email..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-navy-950/70 border border-slate-200/80 dark:border-navy-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-cyan/40 transition-all"
-            />
-            {search && (
-              <button 
-                onClick={() => setSearch('')}
-                className="absolute right-3 top-3 text-[11px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-white"
-              >
-                Clear
-              </button>
-            )}
-          </div>
-
-          {/* Department Filter */}
-          <div className="lg:col-span-4">
-            <select
-              value={selectedDept}
-              onChange={(e) => setSelectedDept(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-2xl bg-slate-50 dark:bg-navy-950/70 border border-slate-200/80 dark:border-navy-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-cyan/40 transition-all truncate"
-            >
-              <option value="All">All 14 Departments</option>
-              {COLLEGE_DEPARTMENTS.map((dept) => (
-                <option key={dept} value={dept}>
-                  {dept}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Semester Filter */}
-          <div className="lg:col-span-2">
-            <select
-              value={selectedSem}
-              onChange={(e) => setSelectedSem(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-2xl bg-slate-50 dark:bg-navy-950/70 border border-slate-200/80 dark:border-navy-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-cyan/40 transition-all"
-            >
-              <option value="All">All Semesters</option>
-              {[1, 2, 3, 4, 5, 6].map((sem) => (
-                <option key={sem} value={String(sem)}>
-                  Semester {sem}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Division Filter */}
-          <div className="lg:col-span-2">
-            <select
-              value={selectedDiv}
-              onChange={(e) => setSelectedDiv(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-2xl bg-slate-50 dark:bg-navy-950/70 border border-slate-200/80 dark:border-navy-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-cyan/40 transition-all"
-            >
-              <option value="All">All Divisions</option>
-              <option value="A">Division A</option>
-              <option value="B">Division B</option>
-              <option value="C">Division C</option>
-            </select>
-          </div>
-        </div>
-      </div>
+      </ScrollReveal>
 
       {/* Error state */}
       {error && (
@@ -197,7 +201,7 @@ export const StudentDirectory: React.FC<StudentDirectoryProps> = ({
           </div>
           <button 
             onClick={loadStudentRecords} 
-            className="font-bold underline hover:text-rose-900 dark:hover:text-rose-100"
+            className="font-bold underline hover:text-rose-900 dark:hover:text-rose-100 cursor-pointer"
           >
             Retry
           </button>
@@ -207,21 +211,7 @@ export const StudentDirectory: React.FC<StudentDirectoryProps> = ({
       {/* Loading Skeleton */}
       {loading && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[...Array(6)].map((_, idx) => (
-            <div key={idx} className="bg-white dark:bg-navy-900 rounded-3xl p-5 border border-slate-200/80 dark:border-navy-800 animate-pulse space-y-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 rounded-2xl bg-slate-200 dark:bg-navy-800" />
-                <div className="space-y-2 flex-1">
-                  <div className="h-4 bg-slate-200 dark:bg-navy-800 rounded-md w-3/4" />
-                  <div className="h-3 bg-slate-200 dark:bg-navy-800 rounded-md w-1/2" />
-                </div>
-              </div>
-              <div className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-navy-800">
-                <div className="h-3 bg-slate-200 dark:bg-navy-800 rounded-md w-full" />
-                <div className="h-3 bg-slate-200 dark:bg-navy-800 rounded-md w-2/3" />
-              </div>
-            </div>
-          ))}
+          <SkeletonCard count={6} />
         </div>
       )}
 
@@ -251,7 +241,7 @@ export const StudentDirectory: React.FC<StudentDirectoryProps> = ({
                 setSelectedSem('All');
                 setSelectedDiv('All');
               }}
-              className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-navy-800 hover:bg-slate-200 dark:hover:bg-navy-700 text-xs font-bold text-slate-700 dark:text-slate-200 transition-colors"
+              className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-navy-800 hover:bg-slate-200 dark:hover:bg-navy-700 text-xs font-bold text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
             >
               Reset All Filters
             </button>
@@ -262,12 +252,12 @@ export const StudentDirectory: React.FC<StudentDirectoryProps> = ({
       {/* Directory Grid of Real Students */}
       {!loading && !error && students.length > 0 && (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <ScrollStagger staggerMs={25} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {paginatedStudents.map((st) => (
               <div
                 key={st.id}
                 onClick={() => onSelectStudent(st)}
-                className="bg-white dark:bg-navy-900 rounded-3xl p-5 border border-slate-200/80 dark:border-navy-800 hover:border-brand-cyan/60 hover:shadow-lg dark:hover:border-brand-cyan/60 transition-all duration-200 cursor-pointer flex flex-col justify-between group"
+                className="bg-white dark:bg-navy-900 rounded-3xl p-5 border border-slate-200/80 dark:border-navy-800 hover:border-brand-cyan/60 hover:shadow-lg dark:hover:border-brand-cyan/60 transition-all duration-200 cursor-pointer flex flex-col justify-between group interactive-card"
               >
                 <div>
                   {/* Top: Avatar & Basic Info */}
@@ -329,7 +319,7 @@ export const StudentDirectory: React.FC<StudentDirectoryProps> = ({
                 </div>
               </div>
             ))}
-          </div>
+          </ScrollStagger>
 
           {/* Pagination Controls */}
           {totalPages > 1 && (

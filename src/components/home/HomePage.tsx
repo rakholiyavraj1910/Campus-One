@@ -5,6 +5,7 @@ import { TodayScheduleWidget } from './TodayScheduleWidget';
 import { UrgentNoticesTicker } from './UrgentNoticesTicker';
 import { UpcomingEventsCarousel } from './UpcomingEventsCarousel';
 import { CampusNewsSection } from './CampusNewsSection';
+import { ScrollReveal } from '../common/ScrollReveal';
 import { Notice, EventItem } from '../../types';
 
 interface HomePageProps {
@@ -28,31 +29,39 @@ export const HomePage: React.FC<HomePageProps> = ({
       <HeroBanner onNavigate={onNavigate} />
 
       {/* 2. 8 Quick-Access Portal Cards */}
-      <QuickAccessGrid onNavigate={onNavigate} />
+      <ScrollReveal direction="up" delay={40}>
+        <QuickAccessGrid onNavigate={onNavigate} />
+      </ScrollReveal>
 
       {/* 3. Dynamic 2-column split: Today's Classes & Important Circulars */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-        <div className="lg:col-span-6">
-          <TodayScheduleWidget onNavigate={onNavigate} />
+      <ScrollReveal direction="up" delay={60}>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+          <div className="lg:col-span-6">
+            <TodayScheduleWidget onNavigate={onNavigate} />
+          </div>
+          <div className="lg:col-span-6">
+            <UrgentNoticesTicker
+              notices={notices}
+              onNavigate={onNavigate}
+              onOpenNotice={onOpenNotice}
+            />
+          </div>
         </div>
-        <div className="lg:col-span-6">
-          <UrgentNoticesTicker
-            notices={notices}
-            onNavigate={onNavigate}
-            onOpenNotice={onOpenNotice}
-          />
-        </div>
-      </div>
+      </ScrollReveal>
 
       {/* 4. Upcoming Events & Competitions Carousel */}
-      <UpcomingEventsCarousel
-        events={events}
-        onNavigate={onNavigate}
-        onRefreshEvents={onRefreshEvents}
-      />
+      <ScrollReveal direction="up" delay={60}>
+        <UpcomingEventsCarousel
+          events={events}
+          onNavigate={onNavigate}
+          onRefreshEvents={onRefreshEvents}
+        />
+      </ScrollReveal>
 
       {/* 5. Campus News & Achievements */}
-      <CampusNewsSection />
+      <ScrollReveal direction="up" delay={60}>
+        <CampusNewsSection />
+      </ScrollReveal>
     </div>
   );
 };

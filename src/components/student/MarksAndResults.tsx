@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
 import { getStudentMarks } from '../../lib/storageService';
+import { SkeletonCard, SkeletonTable } from '../common/SkeletonLoader';
+import { ScrollReveal } from '../common/ScrollReveal';
 import { 
   Award, 
   TrendingUp, 
@@ -74,9 +76,9 @@ export const MarksAndResults: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="bg-white dark:bg-navy-900 rounded-3xl p-12 text-center text-slate-400 space-y-3 border border-slate-200/80 dark:border-navy-800">
-        <RefreshCw className="w-8 h-8 mx-auto animate-spin text-brand-cyan" />
-        <p className="text-xs font-semibold">Loading verified academic assessment records from Supabase...</p>
+      <div className="space-y-6 animate-fade-in">
+        <SkeletonCard rows={2} className="h-44" />
+        <SkeletonTable rows={4} cols={5} />
       </div>
     );
   }

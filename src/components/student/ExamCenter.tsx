@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { 
   Award, 
@@ -12,6 +12,7 @@ import {
   QrCode,
   ShieldCheck
 } from 'lucide-react';
+import { ScrollReveal } from '../common/ScrollReveal';
 
 export const ExamCenter: React.FC = () => {
   const { user } = useAuth();
@@ -29,104 +30,129 @@ export const ExamCenter: React.FC = () => {
     window.print();
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showHallTicketModal) {
+        setShowHallTicketModal(false);
+      }
+    };
+    if (showHallTicketModal) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showHallTicketModal]);
+
   return (
     <div className="space-y-6">
       {/* Top Banner */}
-      <div className="bg-gradient-to-r from-navy-900 via-navy-800 to-[#102a43] rounded-3xl p-6 sm:p-8 text-white border border-navy-700 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="space-y-2">
-          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-cyan/20 text-brand-cyan border border-brand-cyan/30">
-            Office of Controller of Examinations
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
-            Semester Examination Hub
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-300">
-            Even Semester 2026 Examination Schedule & Digital Hall Ticket
-          </p>
-        </div>
-
-        <button
-          onClick={() => setShowHallTicketModal(true)}
-          className="px-5 py-3 rounded-2xl bg-brand-cyan hover:bg-brand-cyan-hover text-navy-950 font-extrabold text-xs shadow-lg shadow-brand-cyan/20 transition-all flex items-center space-x-2 shrink-0 hover:scale-102"
-        >
-          <Award className="w-4 h-4" />
-          <span>View / Print Hall Ticket</span>
-        </button>
-      </div>
-
-      {/* Exam Timetable List */}
-      <div className="bg-white dark:bg-navy-900 rounded-3xl p-6 border border-slate-200/80 dark:border-navy-800 shadow-sm space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
-              Mid-Semester Theory Examination Timetable
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Exam timings: 10:00 AM sharp. Students must report 20 minutes prior.
+      <ScrollReveal direction="down" distance={16}>
+        <div className="bg-gradient-to-r from-navy-900 via-navy-800 to-[#102a43] rounded-3xl p-6 sm:p-8 text-white border border-navy-700 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-cyan/20 text-brand-cyan border border-brand-cyan/30">
+              Office of Controller of Examinations
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
+              Semester Examination Hub
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-300">
+              Even Semester 2026 Examination Schedule &amp; Digital Hall Ticket
             </p>
           </div>
-          <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-500 border border-emerald-500/30">
-            Seat Allotted
-          </span>
-        </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-slate-200 dark:border-navy-800 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
-                <th className="py-3 px-3">Date & Time</th>
-                <th className="py-3 px-3">Subject Code & Title</th>
-                <th className="py-3 px-3">Examination Venue</th>
-                <th className="py-3 px-3">Seat Number</th>
-                <th className="py-3 px-3 text-center">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-navy-800 font-medium text-slate-700 dark:text-slate-300">
-              {examSchedules.map((ex) => (
-                <tr key={ex.code} className="hover:bg-slate-50 dark:hover:bg-navy-800/50 transition-colors">
-                  <td className="py-3.5 px-3">
-                    <p className="font-bold text-slate-900 dark:text-white">{ex.date}</p>
-                    <p className="text-[11px] text-slate-400">{ex.time}</p>
-                  </td>
-                  <td className="py-3.5 px-3">
-                    <span className="font-mono font-bold text-brand-cyan">{ex.code}</span>
-                    <p className="font-semibold text-slate-800 dark:text-slate-200">{ex.name}</p>
-                  </td>
-                  <td className="py-3.5 px-3 font-semibold text-slate-800 dark:text-slate-200">
-                    {ex.room}
-                  </td>
-                  <td className="py-3.5 px-3 font-mono font-bold text-brand-cyan">
-                    {ex.seat}
-                  </td>
-                  <td className="py-3.5 px-3 text-center">
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-500 border border-blue-500/20">
-                      Confirmed
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <button
+            onClick={() => setShowHallTicketModal(true)}
+            className="px-5 py-3 rounded-2xl bg-brand-cyan hover:bg-brand-cyan-hover text-navy-950 font-extrabold text-xs shadow-lg shadow-brand-cyan/20 transition-all flex items-center space-x-2 shrink-0 cursor-pointer btn-tactile"
+          >
+            <Award className="w-4 h-4" />
+            <span>View / Print Hall Ticket</span>
+          </button>
         </div>
-      </div>
+      </ScrollReveal>
+
+      {/* Exam Timetable List */}
+      <ScrollReveal delayMs={30}>
+        <div className="bg-white dark:bg-navy-900 rounded-3xl p-6 border border-slate-200/80 dark:border-navy-800 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
+                Mid-Semester Theory Examination Timetable
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Exam timings: 10:00 AM sharp. Students must report 20 minutes prior.
+              </p>
+            </div>
+            <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-500 border border-emerald-500/30">
+              Seat Allotted
+            </span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-slate-200 dark:border-navy-800 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+                  <th className="py-3 px-3">Date &amp; Time</th>
+                  <th className="py-3 px-3">Subject Code &amp; Title</th>
+                  <th className="py-3 px-3">Examination Venue</th>
+                  <th className="py-3 px-3">Seat Number</th>
+                  <th className="py-3 px-3 text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-navy-800 font-medium text-slate-700 dark:text-slate-300">
+                {examSchedules.map((ex) => (
+                  <tr key={ex.code} className="hover:bg-slate-50 dark:hover:bg-navy-800/50 transition-colors">
+                    <td className="py-3.5 px-3">
+                      <p className="font-bold text-slate-900 dark:text-white">{ex.date}</p>
+                      <p className="text-[11px] text-slate-400">{ex.time}</p>
+                    </td>
+                    <td className="py-3.5 px-3">
+                      <span className="font-mono font-bold text-brand-cyan">{ex.code}</span>
+                      <p className="font-semibold text-slate-800 dark:text-slate-200">{ex.name}</p>
+                    </td>
+                    <td className="py-3.5 px-3 font-semibold text-slate-800 dark:text-slate-200">
+                      {ex.room}
+                    </td>
+                    <td className="py-3.5 px-3 font-mono font-bold text-brand-cyan">
+                      {ex.seat}
+                    </td>
+                    <td className="py-3.5 px-3 text-center">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                        Confirmed
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </ScrollReveal>
 
       {/* Guidelines Card */}
-      <div className="bg-slate-50 dark:bg-navy-900/60 rounded-3xl p-6 border border-slate-200/80 dark:border-navy-800 space-y-3">
-        <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center space-x-2">
-          <AlertCircle className="w-4 h-4 text-amber-500" />
-          <span>Mandatory Examination Instructions for Candidates</span>
-        </h3>
-        <ul className="text-xs text-slate-600 dark:text-slate-400 space-y-1.5 list-disc list-inside">
-          <li>Physical printed Hall Ticket and institutional Smart RFID ID Card must be placed on candidate desk at all times.</li>
-          <li>Electronic devices including smartwatches, programmable calculators, and Bluetooth wearables are strictly prohibited.</li>
-          <li>Entry into the examination hall closes precisely 15 minutes after the exam commences.</li>
-          <li>In case of medical emergencies or clash in timetable, report to Controller of Examinations Suite 102 immediately.</li>
-        </ul>
-      </div>
+      <ScrollReveal delayMs={50}>
+        <div className="bg-slate-50 dark:bg-navy-900/60 rounded-3xl p-6 border border-slate-200/80 dark:border-navy-800 space-y-3">
+          <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center space-x-2">
+            <AlertCircle className="w-4 h-4 text-amber-500" />
+            <span>Mandatory Examination Instructions for Candidates</span>
+          </h3>
+          <ul className="text-xs text-slate-600 dark:text-slate-400 space-y-1.5 list-disc list-inside">
+            <li>Physical printed Hall Ticket and institutional Smart RFID ID Card must be placed on candidate desk at all times.</li>
+            <li>Electronic devices including smartwatches, programmable calculators, and Bluetooth wearables are strictly prohibited.</li>
+            <li>Entry into the examination hall closes precisely 15 minutes after the exam commences.</li>
+            <li>In case of medical emergencies or clash in timetable, report to Controller of Examinations Suite 102 immediately.</li>
+          </ul>
+        </div>
+      </ScrollReveal>
 
       {/* Hall Ticket Preview Modal */}
       {showHallTicketModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-navy-950/75 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+        <div 
+          className="fixed inset-0 z-50 overflow-y-auto bg-navy-950/75 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowHallTicketModal(false);
+          }}
+        >
           <div 
             className="w-full max-w-2xl bg-white text-navy-950 rounded-3xl shadow-2xl p-6 sm:p-8 space-y-6 border border-slate-300 relative print:m-0 print:p-0 print:border-none"
             onClick={(e) => e.stopPropagation()}
@@ -137,14 +163,14 @@ export const ExamCenter: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <button
                   onClick={handlePrint}
-                  className="px-3 py-1.5 rounded-lg bg-navy-900 text-white text-xs font-bold flex items-center space-x-1"
+                  className="px-3 py-1.5 rounded-lg bg-navy-900 hover:bg-navy-800 text-white text-xs font-bold flex items-center space-x-1 cursor-pointer btn-tactile"
                 >
                   <Printer className="w-3.5 h-3.5" />
                   <span>Print Document</span>
                 </button>
                 <button
                   onClick={() => setShowHallTicketModal(false)}
-                  className="p-1 rounded-lg text-slate-400 hover:text-navy-950 text-sm font-bold"
+                  className="p-1 rounded-lg text-slate-400 hover:text-navy-950 text-sm font-bold cursor-pointer"
                 >
                   ✕
                 </button>

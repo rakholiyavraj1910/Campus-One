@@ -39,6 +39,7 @@ import {
 } from '../../lib/storageService';
 import { UserAvatar } from '../common/UserAvatar';
 import { useAuth } from '../../context/AuthContext';
+import { ScrollStagger } from '../common/ScrollReveal';
 
 interface ManageUsersProps {
   onNavigateTab?: (tab: string, filter?: string) => void;
@@ -134,6 +135,18 @@ export const ManageUsers: React.FC<ManageUsersProps> = () => {
     }, 300);
     return () => clearTimeout(timer);
   }, [search]);
+
+  // Keyboard accessibility for modals
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (editingUser) setEditingUser(null);
+        if (roleModalUser) setRoleModalUser(null);
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [editingUser, roleModalUser]);
 
   // Filtered and paginated lists
   const filteredUsers = useMemo(() => {
@@ -523,7 +536,7 @@ export const ManageUsers: React.FC<ManageUsersProps> = () => {
       )}
 
       {/* Stats Summary Counter Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+      <ScrollStagger staggerMs={25} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
         <div className="p-4 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200/80 dark:border-navy-800 shadow-sm">
           <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
             <span className="text-xs font-bold uppercase tracking-wider">Total Accounts</span>
@@ -577,7 +590,7 @@ export const ManageUsers: React.FC<ManageUsersProps> = () => {
           <p className="text-2xl font-black text-navy-950 dark:text-white mt-2">{stats.suspended}</p>
           <span className="text-[11px] text-rose-600 dark:text-rose-400 mt-1 block">Restricted logins</span>
         </div>
-      </div>
+      </ScrollStagger>
 
       {/* Control & Filter Toolbar */}
       <div className="bg-white dark:bg-navy-900 p-4 sm:p-5 rounded-3xl border border-slate-200/80 dark:border-navy-800 shadow-sm space-y-4">
@@ -694,12 +707,24 @@ export const ManageUsers: React.FC<ManageUsersProps> = () => {
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-navy-800 text-xs">
               {isLoading ? (
-                <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-400">
-                    <RefreshCw className="w-6 h-6 animate-spin mx-auto text-teal-500 mb-2" />
-                    <span>Loading institutional user registry...</span>
-                  </td>
-                </tr>
+                Array.from({ length: 6 }).map((_, idx) => (
+                  <tr key={idx} className="animate-pulse">
+                    <td className="py-4 px-4 sm:px-6">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 rounded-2xl bg-slate-200 dark:bg-navy-800 skeleton-shimmer shrink-0" />
+                        <div className="space-y-1.5 flex-1 min-w-0">
+                          <div className="h-3.5 w-32 bg-slate-200 dark:bg-navy-800 rounded skeleton-shimmer" />
+                          <div className="h-3 w-44 bg-slate-200 dark:bg-navy-800 rounded skeleton-shimmer" />
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-4 px-4"><div className="h-5 w-20 rounded-full bg-slate-200 dark:bg-navy-800 skeleton-shimmer" /></td>
+                    <td className="py-4 px-4"><div className="h-3.5 w-28 rounded bg-slate-200 dark:bg-navy-800 skeleton-shimmer" /></td>
+                    <td className="py-4 px-4"><div className="h-3.5 w-24 rounded bg-slate-200 dark:bg-navy-800 skeleton-shimmer" /></td>
+                    <td className="py-4 px-4"><div className="h-5 w-16 rounded-full bg-slate-200 dark:bg-navy-800 skeleton-shimmer" /></td>
+                    <td className="py-4 px-4 text-right"><div className="h-7 w-20 ml-auto rounded-xl bg-slate-200 dark:bg-navy-800 skeleton-shimmer" /></td>
+                  </tr>
+                ))
               ) : paginatedUsers.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-slate-400">

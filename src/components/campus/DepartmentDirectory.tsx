@@ -3,6 +3,7 @@ import { INITIAL_DEPARTMENTS } from '../../lib/mockData';
 import { getDepartments } from '../../lib/storageService';
 import { DepartmentInfo } from '../../types';
 import { Building2, Users, GraduationCap, Laptop, Sparkles, Mail, CheckCircle2 } from 'lucide-react';
+import { ScrollReveal, ScrollStagger } from '../common/ScrollReveal';
 
 export const DepartmentDirectory: React.FC = () => {
   const [departments, setDepartments] = useState<DepartmentInfo[]>(INITIAL_DEPARTMENTS);
@@ -22,33 +23,35 @@ export const DepartmentDirectory: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Top Banner */}
-      <div className="bg-white dark:bg-navy-900 rounded-3xl p-6 border border-slate-200/80 dark:border-navy-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-brand-cyan/20 text-brand-cyan border border-brand-cyan/30">
-            Academic Schools & Faculties
-          </span>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-navy-900 dark:text-white mt-1">
-            College Departments & Centers of Excellence
-          </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Explore undergraduate, postgraduate, and doctoral engineering disciplines
-          </p>
-        </div>
+      <ScrollReveal direction="down" distance={16}>
+        <div className="bg-white dark:bg-navy-900 rounded-3xl p-6 border border-slate-200/80 dark:border-navy-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-brand-cyan/20 text-brand-cyan border border-brand-cyan/30">
+              Academic Schools &amp; Faculties
+            </span>
+            <h2 className="text-xl sm:text-2xl font-extrabold text-navy-900 dark:text-white mt-1">
+              College Departments &amp; Centers of Excellence
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Explore undergraduate, postgraduate, and doctoral engineering disciplines
+            </p>
+          </div>
 
-        <div className="flex items-center space-x-2">
-          <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
-            {departments.length} Engineering Departments
-          </span>
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+              {departments.length} Engineering Departments
+            </span>
+          </div>
         </div>
-      </div>
+      </ScrollReveal>
 
       {/* Department Selector Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <ScrollStagger staggerMs={20} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {departments.map((dept) => (
           <button
             key={dept.id}
             onClick={() => setSelectedDept(dept)}
-            className={`p-4 rounded-2xl text-left border transition-all ${
+            className={`p-4 rounded-2xl text-left border transition-all cursor-pointer interactive-card ${
               selectedDept.id === dept.id
                 ? 'bg-navy-900 text-white dark:bg-brand-cyan dark:text-navy-950 border-transparent shadow-md'
                 : 'bg-white dark:bg-navy-900 text-slate-700 dark:text-slate-300 border-slate-200/80 dark:border-navy-800 hover:border-brand-cyan/50'
@@ -59,10 +62,11 @@ export const DepartmentDirectory: React.FC = () => {
             <p className="text-[11px] opacity-75 mt-0.5">Est. {dept.establishedYear}</p>
           </button>
         ))}
-      </div>
+      </ScrollStagger>
 
       {/* Selected Department Showcase Card */}
-      <div className="bg-white dark:bg-navy-900 rounded-3xl border border-slate-200/80 dark:border-navy-800 overflow-hidden shadow-sm">
+      <ScrollReveal delayMs={30}>
+        <div className="bg-white dark:bg-navy-900 rounded-3xl border border-slate-200/80 dark:border-navy-800 overflow-hidden shadow-sm">
         {/* Banner with image */}
         <div className="relative h-56 bg-navy-950">
           <img
@@ -167,6 +171,7 @@ export const DepartmentDirectory: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </ScrollReveal>
+  </div>
+);
 };
