@@ -501,33 +501,44 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = ''
 AS $$
+DECLARE
+  v_is_authorized_admin BOOLEAN := false;
 BEGIN
-  -- Strict Privilege Separation: Non-admins cannot alter authentication identity, account role, or admin privileges
-  IF auth.uid() IS NOT NULL AND NOT public.is_admin() THEN
-    -- Immutable core authentication identity fields
-    IF (OLD.id IS DISTINCT FROM NEW.id) THEN
-      RAISE EXCEPTION 'Unauthorized: Account ID cannot be altered.';
-    END IF;
-    IF (OLD.email IS DISTINCT FROM NEW.email) THEN
-      RAISE EXCEPTION 'Unauthorized: Account email cannot be altered directly via profile update.';
-    END IF;
+  -- Determine whether the executing context possesses administrative clearance:
+  -- A. An active authenticated administrator session in PostgREST (auth.uid() matches an admin profile)
+  IF public.is_admin() THEN
+    v_is_authorized_admin := true;
+  -- B. A direct database administrator session executed by the database owner ('postgres')
+  --    without an external web user identity (auth.uid() IS NULL).
+  ELSIF pg_catalog.current_user = 'postgres' AND auth.uid() IS NULL THEN
+    v_is_authorized_admin := true;
+  END IF;
 
-    -- Privilege-defining security fields: only institutional administrators can change roles or admin levels
+  -- Enforce strict role and privilege protection against unauthorized users (students, faculty, anon API callers)
+  IF NOT v_is_authorized_admin THEN
     IF (OLD.role IS DISTINCT FROM NEW.role) THEN
       RAISE EXCEPTION 'Unauthorized: Only institutional administrators can change account roles.';
     END IF;
     IF (OLD.admin_level IS DISTINCT FROM NEW.admin_level) THEN
       RAISE EXCEPTION 'Unauthorized: Only institutional administrators can modify admin levels or approval status.';
     END IF;
+  END IF;
 
-    -- Database-level validation for academic metrics
-    IF NEW.cgpa IS NOT NULL AND (NEW.cgpa < 0.00 OR NEW.cgpa > 10.00) THEN
-      RAISE EXCEPTION 'Invalid CGPA: CGPA must be between 0.00 and 10.00.';
-    END IF;
+  -- Immutable core authentication identity fields
+  IF (OLD.id IS DISTINCT FROM NEW.id) THEN
+    RAISE EXCEPTION 'Unauthorized: Account ID cannot be altered.';
+  END IF;
+  IF (OLD.email IS DISTINCT FROM NEW.email) THEN
+    RAISE EXCEPTION 'Unauthorized: Account email cannot be altered directly via profile update.';
+  END IF;
 
-    IF NEW.semester IS NOT NULL AND (NEW.semester < 1 OR NEW.semester > 12) THEN
-      RAISE EXCEPTION 'Invalid Semester: Semester must be between 1 and 12.';
-    END IF;
+  -- Database-level validation for academic metrics
+  IF NEW.cgpa IS NOT NULL AND (NEW.cgpa < 0.00 OR NEW.cgpa > 10.00) THEN
+    RAISE EXCEPTION 'Invalid CGPA: CGPA must be between 0.00 and 10.00.';
+  END IF;
+
+  IF NEW.semester IS NOT NULL AND (NEW.semester < 1 OR NEW.semester > 12) THEN
+    RAISE EXCEPTION 'Invalid Semester: Semester must be between 1 and 12.';
   END IF;
 
   NEW.updated_at := pg_catalog.now();
