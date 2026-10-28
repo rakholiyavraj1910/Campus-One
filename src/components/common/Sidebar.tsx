@@ -101,13 +101,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: Users,
       badge: role === 'faculty' ? 'Authorized' : null,
       subItems: [
-        { id: 'profile', label: 'Faculty Profile' },
-        { id: 'directory', label: 'Student Directory' },
-        { id: 'attendance', label: 'Record Attendance' },
-        { id: 'marks', label: 'Marks Evaluation' },
-        { id: 'assignments', label: 'Assignments' },
+        { id: 'dashboard', label: 'Faculty Dashboard' },
+        { id: 'students', label: 'Student Directory' },
+        { id: 'notices', label: 'Notice Management' },
         { id: 'materials', label: 'Study Materials' },
-        { id: 'announcements', label: 'Course Circulars' }
+        { id: 'events', label: 'Department Events' },
+        { id: 'academic', label: 'Academic Resources' },
+        { id: 'profile', label: 'Faculty Profile' }
       ]
     },
     {

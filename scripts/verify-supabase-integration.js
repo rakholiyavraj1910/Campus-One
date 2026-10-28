@@ -816,6 +816,75 @@ assert(appContent.includes("currentPage === 'admin-auth'"), 'App.tsx inspects de
 assert(appContent.includes('<AdminLayout'), 'App.tsx renders standalone AdminLayout without student UI');
 assert(appContent.includes("role !== 'admin'"), 'App.tsx guards admin route against unauthorized roles');
 
+console.log('\n21. Checking Fully Functional Faculty Portal & Supabase Integration:');
+const facultyMigrationPath = path.join(rootDir, 'supabase', 'migrations', '20261028080000_faculty_portal_permissions_and_storage.sql');
+assert(fs.existsSync(facultyMigrationPath), '20261028080000_faculty_portal_permissions_and_storage.sql exists');
+const facultyMigrationContent = fs.readFileSync(facultyMigrationPath, 'utf8');
+assert(facultyMigrationContent.includes('created_by UUID REFERENCES public.profiles(id)'), 'Migration extends notices with created_by UUID foreign key');
+assert(facultyMigrationContent.includes('target_audience TEXT'), 'Migration extends notices with target_audience');
+assert(facultyMigrationContent.includes('storage_path TEXT'), 'Migration adds storage_path to study_materials');
+assert(facultyMigrationContent.includes('department TEXT'), 'Migration adds department to events');
+assert(facultyMigrationContent.includes('notices_update_policy'), 'Migration defines faculty ownership update policy for notices');
+assert(facultyMigrationContent.includes('materials_update_policy'), 'Migration defines faculty ownership update policy for study materials');
+assert(facultyMigrationContent.includes('events_update_policy'), 'Migration defines faculty ownership update policy for events');
+assert(facultyMigrationContent.includes('study_materials_faculty_insert'), 'Migration configures storage INSERT policy for study_materials bucket');
+assert(facultyMigrationContent.includes('notices_faculty_insert'), 'Migration configures storage INSERT policy for notice_attachments bucket');
+
+assert(storageContent.includes('export const uploadStudyMaterialFile'), 'storageService exports uploadStudyMaterialFile');
+assert(storageContent.includes('export const uploadNoticeAttachment'), 'storageService exports uploadNoticeAttachment');
+assert(storageContent.includes('export const getFacultyDashboardMetrics'), 'storageService exports getFacultyDashboardMetrics');
+assert(storageContent.includes('export const updateStudyMaterial'), 'storageService exports updateStudyMaterial');
+
+const facultyDashboardPath = path.join(rootDir, 'src', 'components', 'faculty', 'FacultyDashboard.tsx');
+assert(fs.existsSync(facultyDashboardPath), 'FacultyDashboard.tsx exists');
+const facultyDashboardContent = fs.readFileSync(facultyDashboardPath, 'utf8');
+assert(facultyDashboardContent.includes('getFacultyDashboardMetrics'), 'FacultyDashboard queries real metrics from Supabase');
+assert(facultyDashboardContent.includes('Dept Students'), 'FacultyDashboard displays departmental students metric');
+assert(facultyDashboardContent.includes('Circulars &amp; Notices'), 'FacultyDashboard displays notices metric');
+assert(facultyDashboardContent.includes('Study Materials'), 'FacultyDashboard displays study materials metric');
+
+const facultyNoticesPath = path.join(rootDir, 'src', 'components', 'faculty', 'FacultyNotices.tsx');
+assert(fs.existsSync(facultyNoticesPath), 'FacultyNotices.tsx exists');
+const facultyNoticesContent = fs.readFileSync(facultyNoticesPath, 'utf8');
+assert(facultyNoticesContent.includes('uploadNoticeAttachment'), 'FacultyNotices integrates Supabase Storage attachment upload');
+assert(facultyNoticesContent.includes('isDraft'), 'FacultyNotices supports draft vs published state');
+assert(facultyNoticesContent.includes('addNotice'), 'FacultyNotices calls addNotice with authenticated faculty UID');
+
+const facultyMaterialsPath = path.join(rootDir, 'src', 'components', 'faculty', 'FacultyStudyMaterials.tsx');
+assert(fs.existsSync(facultyMaterialsPath), 'FacultyStudyMaterials.tsx exists');
+const facultyMaterialsContent = fs.readFileSync(facultyMaterialsPath, 'utf8');
+assert(facultyMaterialsContent.includes('uploadStudyMaterialFile'), 'FacultyStudyMaterials uploads authentic files to Supabase Storage');
+assert(facultyMaterialsContent.includes('addStudyMaterial'), 'FacultyStudyMaterials persists metadata to database');
+assert(facultyMaterialsContent.includes('updateStudyMaterial'), 'FacultyStudyMaterials supports updating file title & metadata');
+
+const facultyEventsPath = path.join(rootDir, 'src', 'components', 'faculty', 'FacultyEvents.tsx');
+assert(fs.existsSync(facultyEventsPath), 'FacultyEvents.tsx exists');
+const facultyEventsContent = fs.readFileSync(facultyEventsPath, 'utf8');
+assert(facultyEventsContent.includes('addEvent'), 'FacultyEvents persists new workshops and seminars to Supabase');
+assert(facultyEventsContent.includes('updateEvent'), 'FacultyEvents supports editing scheduled events');
+assert(facultyEventsContent.includes('deleteEvent'), 'FacultyEvents supports cancelling/deleting events');
+
+const facultyAcademicPath = path.join(rootDir, 'src', 'components', 'faculty', 'FacultyAcademicResources.tsx');
+assert(fs.existsSync(facultyAcademicPath), 'FacultyAcademicResources.tsx exists');
+const facultyAcademicContent = fs.readFileSync(facultyAcademicPath, 'utf8');
+assert(facultyAcademicContent.includes('saveAttendanceSession'), 'FacultyAcademicResources records class attendance to Supabase');
+assert(facultyAcademicContent.includes('saveStudentMarks'), 'FacultyAcademicResources commits internal marks to Supabase');
+
+assert(facultyPortalContent.includes('FacultyDashboard'), 'FacultyPortal integrates FacultyDashboard');
+assert(facultyPortalContent.includes('FacultyNotices'), 'FacultyPortal integrates FacultyNotices');
+assert(facultyPortalContent.includes('FacultyStudyMaterials'), 'FacultyPortal integrates FacultyStudyMaterials');
+assert(facultyPortalContent.includes('FacultyEvents'), 'FacultyPortal integrates FacultyEvents');
+assert(facultyPortalContent.includes('FacultyAcademicResources'), 'FacultyPortal integrates FacultyAcademicResources');
+
+const facultySidebarContent = fs.readFileSync(sidebarPath, 'utf8');
+assert(facultySidebarContent.includes("{ id: 'dashboard', label: 'Faculty Dashboard' }"), 'Sidebar includes Faculty Dashboard item');
+assert(facultySidebarContent.includes("{ id: 'students', label: 'Student Directory' }"), 'Sidebar includes Student Directory item');
+assert(facultySidebarContent.includes("{ id: 'notices', label: 'Notice Management' }"), 'Sidebar includes Notice Management item');
+assert(facultySidebarContent.includes("{ id: 'materials', label: 'Study Materials' }"), 'Sidebar includes Study Materials item');
+assert(facultySidebarContent.includes("{ id: 'events', label: 'Department Events' }"), 'Sidebar includes Department Events item');
+assert(facultySidebarContent.includes("{ id: 'academic', label: 'Academic Resources' }"), 'Sidebar includes Academic Resources item');
+assert(facultySidebarContent.includes("{ id: 'profile', label: 'Faculty Profile' }"), 'Sidebar includes Faculty Profile item');
+
 console.log('\n====================================================');
 console.log(`Results: ${passedTests}/${totalTests} tests passed (${Math.round((passedTests / totalTests) * 100)}%)`);
 console.log('====================================================\n');

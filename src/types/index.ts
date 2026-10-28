@@ -64,6 +64,10 @@ export interface Notice {
   attachmentSize?: string;
   attachmentUrl?: string;
   views: number;
+  createdBy?: string;
+  status?: 'Published' | 'Draft';
+  targetAudience?: 'All' | 'Students' | 'Faculty' | 'Department';
+  createdAt?: string;
 }
 
 export interface EventItem {
@@ -84,6 +88,10 @@ export interface EventItem {
   tags: string[];
   contactPerson: string;
   contactEmail: string;
+  createdBy?: string;
+  department?: string;
+  targetAudience?: string;
+  createdAt?: string;
 }
 
 export interface FacultyMember {
@@ -195,6 +203,10 @@ export interface StudyMaterial {
   fileFormat: string;
   downloadsCount: number;
   fileUrl: string;
+  createdBy?: string;
+  description?: string;
+  storagePath?: string;
+  createdAt?: string;
 }
 
 export interface LibraryBook {

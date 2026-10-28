@@ -263,7 +263,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onNavigate, cur
                           <span>My Faculty Profile</span>
                         </button>
                         <button
-                          onClick={() => onNavigate('faculty-portal', 'directory')}
+                          onClick={() => onNavigate('faculty-portal', 'dashboard')}
                           className="w-full text-left px-4 py-2 text-xs text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-navy-800 flex items-center space-x-2 font-semibold"
                         >
                           <GraduationCap className="w-4 h-4" />

@@ -111,6 +111,10 @@ const mapNoticeFromDb = (row: any): Notice => ({
   attachmentSize: row.attachment_size || undefined,
   attachmentUrl: row.attachment_url || undefined,
   views: row.views || 0,
+  createdBy: row.created_by || undefined,
+  status: row.status || 'Published',
+  targetAudience: row.target_audience || 'All',
+  createdAt: row.created_at || undefined,
 });
 
 const mapEventFromDb = (row: any): EventItem => ({
@@ -131,6 +135,10 @@ const mapEventFromDb = (row: any): EventItem => ({
   tags: row.tags || [],
   contactPerson: row.contact_person || 'Event Coordinator',
   contactEmail: row.contact_email || 'events@campusone.edu',
+  createdBy: row.created_by || undefined,
+  department: row.department || 'All',
+  targetAudience: row.target_audience || 'All',
+  createdAt: row.created_at || undefined,
 });
 
 const mapFacultyFromDb = (row: any): FacultyMember => ({
@@ -165,6 +173,10 @@ const mapStudyMaterialFromDb = (row: any): StudyMaterial => ({
   fileFormat: row.file_format || 'PDF',
   downloadsCount: row.downloads_count || 0,
   fileUrl: row.file_url || '#',
+  createdBy: row.created_by || undefined,
+  description: row.description || undefined,
+  storagePath: row.storage_path || undefined,
+  createdAt: row.created_at || undefined,
 });
 
 const mapFeedbackFromDb = (row: any): FeedbackItem => ({
@@ -288,6 +300,9 @@ export const addNotice = async (notice: Omit<Notice, 'id' | 'views'>): Promise<N
       attachment_size: notice.attachmentSize || null,
       attachment_url: notice.attachmentUrl || null,
       views: 0,
+      created_by: notice.createdBy || null,
+      status: notice.status || 'Published',
+      target_audience: notice.targetAudience || 'All',
     };
 
     const { data, error } = await supabase
@@ -332,6 +347,9 @@ export const updateNotice = async (updatedItem: Notice): Promise<Notice> => {
       content: updatedItem.content,
       attachment_name: updatedItem.attachmentName || null,
       attachment_size: updatedItem.attachmentSize || null,
+      attachment_url: updatedItem.attachmentUrl || null,
+      status: updatedItem.status || 'Published',
+      target_audience: updatedItem.targetAudience || 'All',
     };
 
     const { error } = await supabase
@@ -445,6 +463,9 @@ export const addEvent = async (event: Omit<EventItem, 'id' | 'registeredCount'>)
       tags: event.tags,
       contact_person: event.contactPerson,
       contact_email: event.contactEmail,
+      created_by: event.createdBy || null,
+      department: event.department || 'All',
+      target_audience: event.targetAudience || 'All',
     };
 
     const { data, error } = await supabase
@@ -492,7 +513,12 @@ export const updateEvent = async (event: EventItem): Promise<EventItem> => {
       banner_image: event.bannerImage,
       max_capacity: event.maxCapacity,
       registration_open: event.registrationOpen,
+      registration_deadline: event.registrationDeadline,
       tags: event.tags,
+      contact_person: event.contactPerson,
+      contact_email: event.contactEmail,
+      department: event.department || 'All',
+      target_audience: event.targetAudience || 'All',
     };
 
     const { error } = await supabase
@@ -772,6 +798,9 @@ export const addStudyMaterial = async (mat: Omit<StudyMaterial, 'id' | 'download
       file_format: mat.fileFormat,
       downloads_count: 0,
       file_url: mat.fileUrl,
+      created_by: mat.createdBy || null,
+      description: mat.description || null,
+      storage_path: mat.storagePath || null,
     };
 
     const { data, error } = await supabase
@@ -819,6 +848,201 @@ export const deleteStudyMaterial = async (id: string): Promise<boolean> => {
   const list = loadFromStorage<StudyMaterial[]>(STORAGE_KEYS.MATERIALS, INITIAL_STUDY_MATERIALS);
   saveToStorage(STORAGE_KEYS.MATERIALS, list.filter(m => m.id !== id));
   return true;
+};
+
+export const updateStudyMaterial = async (updatedMat: StudyMaterial): Promise<StudyMaterial> => {
+  assertCanMutateContent();
+
+  if (isSupabaseConfigured && supabase) {
+    const payload: any = {
+      title: updatedMat.title,
+      subject_code: updatedMat.subjectCode,
+      subject_name: updatedMat.subjectName,
+      department: updatedMat.department,
+      semester: updatedMat.semester,
+      type: updatedMat.type,
+      year: updatedMat.year,
+      file_size: updatedMat.fileSize,
+      file_format: updatedMat.fileFormat,
+      file_url: updatedMat.fileUrl,
+      description: updatedMat.description || null,
+      storage_path: updatedMat.storagePath || null,
+    };
+
+    const { data, error } = await supabase
+      .from('study_materials')
+      .update(payload)
+      .eq('id', updatedMat.id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Supabase updateStudyMaterial error:', error);
+      throw new Error(`Failed to update study material: ${error.message}`);
+    }
+
+    return mapStudyMaterialFromDb(data);
+  }
+
+  const list = loadFromStorage<StudyMaterial[]>(STORAGE_KEYS.MATERIALS, INITIAL_STUDY_MATERIALS);
+  const updated = list.map(m => m.id === updatedMat.id ? updatedMat : m);
+  saveToStorage(STORAGE_KEYS.MATERIALS, updated);
+  return updatedMat;
+};
+
+export const uploadStudyMaterialFile = async (
+  userId: string,
+  file: File,
+  subjectCode: string
+): Promise<{ publicUrl: string; filePath: string; fileSize: string; fileFormat: string }> => {
+  if (!userId || userId === 'guest') {
+    throw new Error('Authentication required: Sign in with an authorized faculty account.');
+  }
+
+  const bytes = file.size;
+  let fileSize = `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  if (bytes < 1024 * 1024) {
+    fileSize = `${Math.round(bytes / 1024)} KB`;
+  }
+
+  const ext = file.name.split('.').pop()?.toUpperCase() || 'PDF';
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const filePath = `${userId}/${subjectCode}-${Date.now()}-${sanitizedName}`;
+
+      const { data, error } = await supabase.storage
+        .from('study_materials')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (error) {
+        throw new Error(`Supabase storage upload failed: ${error.message}`);
+      }
+
+      const { data: urlData } = supabase.storage
+        .from('study_materials')
+        .getPublicUrl(data.path);
+
+      return {
+        publicUrl: urlData.publicUrl,
+        filePath: data.path,
+        fileSize,
+        fileFormat: ext
+      };
+    } catch (e: any) {
+      console.error('Study material upload exception:', e);
+      throw e;
+    }
+  }
+
+  return {
+    publicUrl: URL.createObjectURL(file),
+    filePath: `demo/${file.name}`,
+    fileSize,
+    fileFormat: ext
+  };
+};
+
+export const uploadNoticeAttachment = async (
+  userId: string,
+  file: File
+): Promise<{ publicUrl: string; filePath: string; fileName: string; fileSize: string }> => {
+  if (!userId || userId === 'guest') {
+    throw new Error('Authentication required: Sign in with an authorized account.');
+  }
+
+  const bytes = file.size;
+  let fileSize = `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  if (bytes < 1024 * 1024) {
+    fileSize = `${Math.round(bytes / 1024)} KB`;
+  }
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const filePath = `${userId}/${Date.now()}-${sanitizedName}`;
+
+      const { data, error } = await supabase.storage
+        .from('notice_attachments')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (error) {
+        throw new Error(`Supabase storage upload failed: ${error.message}`);
+      }
+
+      const { data: urlData } = supabase.storage
+        .from('notice_attachments')
+        .getPublicUrl(data.path);
+
+      return {
+        publicUrl: urlData.publicUrl,
+        filePath: data.path,
+        fileName: file.name,
+        fileSize
+      };
+    } catch (e: any) {
+      console.error('Notice attachment upload exception:', e);
+      throw e;
+    }
+  }
+
+  return {
+    publicUrl: URL.createObjectURL(file),
+    filePath: `demo/${file.name}`,
+    fileName: file.name,
+    fileSize
+  };
+};
+
+export interface FacultyDashboardMetrics {
+  totalStudentsInDept: number;
+  publishedNoticesCount: number;
+  uploadedMaterialsCount: number;
+  upcomingEventsCount: number;
+  recentMaterials: StudyMaterial[];
+  recentNotices: Notice[];
+  recentEvents: EventItem[];
+}
+
+export const getFacultyDashboardMetrics = async (
+  facultyEmail: string,
+  facultyDept: string
+): Promise<FacultyDashboardMetrics> => {
+  const [students, notices, materials, events] = await Promise.all([
+    getStudents({ department: facultyDept }).catch(() => []),
+    getNotices().catch(() => []),
+    getStudyMaterials().catch(() => []),
+    getEvents().catch(() => [])
+  ]);
+
+  const filteredNotices = notices.filter(n => 
+    n.department === 'All' || n.department === facultyDept || (facultyEmail && n.author && n.author.toLowerCase().includes(facultyEmail.toLowerCase()))
+  );
+
+  const filteredMaterials = materials.filter(m => 
+    m.department === 'All' || m.department === facultyDept
+  );
+
+  const filteredEvents = events.filter(e => 
+    !e.department || e.department === 'All' || e.department === facultyDept
+  );
+
+  return {
+    totalStudentsInDept: students.length,
+    publishedNoticesCount: filteredNotices.length,
+    uploadedMaterialsCount: filteredMaterials.length,
+    upcomingEventsCount: filteredEvents.length,
+    recentMaterials: filteredMaterials.slice(0, 5),
+    recentNotices: filteredNotices.slice(0, 5),
+    recentEvents: filteredEvents.slice(0, 5)
+  };
 };
 
 export const incrementMaterialDownload = (id: string): void => {
