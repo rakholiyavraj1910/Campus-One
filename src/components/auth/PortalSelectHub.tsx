@@ -57,6 +57,7 @@ export const PortalSelectHub: React.FC<PortalSelectHubProps> = ({
             variant="full"
             size="md"
             withBadge
+            responsive
             subtext="FOR GOVERNMENT POLYTECHNIC AHMEDABAD"
           />
 

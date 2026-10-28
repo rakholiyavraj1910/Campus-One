@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { UserAvatar } from '../common/UserAvatar';
 import { ImageCropModal } from '../common/ImageCropModal';
+import { CampusOneIcon } from '../common/CampusOneLogo';
 import { 
   uploadProfileAvatar, 
   removeProfileAvatar, 
@@ -637,9 +638,9 @@ export const AdminProfilePage: React.FC<AdminProfilePageProps> = ({
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0c1322] via-[#101e36] to-[#0c1a2d] border-2 border-teal-500/40 p-6 text-white shadow-2xl space-y-5">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center space-x-2">
-                <ShieldCheck className="w-5 h-5 text-teal-400" />
+                <CampusOneIcon size={20} withBadge />
                 <span className="text-[11px] font-black uppercase tracking-wider text-teal-300">
-                  Institutional Admin Badge
+                  CampusOne Admin Clearance
                 </span>
               </div>
               <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-500/30">

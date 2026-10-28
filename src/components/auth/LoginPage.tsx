@@ -278,21 +278,23 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-md py-4 px-6 relative z-10">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <CampusOneIcon size={40} withBadge />
-            <div>
-              <div className="flex items-center space-x-2">
-                <span className="font-extrabold text-xl tracking-tight text-white font-sans">
-                  Campus<span className="text-brand-cyan">One</span>
-                </span>
-                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border transition-colors ${
-                  isStudent 
-                    ? 'bg-brand-cyan/20 text-brand-cyan border-brand-cyan/30' 
-                    : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-                }`}>
-                  {isStudent ? 'Student Academic Portal' : 'Faculty Instructional Suite'}
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-400 font-medium">
+            <CampusOneLogo
+              variant="full"
+              size="md"
+              theme="dark"
+              withBadge
+              responsive
+              subtext="FOR GOVERNMENT POLYTECHNIC AHMEDABAD"
+            />
+            <div className="hidden lg:block border-l border-slate-800 pl-3">
+              <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border transition-colors ${
+                isStudent 
+                  ? 'bg-brand-cyan/20 text-brand-cyan border-brand-cyan/30' 
+                  : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+              }`}>
+                {isStudent ? 'Student Academic Portal' : 'Faculty Instructional Suite'}
+              </span>
+              <p className="text-[10px] text-slate-400 font-medium">
                 Government Polytechnic Ahmedabad • Directorate of Technical Education
               </p>
             </div>

@@ -17,7 +17,7 @@ import {
   Shield,
   Activity
 } from 'lucide-react';
-import { CampusOneLogo } from '../common/CampusOneLogo';
+import { CampusOneLogo, CampusOneIcon } from '../common/CampusOneLogo';
 import { UserAvatar } from '../common/UserAvatar';
 import { UserProfile } from '../../types';
 import { BackendStatus } from '../../lib/supabaseClient';
@@ -165,20 +165,18 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       >
         {/* Header / Brand */}
         <div className="p-5 border-b border-slate-800/80 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-teal-500/20 to-teal-500/5 border border-teal-500/30 text-teal-400">
-              <Shield className="w-5 h-5" />
-            </div>
-            <div>
+          <div className="flex items-center space-x-3 min-w-0">
+            <CampusOneIcon size={34} withBadge />
+            <div className="min-w-0">
               <div className="flex items-center space-x-1.5">
-                <span className="text-sm font-black tracking-tight text-white uppercase">
+                <span className="text-sm font-black tracking-tight text-white uppercase truncate">
                   CampusOne
                 </span>
-                <span className="px-1.5 py-0.5 rounded text-[9px] font-black tracking-wider uppercase bg-teal-500/20 text-teal-300 border border-teal-500/40">
+                <span className="px-1.5 py-0.5 rounded text-[9px] font-black tracking-wider uppercase bg-teal-500/20 text-teal-300 border border-teal-500/40 shrink-0">
                   ADMIN
                 </span>
               </div>
-              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider truncate">
                 Control Center
               </p>
             </div>
