@@ -15,7 +15,8 @@ import {
   Download,
   Building2,
   ExternalLink,
-  ChevronRight
+  ChevronRight,
+  Sliders
 } from 'lucide-react';
 import { UserProfile, Notice, StudyMaterial, EventItem } from '../../types';
 import { getFacultyDashboardMetrics, FacultyDashboardMetrics } from '../../lib/storageService';
@@ -120,6 +121,14 @@ export const FacultyDashboard: React.FC<FacultyDashboardProps> = ({
               <span>My Profile</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
+            <a
+              href="/settings"
+              className="p-2.5 rounded-2xl bg-navy-900/90 hover:bg-navy-800 border border-navy-700 text-slate-300 hover:text-purple-300 transition-all flex items-center space-x-1 text-xs font-bold btn-tactile"
+              title="Settings & Personalization"
+            >
+              <Sliders className="w-3.5 h-3.5 text-purple-400" />
+              <span className="hidden sm:inline">Settings</span>
+            </a>
           </div>
         </div>
       </ScrollReveal>

@@ -13,7 +13,8 @@ import {
   Sparkles,
   Database,
   Users,
-  Activity
+  Activity,
+  Sliders
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { UserProfile } from '../../types';
@@ -273,6 +274,14 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
                 <Settings className="w-4 h-4 text-slate-400" />
                 <span>System Settings</span>
               </button>
+
+              <a
+                href="/settings"
+                className="w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800/80 transition-colors text-left"
+              >
+                <Sliders className="w-4 h-4 text-purple-400" />
+                <span>Personalization &amp; Theme</span>
+              </a>
 
               <button
                 onClick={() => {

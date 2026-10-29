@@ -9,7 +9,8 @@ import {
   Clock, 
   TrendingUp, 
   Award,
-  ArrowRight
+  ArrowRight,
+  Sliders
 } from 'lucide-react';
 
 interface HeroBannerProps {
@@ -108,7 +109,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ onNavigate }) => {
 
             {role === 'faculty' && (
               <button
-                onClick={() => onNavigate('faculty', 'attendance')}
+                onClick={() => onNavigate('faculty-portal', 'academic')}
                 className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-brand-cyan hover:bg-brand-cyan-hover text-navy-950 text-xs sm:text-sm font-bold shadow-md shadow-brand-cyan/20 transition-all hover:scale-102"
               >
                 <span>Take Attendance</span>
@@ -131,6 +132,15 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ onNavigate }) => {
               className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-navy-800 hover:bg-navy-700 text-slate-200 border border-navy-700 text-xs sm:text-sm font-medium transition-colors"
             >
               <span>Recent Circulars</span>
+            </button>
+
+            <button
+              onClick={() => onNavigate('settings')}
+              className="flex items-center space-x-2 px-3.5 py-2.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-200 border border-purple-500/30 backdrop-blur-xs text-xs sm:text-sm font-semibold transition-all shadow-xs"
+              title="Open Personalization & Settings"
+            >
+              <Sliders className="w-4 h-4 text-purple-400" />
+              <span className="hidden sm:inline">Settings</span>
             </button>
           </div>
         </div>
