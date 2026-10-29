@@ -72,7 +72,7 @@ export const CampusOneIcon: React.FC<CampusOneIconProps> = ({
   if (withBadge) {
     return (
       <div 
-        className={`shrink-0 inline-flex items-center justify-center rounded-2xl bg-navy-900 border border-slate-700/60 shadow-md ${className}`}
+        className={`shrink-0 inline-flex items-center justify-center rounded-2xl bg-[#0B192C] border border-slate-700/60 shadow-md ${className}`}
         style={{ width: size, height: size }}
         aria-label="CampusOne Logo Badge"
       >
@@ -83,6 +83,7 @@ export const CampusOneIcon: React.FC<CampusOneIconProps> = ({
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
           aria-hidden="true"
+          shapeRendering="geometricPrecision"
         >
           {/* Collegiate Gateway Arch 'C' in crisp white */}
           <path
@@ -107,6 +108,7 @@ export const CampusOneIcon: React.FC<CampusOneIconProps> = ({
       xmlns="http://www.w3.org/2000/svg"
       className={`shrink-0 ${className}`}
       aria-label="CampusOne Collegiate Emblem"
+      shapeRendering="geometricPrecision"
     >
       {/* Collegiate Gateway Arch 'C' */}
       <path
