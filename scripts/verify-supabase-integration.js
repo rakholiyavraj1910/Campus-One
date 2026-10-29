@@ -1070,6 +1070,35 @@ const sec25AppContent = fs.readFileSync(sec25AppPath, 'utf8');
 assert(sec25AppContent.includes('PreferencesProvider'), 'App.tsx integrates PreferencesProvider');
 assert(sec25AppContent.includes('SettingsPersonalizationPage'), 'App.tsx integrates SettingsPersonalizationPage');
 
+// 26. Checking Faculty Portal Separation & Strict Role-Based Portal Isolation
+console.log('\n26. Checking Faculty Portal Separation & Strict Role-Based Isolation:');
+const sec26SidebarPath = path.join(rootDir, 'src', 'components', 'common', 'Sidebar.tsx');
+const sec26SidebarContent = fs.readFileSync(sec26SidebarPath, 'utf8');
+assert(sec26SidebarContent.includes("role === 'faculty' && item.id === 'student'"), 'Sidebar.tsx filters out student navigation for faculty role');
+assert(sec26SidebarContent.includes("role === 'student' && item.id === 'faculty-portal'"), 'Sidebar.tsx filters out faculty navigation for student role');
+
+const sec26FacultyPortalPath = path.join(rootDir, 'src', 'components', 'faculty', 'FacultyPortal.tsx');
+const sec26FacultyPortalContent = fs.readFileSync(sec26FacultyPortalPath, 'utf8');
+assert(sec26FacultyPortalContent.includes('Faculty Portal Access Restricted'), 'FacultyPortal.tsx includes security gate for unauthorized roles');
+assert(sec26FacultyPortalContent.includes('!isFaculty && !isAdmin'), 'FacultyPortal.tsx blocks unauthorized users from faculty suite');
+assert(!sec26FacultyPortalContent.includes('Student Portal Switcher'), 'FacultyPortal.tsx strictly excludes student portal switcher');
+
+const sec26StudentDashboardPath = path.join(rootDir, 'src', 'components', 'student', 'StudentDashboard.tsx');
+const sec26StudentDashboardContent = fs.readFileSync(sec26StudentDashboardPath, 'utf8');
+assert(sec26StudentDashboardContent.includes("role === 'faculty'"), 'StudentDashboard.tsx displays faculty role preview notification');
+assert(sec26StudentDashboardContent.includes("role === 'admin'"), 'StudentDashboard.tsx displays admin role preview notification');
+
+const sec26StudentProfileViewPath = path.join(rootDir, 'src', 'components', 'faculty', 'StudentProfileView.tsx');
+assert(fs.existsSync(sec26StudentProfileViewPath), 'StudentProfileView.tsx exists for dedicated faculty student inspection');
+const sec26StudentProfileViewContent = fs.readFileSync(sec26StudentProfileViewPath, 'utf8');
+assert(sec26StudentProfileViewContent.includes('getStudentAttendanceSummary'), 'StudentProfileView.tsx queries real attendance summary');
+assert(sec26StudentProfileViewContent.includes('getStudentMarks'), 'StudentProfileView.tsx queries real marks summary');
+
+const sec26PendingApprovalPath = path.join(rootDir, 'src', 'components', 'auth', 'AccountPendingApproval.tsx');
+assert(fs.existsSync(sec26PendingApprovalPath), 'AccountPendingApproval.tsx exists');
+const sec26PendingApprovalContent = fs.readFileSync(sec26PendingApprovalPath, 'utf8');
+assert(sec26PendingApprovalContent.includes('Faculty Access Request Pending'), 'AccountPendingApproval.tsx gates pending faculty applicants');
+
 console.log('\n====================================================');
 console.log(`Results: ${passedTests}/${totalTests} tests passed (${Math.round((passedTests / totalTests) * 100)}%)`);
 console.log('====================================================\n');

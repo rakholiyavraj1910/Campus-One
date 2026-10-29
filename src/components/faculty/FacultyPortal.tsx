@@ -101,6 +101,19 @@ export const FacultyPortal: React.FC<FacultyPortalProps> = ({
         <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
           You are currently viewing CampusOne under the <strong className="text-slate-800 dark:text-white capitalize">{role}</strong> role. The faculty operations suite requires an authorized faculty or institutional administrator account.
         </p>
+        <div className="pt-2 flex items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                window.location.href = role === 'student' ? '/student' : '/';
+              }
+            }}
+            className="px-4 py-2 rounded-xl bg-navy-900 text-white dark:bg-brand-cyan dark:text-navy-950 text-xs font-bold transition-all shadow-sm cursor-pointer"
+          >
+            Return to {role === 'student' ? 'Student Portal' : 'Main Hub'}
+          </button>
+        </div>
       </div>
     );
   }

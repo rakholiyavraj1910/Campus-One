@@ -21,7 +21,8 @@ import {
   Sparkles,
   Receipt,
   ShieldCheck,
-  Sliders
+  Sliders,
+  GraduationCap
 } from 'lucide-react';
 
 interface StudentDashboardProps {
@@ -84,6 +85,26 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
             className="px-3 py-1.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs hover:bg-amber-400 transition-colors whitespace-nowrap"
           >
             Go to Admin Control Center &rarr;
+          </button>
+        </div>
+      )}
+
+      {/* Faculty View Notice */}
+      {role === 'faculty' && (
+        <div className="bg-teal-500/10 border border-teal-500/30 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-teal-900 dark:text-teal-200">
+          <div className="flex items-center space-x-3">
+            <GraduationCap className="w-5 h-5 text-teal-500 shrink-0" />
+            <p className="text-xs font-medium">
+              <strong className="font-bold">Faculty Account Detected:</strong> You are currently viewing the Student Academic Dashboard. To record attendance, manage study materials, or review rosters, open your dedicated faculty workspace.
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              window.location.href = '/faculty-portal';
+            }}
+            className="px-3.5 py-1.5 rounded-xl bg-teal-500 text-navy-950 font-bold text-xs hover:bg-teal-400 transition-colors whitespace-nowrap cursor-pointer btn-tactile"
+          >
+            Go to Faculty Portal &rarr;
           </button>
         </div>
       )}
