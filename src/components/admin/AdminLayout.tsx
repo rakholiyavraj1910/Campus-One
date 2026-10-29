@@ -12,6 +12,7 @@ import { ManageNoticesAndEvents } from './ManageNoticesAndEvents';
 import { ManageAcademicRecords } from './ManageAcademicRecords';
 import { AuditLogsViewer } from './AuditLogsViewer';
 import { SystemSettings } from './SystemSettings';
+import { SystemMonitoring } from './SystemMonitoring';
 import { AdminProfilePage } from '../profile/AdminProfilePage';
 import { useAuth } from '../../context/AuthContext';
 import { Notice, EventItem } from '../../types';
@@ -42,10 +43,11 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     if (!sec) return 'overview';
     const valid: AdminSectionId[] = [
       'overview', 'users', 'students', 'faculty', 'roles', 
-      'approvals', 'departments', 'notices-events', 'academic', 'audit', 'settings', 'profile'
+      'approvals', 'departments', 'notices-events', 'academic', 'audit', 'monitoring', 'settings', 'profile'
     ];
     if (sec === 'notices' || sec === 'events') return 'notices-events';
     if (sec === 'faculty-requests') return 'approvals';
+    if (sec === 'monitoring' || sec === 'database-health' || sec === 'system-monitoring' || sec === 'health') return 'monitoring';
     if (sec === 'system' || sec === 'database') return 'settings';
     if (sec === 'profile' || sec === 'my-profile' || sec === 'identity' || sec === 'account') return 'profile';
     if (sec === 'users' || sec === 'user-management' || sec === 'user-roles' || sec === 'manage-users') return 'users';
@@ -185,6 +187,10 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
 
           {currentSection === 'audit' && (
             <AuditLogsViewer />
+          )}
+
+          {currentSection === 'monitoring' && (
+            <SystemMonitoring />
           )}
 
           {currentSection === 'settings' && (

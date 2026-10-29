@@ -14,7 +14,8 @@ import {
   HelpCircle, 
   X,
   ChevronRight,
-  Lock
+  Lock,
+  Palette
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -143,17 +144,30 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: 'Contact & Help',
       icon: HelpCircle,
       badge: null
+    },
+    {
+      id: 'settings',
+      label: 'Settings & Personalization',
+      icon: Palette,
+      badge: null
     }
   ];
 
-  const renderNavList = () => (
-    <div className="flex-1 overflow-y-auto px-4 py-5 space-y-6">
-      <div>
-        <p className="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">
-          Main Navigation
-        </p>
-        <nav className="space-y-1">
-          {navItems.map((item) => {
+  const renderNavList = () => {
+    const visibleNavItems = navItems.filter((item) => {
+      if (role === 'faculty' && item.id === 'student') return false;
+      if (role === 'student' && item.id === 'faculty-portal') return false;
+      return true;
+    });
+
+    return (
+      <div className="flex-1 overflow-y-auto px-4 py-5 space-y-6">
+        <div>
+          <p className="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">
+            Main Navigation
+          </p>
+          <nav className="space-y-1">
+            {visibleNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentPage === item.id;
 
@@ -291,6 +305,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       )}
     </div>
   );
+  };
 
   return (
     <>

@@ -1036,6 +1036,40 @@ assert(sec24GlobalSearchContent.includes('momentum-scroll'), 'GlobalSearchModal.
 const sec24NoticeModalContent = fs.readFileSync(path.join(rootDir, 'src', 'components', 'notices', 'NoticeDetailModal.tsx'), 'utf8');
 assert(sec24NoticeModalContent.includes('momentum-scroll'), 'NoticeDetailModal.tsx enables smooth internal scrolling on notice detail modal');
 
+// 25. Checking Database & System Monitoring Dashboard & Security Architecture
+console.log('\n25. Checking Database & System Monitoring Dashboard & Security Architecture:');
+const sec25MonitoringServicePath = path.join(rootDir, 'src', 'lib', 'monitoringService.ts');
+assert(fs.existsSync(sec25MonitoringServicePath), 'src/lib/monitoringService.ts exists');
+const sec25MonitoringServiceContent = fs.readFileSync(sec25MonitoringServicePath, 'utf8');
+assert(sec25MonitoringServiceContent.includes('export const fetchSystemMonitoringData'), 'monitoringService exports fetchSystemMonitoringData');
+assert(sec25MonitoringServiceContent.includes('export const pingDatabaseLatency'), 'monitoringService exports pingDatabaseLatency');
+assert(sec25MonitoringServiceContent.includes('export const formatBytes'), 'monitoringService exports formatBytes');
+assert(sec25MonitoringServiceContent.includes("count: 'exact', head: true"), 'monitoringService utilizes PostgREST exact head count queries');
+
+const sec25MonitoringComponentPath = path.join(rootDir, 'src', 'components', 'admin', 'SystemMonitoring.tsx');
+assert(fs.existsSync(sec25MonitoringComponentPath), 'src/components/admin/SystemMonitoring.tsx exists');
+const sec25MonitoringComponentContent = fs.readFileSync(sec25MonitoringComponentPath, 'utf8');
+assert(sec25MonitoringComponentContent.includes('fetchSystemMonitoringData'), 'SystemMonitoring.tsx fetches real system telemetry');
+assert(sec25MonitoringComponentContent.includes('Not available on current plan'), 'SystemMonitoring.tsx honestly reports unavailable CPU/RAM metrics');
+assert(sec25MonitoringComponentContent.includes('Auto-Refresh'), 'SystemMonitoring.tsx provides automatic refresh controls');
+assert(sec25MonitoringComponentContent.includes('Refresh Now'), 'SystemMonitoring.tsx provides manual refresh action');
+
+const sec25AdminSidebarContent = fs.readFileSync(adminSidebarPath, 'utf8');
+assert(sec25AdminSidebarContent.includes("'monitoring'"), 'AdminSidebar includes monitoring in AdminSectionId');
+assert(sec25AdminSidebarContent.includes("id: 'monitoring'"), 'AdminSidebar includes System Monitoring in navItems');
+
+const sec25AdminHeaderContent = fs.readFileSync(sec23AdminHeaderPath, 'utf8');
+assert(sec25AdminHeaderContent.includes('monitoring: {'), 'AdminHeader declares monitoring section metadata');
+
+const sec25AdminLayoutContent = fs.readFileSync(adminLayoutPath, 'utf8');
+assert(sec25AdminLayoutContent.includes("currentSection === 'monitoring'"), 'AdminLayout routes to SystemMonitoring');
+assert(sec25AdminLayoutContent.includes('<SystemMonitoring'), 'AdminLayout renders SystemMonitoring component');
+
+const sec25AppPath = path.join(rootDir, 'src', 'App.tsx');
+const sec25AppContent = fs.readFileSync(sec25AppPath, 'utf8');
+assert(sec25AppContent.includes('PreferencesProvider'), 'App.tsx integrates PreferencesProvider');
+assert(sec25AppContent.includes('SettingsPersonalizationPage'), 'App.tsx integrates SettingsPersonalizationPage');
+
 console.log('\n====================================================');
 console.log(`Results: ${passedTests}/${totalTests} tests passed (${Math.round((passedTests / totalTests) * 100)}%)`);
 console.log('====================================================\n');

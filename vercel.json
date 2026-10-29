@@ -92,15 +92,6 @@
       ]
     },
     {
-      "source": "/brand/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=86400, must-revalidate"
-        }
-      ]
-    },
-    {
       "source": "/assets/(.*)",
       "headers": [
         {
@@ -112,7 +103,7 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!assets/|favicon.svg|manifest.json|sw.js)(?!brand/|favicon.ico|robots.txt|sitemap.xml|og-image.png).*)",
+      "source": "/((?!assets/|favicon.svg|manifest.json|sw.js)(?!robots.txt|sitemap.xml|og-image.png).*)",
       "destination": "/index.html"
     }
   ]

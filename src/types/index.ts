@@ -370,3 +370,100 @@ export interface StudentFeeRecord {
   receiptNumber?: string;
   paymentDate?: string;
 }
+
+// ==========================================
+// User Personalization & Preferences System
+// ==========================================
+
+export type AccentColor = 'turquoise' | 'ocean' | 'emerald' | 'violet' | 'amber';
+export type InterfaceDensity = 'comfortable' | 'compact';
+export type ThemeMode = 'light' | 'dark' | 'system';
+
+export interface DashboardWidgetConfig {
+  id: string;
+  label: string;
+  description: string;
+  visible: boolean;
+  order: number;
+}
+
+export interface UserPreferences {
+  themeMode: ThemeMode;
+  accentColor: AccentColor;
+  density: InterfaceDensity;
+  reducedMotion: boolean;
+  studentWidgets: DashboardWidgetConfig[];
+  facultyWidgets: DashboardWidgetConfig[];
+  adminWidgets: DashboardWidgetConfig[];
+  notifications: {
+    academicAlerts: boolean;
+    noticeUpdates: boolean;
+    eventReminders: boolean;
+    adminAnnouncements: boolean;
+  };
+}
+
+// ==========================================
+// Database & System Health Monitoring Types
+// ==========================================
+
+export interface TableMetric {
+  tableName: string;
+  category: 'core' | 'academic' | 'communication' | 'security';
+  displayName: string;
+  rowCount: number;
+  status: 'healthy' | 'empty' | 'error' | 'unauthorized';
+  rlsEnabled: boolean;
+  lastChecked: string;
+  errorMessage?: string;
+}
+
+export interface StorageBucketMetric {
+  name: string;
+  displayName: string;
+  isPublic: boolean;
+  fileCount: number;
+  totalSizeBytes: number;
+  status: 'accessible' | 'empty' | 'restricted' | 'not_found';
+  lastChecked: string;
+  recentFiles?: { name: string; size?: number; createdAt?: string }[];
+}
+
+export interface LatencySample {
+  timestamp: string;
+  latencyMs: number;
+  status: 'optimal' | 'moderate' | 'degraded' | 'failed';
+}
+
+export interface UnavailableMetricDetail {
+  available: false;
+  statusLabel: string;
+  technicalReason: string;
+  suggestedIntegration: string;
+}
+
+export interface SystemMonitoringTelemetry {
+  databaseStatus: 'online' | 'degraded' | 'offline' | 'unconfigured';
+  projectRef: string;
+  endpointUrl: string;
+  sslEnabled: boolean;
+  authMode: string;
+  currentLatencyMs: number;
+  avgLatencyMs: number;
+  minLatencyMs: number;
+  maxLatencyMs: number;
+  latencyHistory: LatencySample[];
+  totalDatabaseRows: number;
+  tableMetrics: TableMetric[];
+  storageBuckets: StorageBucketMetric[];
+  totalStorageSizeBytes: number;
+  totalStorageFiles: number;
+  // Explicitly labeled unavailable metrics - strictly never simulated
+  cpuUtilization: UnavailableMetricDetail;
+  ramUtilization: UnavailableMetricDetail;
+  connectionPoolUtilization: UnavailableMetricDetail;
+  migrationCount: number;
+  schemaVersion: string;
+  lastUpdated: string;
+}
+

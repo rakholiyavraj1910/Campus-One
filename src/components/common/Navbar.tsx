@@ -21,7 +21,8 @@ import {
   Lock,
   AlertTriangle,
   CheckCircle2,
-  Receipt
+  Receipt,
+  Sliders
 } from 'lucide-react';
 import { CampusOneLogo } from './CampusOneLogo';
 import { UserAvatar } from './UserAvatar';
@@ -332,6 +333,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onNavigate, cur
                         </button>
                       </>
                     )}
+                  </div>
+
+                  <div className="py-1 border-t border-slate-100 dark:border-navy-800">
+                    <button
+                      onClick={() => onNavigate('settings')}
+                      className="w-full text-left px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-navy-800 flex items-center space-x-2 font-medium"
+                    >
+                      <Sliders className="w-4 h-4 text-purple-500" />
+                      <span>Settings &amp; Personalization</span>
+                    </button>
                   </div>
 
                   <div className="border-t border-slate-100 dark:border-navy-800 py-1.5 px-4 text-xs">

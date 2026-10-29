@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
+import { PreferencesProvider } from './context/PreferencesContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { NotificationProvider, useNotifications } from './context/NotificationContext';
 import { Navbar } from './components/common/Navbar';
@@ -32,6 +33,7 @@ import { AdminLayout } from './components/admin/AdminLayout';
 import { AdminAccessDenied } from './components/admin/AdminAccessDenied';
 import { AboutPage } from './components/public/AboutPage';
 import { ContactPage } from './components/public/ContactPage';
+import { SettingsPersonalizationPage } from './components/settings/SettingsPersonalizationPage';
 
 import { Notice, EventItem } from './types';
 import { getNotices, getEvents } from './lib/storageService';
@@ -105,6 +107,7 @@ function getPageFromLocation(): ParsedLocation {
   if (first === 'campus') return { page: 'campus', subTab: tab || 'departments' };
   if (first === 'about') return { page: 'about', subTab: tab };
   if (first === 'contact') return { page: 'contact', subTab: tab };
+  if (first === 'settings' || first === 'preferences') return { page: 'settings', subTab: tab };
 
   return { page: 'portal-select', subTab: tab };
 }
@@ -215,6 +218,8 @@ const MainLayout: React.FC = () => {
       targetUrl = '/auth/confirm';
     } else if (page === 'home') {
       targetUrl = '/home';
+    } else if (page === 'settings') {
+      targetUrl = '/settings';
     } else {
       targetUrl = `/${page}${subTab ? `?tab=${subTab}` : ''}`;
     }
@@ -490,8 +495,14 @@ const MainLayout: React.FC = () => {
             />
           )}
 
+          {currentPage === 'settings' && (
+            <SettingsPersonalizationPage
+              onNavigateTab={handleNavigate}
+            />
+          )}
+
           {/* Default fallback for authenticated views if currentPage is portal-select or unknown */}
-          {!['home', 'about', 'contact', 'faculty-portal', 'student', 'campus', 'notices', 'events', 'admin'].includes(currentPage) && (
+          {!['home', 'about', 'contact', 'faculty-portal', 'student', 'campus', 'notices', 'events', 'admin', 'settings'].includes(currentPage) && (
             role === 'admin' ? (
               <AdminDashboard
                 notices={notices}
@@ -581,11 +592,13 @@ const MainLayout: React.FC = () => {
 export default function App() {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <NotificationProvider>
-          <MainLayout />
-        </NotificationProvider>
-      </AuthProvider>
+      <PreferencesProvider>
+        <AuthProvider>
+          <NotificationProvider>
+            <MainLayout />
+          </NotificationProvider>
+        </AuthProvider>
+      </PreferencesProvider>
     </ThemeProvider>
   );
 }

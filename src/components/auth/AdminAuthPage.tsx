@@ -16,7 +16,7 @@ import {
   Loader2,
   Mail
 } from 'lucide-react';
-import { CampusOneLogo, CampusOneIcon } from '../common/CampusOneLogo';
+import { CampusOneLogo } from '../common/CampusOneLogo';
 import { 
   DEFAULT_ADMIN_EMAIL,
   DEFAULT_ADMIN_USERNAME, 
@@ -248,8 +248,8 @@ export const AdminAuthPage: React.FC<AdminAuthPageProps> = ({
           
           {/* Header */}
           <div className="text-center space-y-2 mb-6">
-            <div className="flex justify-center mb-1">
-              <CampusOneIcon size={56} withBadge className="shadow-xl" />
+            <div className="w-14 h-14 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center mx-auto shadow-md">
+              <ShieldCheck className="w-7 h-7" />
             </div>
             
             <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30">

@@ -15,9 +15,65 @@
 
   /* Accessible focus indicators across the entire application */
   :focus-visible {
-    outline: 2px solid #00ADB5;
+    outline: 2px solid var(--color-accent, #00ADB5);
     outline-offset: 2px;
   }
+}
+
+/* Dynamic Personalization Accent Color Variables */
+:root {
+  --color-accent: #00ADB5;
+  --color-accent-hover: #00969d;
+  --color-accent-soft: rgba(0, 173, 181, 0.12);
+  --color-accent-border: rgba(0, 173, 181, 0.35);
+  --color-accent-glow: rgba(0, 173, 181, 0.25);
+  --color-accent-text: #0B192C;
+}
+
+html[data-accent="ocean"] {
+  --color-accent: #2563EB;
+  --color-accent-hover: #1D4ED8;
+  --color-accent-soft: rgba(37, 99, 235, 0.12);
+  --color-accent-border: rgba(37, 99, 235, 0.35);
+  --color-accent-glow: rgba(37, 99, 235, 0.25);
+  --color-accent-text: #FFFFFF;
+}
+
+html[data-accent="emerald"] {
+  --color-accent: #059669;
+  --color-accent-hover: #047857;
+  --color-accent-soft: rgba(5, 150, 105, 0.12);
+  --color-accent-border: rgba(5, 150, 105, 0.35);
+  --color-accent-glow: rgba(5, 150, 105, 0.25);
+  --color-accent-text: #FFFFFF;
+}
+
+html[data-accent="violet"] {
+  --color-accent: #7C3AED;
+  --color-accent-hover: #6D28D9;
+  --color-accent-soft: rgba(124, 58, 237, 0.12);
+  --color-accent-border: rgba(124, 58, 237, 0.35);
+  --color-accent-glow: rgba(124, 58, 237, 0.25);
+  --color-accent-text: #FFFFFF;
+}
+
+html[data-accent="amber"] {
+  --color-accent: #D97706;
+  --color-accent-hover: #B45309;
+  --color-accent-soft: rgba(217, 119, 6, 0.12);
+  --color-accent-border: rgba(217, 119, 6, 0.35);
+  --color-accent-glow: rgba(217, 119, 6, 0.25);
+  --color-accent-text: #0B192C;
+}
+
+/* User Selected Reduced Motion */
+html[data-motion="reduced"] *,
+html[data-motion="reduced"] *::before,
+html[data-motion="reduced"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
 }
 
 @layer utilities {

@@ -12,7 +12,8 @@ import {
   ChevronDown,
   Sparkles,
   Database,
-  Users
+  Users,
+  Activity
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { UserProfile } from '../../types';
@@ -71,6 +72,10 @@ const SECTION_TITLES: Record<AdminSectionId, { title: string; subtitle: string }
   audit: {
     title: 'Security Audit & Activity Logs',
     subtitle: 'Real-time database audit ledger recording role modifications and administrative edits'
+  },
+  monitoring: {
+    title: 'Live Database & System Monitoring',
+    subtitle: 'PostgreSQL cluster health, table row telemetry, storage buckets, and API performance'
   },
   settings: {
     title: 'System & Database Architecture',
@@ -234,6 +239,17 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
               >
                 <ShieldCheck className="w-4 h-4 text-teal-400" />
                 <span>My Admin Profile</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  onSelectSection('monitoring');
+                  setIsAccountOpen(false);
+                }}
+                className="w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-bold text-teal-300 hover:text-white hover:bg-teal-500/10 transition-colors text-left"
+              >
+                <Activity className="w-4 h-4 text-teal-400" />
+                <span>Live System Monitoring</span>
               </button>
 
               <button
